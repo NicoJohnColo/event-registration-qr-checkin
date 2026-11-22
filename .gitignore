@@ -1,0 +1,21 @@
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+
+# Backend (Spring Boot / Maven)
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+
+# Frontend (Node / Vite)
+frontend/node_modules/
+frontend/dist/
+
+# IDEs / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
