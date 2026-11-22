@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: eventreg
+  config:
+    # Local dev: load secrets from the repo-root .env (git-ignored). Optional so
+    # production environment variables work without a file.
+    import: "optional:file:../.env[.properties]"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 5   # keep pool small for Supabase session pooler
+      minimum-idle: 1
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate     # Flyway owns the schema; Hibernate validates it
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC     # store instants in UTC; display in Asia/Manila
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Supabase pre-installs helper functions in public (e.g. rls_auto_enable), so
+    # Flyway sees public as non-empty. Baseline at 0 so V1, V2... all run.
+    baseline-on-migrate: true
+    baseline-version: "0"
+
+server:
+  port: ${PORT:8080}
+
+app:
+  timezone: ${APP_TIMEZONE:Asia/Manila}
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
+  jwt:
+    secret: ${JWT_SECRET}
