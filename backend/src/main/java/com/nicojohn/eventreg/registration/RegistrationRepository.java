@@ -22,4 +22,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("statuses") Collection<RegistrationStatus> statuses);
 
     boolean existsByTicketCode(String ticketCode);
+
+    boolean existsByEventIdAndEmailIgnoreCaseAndStatusIn(
+            Long eventId, String email, Collection<RegistrationStatus> statuses);
 }

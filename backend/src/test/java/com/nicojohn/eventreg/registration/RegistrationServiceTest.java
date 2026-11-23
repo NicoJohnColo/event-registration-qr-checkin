@@ -1,0 +1,149 @@
+package com.nicojohn.eventreg.registration;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.nicojohn.eventreg.common.exception.ApiException;
+import com.nicojohn.eventreg.common.util.ManilaTime;
+import com.nicojohn.eventreg.event.Event;
+import com.nicojohn.eventreg.event.EventRepository;
+import com.nicojohn.eventreg.event.EventStatus;
+import com.nicojohn.eventreg.registration.dto.RegisterRequest;
+import com.nicojohn.eventreg.registration.dto.TicketResponse;
+
+class RegistrationServiceTest {
+
+    private EventRepository eventRepository;
+    private RegistrationRepository registrationRepository;
+    private Clock fixedClock;
+    private RegistrationService registrationService;
+
+    @BeforeEach
+    void setUp() {
+        eventRepository = mock(EventRepository.class);
+        registrationRepository = mock(RegistrationRepository.class);
+        LocalDate today = LocalDate.of(2026, 11, 23);
+        fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
+        registrationService = new RegistrationService(
+                eventRepository, registrationRepository, new TicketCodeGenerator(), fixedClock);
+    }
+
+    private Event sampleEvent(Long id, int capacity, LocalDate day, EventStatus status) {
+        Event event = new Event(
+                "Cebu Dev Meetup 2026", "Desc", "Ayala Center Cebu",
+                ManilaTime.atManilaTime(day, 8, 0),
+                ManilaTime.atManilaTime(day, 22, 0),
+                capacity, status, "CDM", Instant.now(fixedClock));
+        ReflectionTestUtils.setField(event, "id", id);
+        return event;
+    }
+
+    @Test
+    void registersAttendeeAndGeneratesPrefixedTicketCode() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        when(eventRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(event));
+        when(registrationRepository.existsByEventIdAndEmailIgnoreCaseAndStatusIn(
+                eq(1L), eq("juan.delacruz@example.com"), anyCollection())).thenReturn(false);
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(3L);
+        when(registrationRepository.existsByTicketCode(any())).thenReturn(false);
+        when(registrationRepository.saveAndFlush(any(Registration.class))).thenAnswer(inv -> {
+            Registration r = inv.getArgument(0);
+            ReflectionTestUtils.setField(r, "id", 101L);
+            return r;
+        });
+
+        TicketResponse response = registrationService.register(
+                1L, new RegisterRequest("  Juan Dela Cruz  ", "JUAN.DELACRUZ@EXAMPLE.COM", "09171234567"));
+
+        assertEquals(101L, response.registrationId());
+        assertEquals("Juan Dela Cruz", response.attendeeName());
+        assertEquals("juan.delacruz@example.com", response.email());
+        assertEquals(RegistrationStatus.CONFIRMED, response.status());
+        assertTrue(response.ticketCode().startsWith("CDM-"));
+        verify(eventRepository).findByIdForUpdate(1L);
+    }
+
+    @Test
+    void rejectsRegistrationWhenEventIsFull() {
+        Event fullEvent = sampleEvent(3L, 5, LocalDate.of(2026, 11, 26), EventStatus.PUBLISHED);
+        when(eventRepository.findByIdForUpdate(3L)).thenReturn(Optional.of(fullEvent));
+        when(registrationRepository.existsByEventIdAndEmailIgnoreCaseAndStatusIn(
+                eq(3L), eq("juan.delacruz@example.com"), anyCollection())).thenReturn(false);
+        when(registrationRepository.countByEventIdAndStatusIn(eq(3L), anyCollection())).thenReturn(5L);
+
+        ApiException ex = assertThrows(
+                ApiException.class,
+                () -> registrationService.register(
+                        3L, new RegisterRequest("Juan Dela Cruz", "juan.delacruz@example.com", "09171234567")));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+        assertEquals("This event is full. No spots remaining.", ex.getMessage());
+    }
+
+    @Test
+    void rejectsDuplicateEmailRegardlessOfLetterCase() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        when(eventRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(event));
+        when(registrationRepository.existsByEventIdAndEmailIgnoreCaseAndStatusIn(
+                eq(1L), eq("juan.delacruz@example.com"), anyCollection())).thenReturn(true);
+
+        ApiException ex = assertThrows(
+                ApiException.class,
+                () -> registrationService.register(
+                        1L, new RegisterRequest("Juan Dela Cruz", "JUAN.DELACRUZ@EXAMPLE.COM", "09171234567")));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+        assertEquals("This email is already registered for this event.", ex.getMessage());
+    }
+
+    @Test
+    void allowsSameEmailOnDifferentEvent() {
+        Event otherEvent = sampleEvent(2L, 50, LocalDate.of(2026, 11, 30), EventStatus.PUBLISHED);
+        when(eventRepository.findByIdForUpdate(2L)).thenReturn(Optional.of(otherEvent));
+        when(registrationRepository.existsByEventIdAndEmailIgnoreCaseAndStatusIn(
+                eq(2L), eq("juan.delacruz@example.com"), anyCollection())).thenReturn(false);
+        when(registrationRepository.countByEventIdAndStatusIn(eq(2L), anyCollection())).thenReturn(0L);
+        when(registrationRepository.existsByTicketCode(any())).thenReturn(false);
+        when(registrationRepository.saveAndFlush(any(Registration.class))).thenAnswer(inv -> {
+            Registration r = inv.getArgument(0);
+            ReflectionTestUtils.setField(r, "id", 102L);
+            return r;
+        });
+
+        TicketResponse response = registrationService.register(
+                2L, new RegisterRequest("Juan Dela Cruz", "juan.delacruz@example.com", "09171234567"));
+
+        assertEquals(2L, response.eventId());
+    }
+
+    @Test
+    void rejectsRegistrationForPastEvent() {
+        Event pastEvent = sampleEvent(4L, 40, LocalDate.of(2026, 11, 16), EventStatus.PUBLISHED);
+        when(eventRepository.findByIdForUpdate(4L)).thenReturn(Optional.of(pastEvent));
+
+        ApiException ex = assertThrows(
+                ApiException.class,
+                () -> registrationService.register(
+                        4L, new RegisterRequest("Juan Dela Cruz", "juan.delacruz@example.com", "09171234567")));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
+        assertEquals("This event has already ended.", ex.getMessage());
+    }
+}

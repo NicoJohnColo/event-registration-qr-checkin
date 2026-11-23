@@ -4,6 +4,8 @@ import { EventDetailsPage } from '../pages/EventDetailsPage'
 import { EventsPage } from '../pages/EventsPage'
 import { LandingPage } from '../pages/LandingPage'
 import { PhaseComingSoonPage } from '../pages/PhaseComingSoonPage'
+import { RegisterPage } from '../pages/RegisterPage'
+import { TicketPage } from '../pages/TicketPage'
 
 export function AppRouter() {
   return (
@@ -13,16 +15,8 @@ export function AppRouter() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailsPage />} />
-          <Route
-            path="/events/:id/register"
-            element={
-              <PhaseComingSoonPage
-                phase="Phase 3 · Registration Slice"
-                title="Event Registration Form"
-                description="Full name, email, and PH mobile validation + server capacity lock will be built in Phase 3."
-              />
-            }
-          />
+          <Route path="/events/:id/register" element={<RegisterPage />} />
+          <Route path="/ticket/:code" element={<TicketPage />} />
           <Route
             path="/lookup"
             element={
