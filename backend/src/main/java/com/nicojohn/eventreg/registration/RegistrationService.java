@@ -3,6 +3,7 @@ package com.nicojohn.eventreg.registration;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -15,6 +16,8 @@ import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
+import com.nicojohn.eventreg.registration.dto.AttendeeListResponse;
+import com.nicojohn.eventreg.registration.dto.AttendeeRowResponse;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
 import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
@@ -100,6 +103,35 @@ public class RegistrationService {
                 .findByTicketCodeAndEmailIgnoreCase(normalizedCode, normalizedEmail)
                 .map(TicketResponse::from)
                 .orElseThrow(() -> ApiException.notFound("Ticket not found"));
+    }
+
+    /**
+     * Returns attendee rows and event-wide registered / checked-in totals for staff.
+     */
+    @Transactional(readOnly = true)
+    public AttendeeListResponse listAttendeesForEvent(Long eventId, String query) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> ApiException.notFound("Event not found."));
+
+        long registeredCount = registrationRepository.countByEventIdAndStatusIn(eventId, ACTIVE_STATUSES);
+        long checkedInCount = registrationRepository.countByEventIdAndStatus(eventId, RegistrationStatus.CHECKED_IN);
+
+        List<Registration> rows = (query == null || query.isBlank())
+                ? registrationRepository.findAllByEventIdOrderByRegisteredAtDesc(eventId)
+                : registrationRepository.searchByEventIdAndNameOrTicketCode(
+                        eventId, "%" + query.trim().toLowerCase(Locale.ROOT) + "%");
+
+        List<AttendeeRowResponse> attendees = rows.stream()
+                .map(AttendeeRowResponse::from)
+                .toList();
+
+        return new AttendeeListResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getCapacity(),
+                registeredCount,
+                checkedInCount,
+                attendees);
     }
 
     private String nextUniqueTicketCode(String prefix) {

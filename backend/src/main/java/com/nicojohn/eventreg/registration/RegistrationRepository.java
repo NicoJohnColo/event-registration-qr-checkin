@@ -69,4 +69,25 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
             @Param("registrationId") Long registrationId,
             @Param("checkedInAt") Instant checkedInAt,
             @Param("staffUser") StaffUser staffUser);
+
+    @Query("""
+            SELECT r
+            FROM Registration r
+            LEFT JOIN FETCH r.checkedInBy
+            WHERE r.event.id = :eventId
+            ORDER BY r.registeredAt DESC, r.id DESC
+            """)
+    List<Registration> findAllByEventIdOrderByRegisteredAtDesc(@Param("eventId") Long eventId);
+
+    @Query("""
+            SELECT r
+            FROM Registration r
+            LEFT JOIN FETCH r.checkedInBy
+            WHERE r.event.id = :eventId
+              AND (LOWER(r.fullName) LIKE :pattern OR LOWER(r.ticketCode) LIKE :pattern)
+            ORDER BY r.registeredAt DESC, r.id DESC
+            """)
+    List<Registration> searchByEventIdAndNameOrTicketCode(
+            @Param("eventId") Long eventId,
+            @Param("pattern") String pattern);
 }

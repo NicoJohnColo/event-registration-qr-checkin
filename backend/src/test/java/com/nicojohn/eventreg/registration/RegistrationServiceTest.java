@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
+import com.nicojohn.eventreg.registration.dto.AttendeeListResponse;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
 import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
@@ -205,5 +207,56 @@ class RegistrationServiceTest {
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertEquals("Ticket not found", ex.getMessage());
+    }
+
+    @Test
+    void listsEventAttendeesWithExactTotals() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        Registration r1 = new Registration(
+                event, "Juan Dela Cruz", "juan@example.com", "09171234567",
+                "CDM-BES2VQ", RegistrationStatus.CHECKED_IN, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(r1, "id", 10L);
+        ReflectionTestUtils.setField(r1, "checkedInAt", Instant.now(fixedClock));
+
+        Registration r2 = new Registration(
+                event, "Ana Reyes", "ana@example.com", "09171000001",
+                "CDM-ANA111", RegistrationStatus.CONFIRMED, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(r2, "id", 11L);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(2L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(1L);
+        when(registrationRepository.findAllByEventIdOrderByRegisteredAtDesc(1L)).thenReturn(List.of(r1, r2));
+
+        AttendeeListResponse res = registrationService.listAttendeesForEvent(1L, null);
+
+        assertEquals(1L, res.eventId());
+        assertEquals(30, res.capacity());
+        assertEquals(2L, res.registeredCount());
+        assertEquals(1L, res.checkedInCount());
+        assertEquals(2, res.attendees().size());
+        assertEquals("Juan Dela Cruz", res.attendees().get(0).fullName());
+    }
+
+    @Test
+    void searchesEventAttendeesByNameOrTicketCode() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        Registration r1 = new Registration(
+                event, "Juan Dela Cruz", "juan@example.com", "09171234567",
+                "CDM-BES2VQ", RegistrationStatus.CONFIRMED, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(r1, "id", 10L);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(5L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(2L);
+        when(registrationRepository.searchByEventIdAndNameOrTicketCode(1L, "%cdm-bes2vq%"))
+                .thenReturn(List.of(r1));
+
+        AttendeeListResponse res = registrationService.listAttendeesForEvent(1L, "  CDM-BES2VQ ");
+
+        assertEquals(5L, res.registeredCount());
+        assertEquals(2L, res.checkedInCount());
+        assertEquals(1, res.attendees().size());
+        assertEquals("CDM-BES2VQ", res.attendees().get(0).ticketCode());
     }
 }

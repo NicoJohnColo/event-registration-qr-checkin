@@ -7,9 +7,9 @@ import { LandingPage } from '../pages/LandingPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { TicketLookupPage } from '../pages/TicketLookupPage'
 import { TicketPage } from '../pages/TicketPage'
+import { AttendeeListPage } from '../pages/staff/AttendeeListPage'
 import { StaffCheckInPage } from '../pages/staff/StaffCheckInPage'
 import { StaffLoginPage } from '../pages/staff/StaffLoginPage'
-import { StaffPortalPlaceholderPage } from '../pages/staff/StaffPortalPlaceholderPage'
 import { PublicLayout } from './PublicLayout'
 import { StaffLayout } from './StaffLayout'
 
@@ -34,14 +34,8 @@ export function AppRouter() {
           <Route element={<StaffLayout />}>
             <Route path="/staff" element={<Navigate to="/staff/check-in" replace />} />
             <Route path="/staff/check-in" element={<StaffCheckInPage />} />
-            <Route
-              path="/staff/attendees"
-              element={<StaffPortalPlaceholderPage section="attendees" />}
-            />
-            <Route
-              path="/staff/events/:id/attendees"
-              element={<StaffPortalPlaceholderPage section="attendees" />}
-            />
+            <Route path="/staff/attendees" element={<AttendeeListPage />} />
+            <Route path="/staff/events/:id/attendees" element={<AttendeeListPage />} />
           </Route>
         </Route>
       </Routes>
