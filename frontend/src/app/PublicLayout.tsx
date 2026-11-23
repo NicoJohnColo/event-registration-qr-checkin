@@ -1,4 +1,14 @@
-import { Clock, Menu, Search, ShieldCheck, X } from 'lucide-react'
+import {
+  CalendarDays,
+  ChevronRight,
+  Clock,
+  Home,
+  Menu,
+  PlayCircle,
+  Search,
+  ShieldCheck,
+  X,
+} from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BrandLogo } from '../components/ui/BrandLogo'
@@ -26,6 +36,13 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         : 'text-brand-navy/75 hover:bg-page hover:text-brand-navy'
     }`
 
+  const mobileNavItemClass = ({ isActive }: { isActive: boolean }) =>
+    `flex w-full min-h-[44px] items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
+      isActive
+        ? 'bg-sky-50 text-brand-primary ring-1 ring-brand-sky'
+        : 'text-brand-navy/85 hover:bg-page hover:text-brand-navy'
+    }`
+
   return (
     <div className="flex min-h-screen flex-col bg-page text-brand-navy">
       <header className="sticky top-0 z-40 border-b border-brand-sky/70 bg-white/85 backdrop-blur-xl">
@@ -41,12 +58,9 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             <NavLink to="/events" className={navLinkClass}>
               Events
             </NavLink>
-            <a
-              href="/#tutorial"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-bold leading-none text-brand-navy/75 transition-all duration-150 hover:bg-page hover:text-brand-navy"
-            >
+            <NavLink to="/how-it-works" className={navLinkClass}>
               How It Works
-            </a>
+            </NavLink>
             <NavLink to="/lookup" className={navLinkClass}>
               <Search className="h-3.5 w-3.5 shrink-0" />
               <span>Find My Ticket</span>
@@ -68,7 +82,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-brand-navy transition-colors hover:bg-page md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-brand-navy transition-colors hover:bg-page md:hidden"
             onClick={() => setMobileOpen((prev) => !prev)}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
@@ -80,37 +94,54 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         {mobileOpen && (
           <div className="animate-slide-down border-t border-border/80 bg-white/95 px-4 py-4 shadow-lg backdrop-blur-md md:hidden">
             <nav className="flex flex-col gap-1.5" aria-label="Mobile navigation">
-              <NavLink to="/" end className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                Home
-              </NavLink>
-              <NavLink to="/events" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                Events
-              </NavLink>
-              <a
-                href="/#tutorial"
-                className="rounded-full px-3.5 py-2 text-sm font-semibold text-brand-navy/75 transition-all duration-150 hover:bg-page hover:text-brand-navy"
-                onClick={() => setMobileOpen(false)}
-              >
-                How It Works
-              </a>
-              <NavLink to="/lookup" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                Find My Ticket
-              </NavLink>
-              <div className="mt-2 flex items-center justify-between rounded-xl bg-page px-3 py-2 text-xs text-brand-navy/70">
-                <span className="inline-flex items-center gap-1.5 font-medium">
-                  <Clock className="h-3.5 w-3.5 text-brand-primary" />
-                  Cebu Time (UTC+8)
+              <NavLink to="/" end className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
+                <span className="inline-flex items-center gap-3">
+                  <Home className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <span>Home</span>
                 </span>
-                <span>12-hour AM/PM</span>
-              </div>
-              <Link
-                to="/staff/login"
-                className="mt-1"
+                <ChevronRight className="h-4 w-4 text-brand-navy/35" />
+              </NavLink>
+
+              <NavLink to="/events" className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
+                <span className="inline-flex items-center gap-3">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <span>Events</span>
+                </span>
+                <ChevronRight className="h-4 w-4 text-brand-navy/35" />
+              </NavLink>
+
+              <NavLink
+                to="/how-it-works"
+                className={mobileNavItemClass}
                 onClick={() => setMobileOpen(false)}
               >
+                <span className="inline-flex items-center gap-3">
+                  <PlayCircle className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <span>How It Works</span>
+                </span>
+                <ChevronRight className="h-4 w-4 text-brand-navy/35" />
+              </NavLink>
+
+              <NavLink to="/lookup" className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
+                <span className="inline-flex items-center gap-3">
+                  <Search className="h-4 w-4 shrink-0 text-brand-primary" />
+                  <span>Find My Ticket</span>
+                </span>
+                <ChevronRight className="h-4 w-4 text-brand-navy/35" />
+              </NavLink>
+
+              <div className="mt-2 flex items-center justify-between rounded-xl bg-page px-4 py-2.5 text-xs text-brand-navy/70">
+                <span className="inline-flex items-center gap-1.5 font-semibold">
+                  <Clock className="h-3.5 w-3.5 text-brand-primary" />
+                  <span>Cebu Time (UTC+8)</span>
+                </span>
+                <span className="font-semibold">12-hour AM/PM</span>
+              </div>
+
+              <Link to="/staff/login" className="mt-1.5" onClick={() => setMobileOpen(false)}>
                 <Button variant="secondary" size="md" fullWidth>
                   <ShieldCheck className="h-4 w-4 text-brand-primary" />
-                  Staff Sign In
+                  <span>Staff Sign In</span>
                 </Button>
               </Link>
             </nav>
@@ -120,8 +151,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-border/80 bg-surface py-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 text-sm text-brand-navy/65 sm:flex-row sm:items-center sm:px-6">
+      <footer className="border-t border-border/80 bg-surface py-8 sm:py-10">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-5 px-4 text-sm text-brand-navy/65 sm:flex-row sm:items-center sm:px-6">
           <div className="space-y-1.5">
             <BrandLogo />
             <p className="text-xs text-brand-navy/60">

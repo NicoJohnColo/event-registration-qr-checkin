@@ -19,7 +19,7 @@ export function HeroCubeScene({ preview }: { preview: HeroPassPreview }) {
         <span>Asia/Manila UTC+8</span>
       </div>
 
-      <div className="animate-chip-in delay-75 animate-hero-pulse pointer-events-none absolute -right-2 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-brand-cyan/50 bg-brand-navy/70 px-3 py-1.5 text-[11px] font-semibold text-brand-cyan shadow-lg backdrop-blur-md">
+      <div className="animate-chip-in delay-75 animate-hero-pulse pointer-events-none absolute right-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-brand-cyan/50 bg-brand-navy/70 px-3 py-1.5 text-[11px] font-semibold text-brand-cyan shadow-lg backdrop-blur-md sm:-right-2">
         <QrCode className="h-3.5 w-3.5" />
         <span>Instant QR</span>
       </div>
@@ -147,8 +147,8 @@ export function HeroCubeScene({ preview }: { preview: HeroPassPreview }) {
             </span>
           </div>
 
-          <div className="ticket-notch grid grid-cols-12 items-center gap-3 pt-3">
-            <div className="col-span-7 space-y-2 text-xs text-white/85">
+          <div className="ticket-notch grid grid-cols-1 items-center gap-3 pt-3 sm:grid-cols-12">
+            <div className="space-y-2 text-xs text-white/85 sm:col-span-7">
               <div className="flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 shrink-0 text-brand-cyan" />
                 <span className="truncate">{preview.scheduleLabel}</span>
@@ -166,7 +166,7 @@ export function HeroCubeScene({ preview }: { preview: HeroPassPreview }) {
             </div>
 
             {/* QR Tile with Animated Scan Laser */}
-            <div className="col-span-5 flex flex-col items-center justify-center rounded-xl bg-white p-2.5 text-brand-navy">
+            <div className="flex flex-col items-center justify-center rounded-xl bg-white p-2.5 text-brand-navy sm:col-span-5">
               <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg">
                 <QrCode className="h-14 w-14 text-brand-navy" strokeWidth={1.6} />
                 <div
@@ -180,7 +180,7 @@ export function HeroCubeScene({ preview }: { preview: HeroPassPreview }) {
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs">
             <span className="font-semibold text-brand-sky">{preview.spotsLabel}</span>
             {preview.eventId !== undefined && (
               <Link

@@ -23,7 +23,7 @@ export function SegmentedTabs<T extends string>({
 }: SegmentedTabsProps<T>) {
   return (
     <div
-      className={`flex flex-wrap items-center gap-1.5 rounded-xl p-1 ${className}`}
+      className={`no-scrollbar flex items-center gap-1 overflow-x-auto rounded-xl border border-border/70 p-1 [touch-action:pan-x] ${className}`}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -36,7 +36,7 @@ export function SegmentedTabs<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(option.id)}
-            className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 py-2 text-xs font-extrabold leading-none transition-all duration-150 ${
+            className={`inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-extrabold leading-none transition-all duration-150 ${
               active
                 ? 'bg-brand-primary text-white shadow-sm'
                 : 'text-brand-navy/70 hover:bg-white/70 hover:text-brand-navy'

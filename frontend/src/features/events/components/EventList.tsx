@@ -1,4 +1,5 @@
-import { CalendarX2 } from 'lucide-react'
+import { CalendarX2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 import { EmptyState } from '../../../components/ui/EmptyState'
@@ -10,6 +11,7 @@ interface EventListProps {
   isLoading: boolean
   isError: boolean
   errorMessage?: string
+  layout?: 'carousel' | 'grid'
   onRetry?: () => void
   onResetFilters?: () => void
   emptyTitle?: string
@@ -18,9 +20,13 @@ interface EventListProps {
 
 const DELAY_CLASSES = ['', 'delay-75', 'delay-150', 'delay-225']
 
-function EventCardSkeleton() {
+function EventCardSkeleton({ carousel = false }: { carousel?: boolean }) {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-border bg-surface shadow-card">
+    <div
+      className={`overflow-hidden rounded-[20px] border border-border bg-surface shadow-card ${
+        carousel ? 'w-[86%] shrink-0 snap-start sm:w-[340px] lg:w-[calc((100%-3rem)/3)]' : ''
+      }`}
+    >
       <div className="h-1 w-full skeleton-shimmer" />
       <div className="space-y-4 p-5">
         <div className="flex items-start justify-between">
@@ -59,12 +65,117 @@ export function EventList({
   isLoading,
   isError,
   errorMessage,
+  layout = 'carousel',
   onRetry,
   onResetFilters,
   emptyTitle = 'No matching events',
   emptyDescription = 'Try clearing your search or switching filters to view other Cebu events.',
 }: EventListProps) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false })
+  const [dragging, setDragging] = useState(false)
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // Keep active upcoming events ahead of past "Ended" events
+  const sorted = useMemo(
+    () =>
+      [...events].sort((a, b) => {
+        if (a.ended !== b.ended) return a.ended ? 1 : -1
+        return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+      }),
+    [events],
+  )
+
+  const syncCarouselState = useCallback(() => {
+    const el = trackRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    setCanPrev(scrollLeft > 4)
+    setCanNext(scrollLeft + clientWidth < scrollWidth - 4)
+
+    const firstCard = el.firstElementChild as HTMLElement | null
+    if (firstCard) {
+      const step = firstCard.getBoundingClientRect().width + 16
+      if (step > 0) {
+        setActiveIndex(Math.min(sorted.length - 1, Math.max(0, Math.round(scrollLeft / step))))
+      }
+    }
+  }, [sorted.length])
+
+  useEffect(() => {
+    if (layout !== 'carousel') return
+    syncCarouselState()
+    window.addEventListener('resize', syncCarouselState)
+    return () => window.removeEventListener('resize', syncCarouselState)
+  }, [layout, syncCarouselState, sorted.length])
+
+  const scrollByCard = (direction: -1 | 1) => {
+    const el = trackRef.current
+    if (!el) return
+    const firstCard = el.firstElementChild as HTMLElement | null
+    const step = firstCard ? firstCard.getBoundingClientRect().width + 16 : 320
+    el.scrollBy({ left: direction * step, behavior: 'smooth' })
+  }
+
+  const scrollToIndex = (index: number) => {
+    const el = trackRef.current
+    if (!el) return
+    const firstCard = el.firstElementChild as HTMLElement | null
+    const step = firstCard ? firstCard.getBoundingClientRect().width + 16 : 320
+    el.scrollTo({ left: index * step, behavior: 'smooth' })
+  }
+
+  // Desktop mouse drag-to-swipe (touch & pen use 100% native OS touch scrolling)
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || !trackRef.current) return
+    dragRef.current = {
+      active: true,
+      startX: e.clientX,
+      startScrollLeft: trackRef.current.scrollLeft,
+      moved: false,
+    }
+    setDragging(true)
+  }
+
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active || !trackRef.current) return
+    const dx = e.clientX - dragRef.current.startX
+    if (Math.abs(dx) > 6) {
+      dragRef.current.moved = true
+    }
+    if (dragRef.current.moved) {
+      trackRef.current.scrollLeft = dragRef.current.startScrollLeft - dx
+    }
+  }
+
+  const endMouseDrag = () => {
+    if (!dragRef.current.active) return
+    dragRef.current.active = false
+    setDragging(false)
+    window.setTimeout(() => {
+      dragRef.current.moved = false
+    }, 0)
+  }
+
+  const handleClickCapture = (e: MouseEvent<HTMLDivElement>) => {
+    if (dragRef.current.moved) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   if (isLoading) {
+    if (layout === 'carousel') {
+      return (
+        <div className="no-scrollbar flex gap-4 overflow-x-auto pb-3" aria-label="Loading events">
+          <EventCardSkeleton carousel />
+          <EventCardSkeleton carousel />
+          <EventCardSkeleton carousel />
+        </div>
+      )
+    }
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" aria-label="Loading events">
         <EventCardSkeleton />
@@ -92,7 +203,7 @@ export function EventList({
     )
   }
 
-  if (events.length === 0) {
+  if (sorted.length === 0) {
     return (
       <EmptyState
         icon={<CalendarX2 className="h-6 w-6" />}
@@ -109,21 +220,117 @@ export function EventList({
     )
   }
 
-  // Keep active upcoming events ahead of past "Ended" events
-  const sorted = [...events].sort((a, b) => {
-    if (a.ended !== b.ended) return a.ended ? 1 : -1
-    return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
-  })
+  if (layout === 'grid') {
+    return (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sorted.map((event, idx) => (
+          <EventCard
+            key={event.id}
+            event={event}
+            animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
+          />
+        ))}
+      </div>
+    )
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {sorted.map((event, idx) => (
-        <EventCard
-          key={event.id}
-          event={event}
-          animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
-        />
-      ))}
+    <div className="relative">
+      {/* Desktop Left & Right Side Arrows */}
+      <button
+        type="button"
+        onClick={() => scrollByCard(-1)}
+        disabled={!canPrev}
+        aria-label="Previous event"
+        className="absolute -left-4 top-[44%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-brand-navy shadow-dock backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-0 md:flex"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => scrollByCard(1)}
+        disabled={!canNext}
+        aria-label="Next event"
+        className="absolute -right-4 top-[44%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-brand-navy shadow-dock backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-0 md:flex"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+
+      {/* Horizontal Snap-Scroll Track (native touch swipe + desktop mouse drag) */}
+      <div
+        ref={trackRef}
+        onScroll={syncCarouselState}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endMouseDrag}
+        onPointerCancel={endMouseDrag}
+        onPointerLeave={endMouseDrag}
+        onDragStart={(e) => e.preventDefault()}
+        onClickCapture={handleClickCapture}
+        className={`no-scrollbar flex gap-4 overflow-x-auto overscroll-x-contain pb-3 [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] md:gap-6 ${
+          dragging
+            ? 'cursor-grabbing snap-none select-none'
+            : 'cursor-grab snap-x snap-mandatory'
+        }`}
+      >
+        {sorted.map((event, idx) => (
+          <div
+            key={event.id}
+            className="w-[86%] shrink-0 snap-start sm:w-[340px] lg:w-[calc((100%-3rem)/3)]"
+          >
+            <EventCard
+              event={event}
+              animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom Arrow Controls & Dots (visible on both Mobile & Desktop) */}
+      {sorted.length > 1 && (
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            disabled={!canPrev}
+            aria-label="Previous event"
+            className="inline-flex h-10 min-w-[40px] items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">Prev</span>
+          </button>
+
+          <div className="flex items-center gap-1.5" role="tablist" aria-label="Event slides">
+            {sorted.map((ev, idx) => (
+              <button
+                key={ev.id}
+                type="button"
+                role="tab"
+                aria-selected={idx === activeIndex}
+                aria-label={`Go to ${ev.title}`}
+                onClick={() => scrollToIndex(idx)}
+                className={`h-2 rounded-full transition-all duration-200 ${
+                  idx === activeIndex
+                    ? 'w-6 bg-brand-primary'
+                    : 'w-2 bg-brand-navy/20 hover:bg-brand-navy/40'
+                }`}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            disabled={!canNext}
+            aria-label="Next event"
+            className="inline-flex h-10 min-w-[40px] items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <span className="hidden sm:inline">Next</span>
+            <ChevronRight className="h-4 w-4 shrink-0" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

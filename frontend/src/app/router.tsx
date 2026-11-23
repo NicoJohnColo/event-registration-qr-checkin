@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { PublicLayout } from './PublicLayout'
 import { EventDetailsPage } from '../pages/EventDetailsPage'
 import { EventsPage } from '../pages/EventsPage'
+import { HowItWorksPage } from '../pages/HowItWorksPage'
 import { LandingPage } from '../pages/LandingPage'
 import { PhaseComingSoonPage } from '../pages/PhaseComingSoonPage'
 import { RegisterPage } from '../pages/RegisterPage'
@@ -14,6 +15,7 @@ export function AppRouter() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/events/:id" element={<EventDetailsPage />} />
           <Route path="/events/:id/register" element={<RegisterPage />} />
           <Route path="/ticket/:code" element={<TicketPage />} />

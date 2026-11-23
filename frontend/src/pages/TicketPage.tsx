@@ -55,7 +55,7 @@ export function TicketPage() {
 
       <article className="animate-modal-in overflow-hidden rounded-[24px] border border-border bg-surface shadow-dock">
         <div className="bg-brand-navy px-6 py-5 text-white">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-bold uppercase tracking-[0.16em] text-brand-cyan">
               EventRegister · Digital Pass
             </span>
@@ -68,7 +68,7 @@ export function TicketPage() {
           </h1>
         </div>
 
-        <div className="space-y-5 p-6">
+        <div className="space-y-5 p-5 sm:p-6">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-brand-navy/55">
               Attendee
@@ -76,7 +76,7 @@ export function TicketPage() {
             <p className="mt-0.5 font-heading text-lg font-extrabold text-brand-navy">
               {ticket.attendeeName}
             </p>
-            <p className="text-xs text-brand-navy/65">
+            <p className="break-words text-xs text-brand-navy/65">
               {ticket.email} · {ticket.mobile}
             </p>
           </div>
@@ -100,9 +100,9 @@ export function TicketPage() {
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-navy/55">
               Ticket Code
             </p>
-            <div className="mt-2 inline-flex items-center gap-2 rounded-2xl border border-brand-sky bg-sky-50/70 px-5 py-3">
-              <Ticket className="h-5 w-5 text-brand-primary" />
-              <span className="font-code text-2xl font-bold tracking-widest text-brand-navy">
+            <div className="mt-2 inline-flex max-w-full items-center gap-2 rounded-2xl border border-brand-sky bg-sky-50/70 px-4 py-3 sm:px-5">
+              <Ticket className="h-5 w-5 shrink-0 text-brand-primary" />
+              <span className="font-code text-xl font-bold tracking-widest text-brand-navy sm:text-2xl">
                 {ticket.ticketCode}
               </span>
             </div>
