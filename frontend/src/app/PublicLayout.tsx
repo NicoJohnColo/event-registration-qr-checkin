@@ -10,17 +10,21 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { BrandLogo } from '../components/ui/BrandLogo'
 import { Button } from '../components/ui/Button'
+import { useAuth } from '../features/auth'
 
 interface PublicLayoutProps {
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function PublicLayout({ children }: PublicLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname, hash } = useLocation()
+  const { isAuthenticated } = useAuth()
+  const staffDestination = isAuthenticated ? '/staff/check-in' : '/staff/login'
+  const staffLabel = isAuthenticated ? 'Staff Portal' : 'Staff Sign In'
 
   useEffect(() => {
     setMobileOpen(false)
@@ -81,10 +85,10 @@ export function PublicLayout({ children }: PublicLayoutProps) {
               <Clock className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
               <span>Asia/Manila (UTC+8)</span>
             </span>
-            <Link to="/staff/login">
+            <Link to={staffDestination}>
               <Button variant="secondary" size="sm">
                 <ShieldCheck className="h-4 w-4 shrink-0 text-brand-primary" />
-                <span>Staff Sign In</span>
+                <span>{staffLabel}</span>
               </Button>
             </Link>
           </div>
@@ -147,10 +151,10 @@ export function PublicLayout({ children }: PublicLayoutProps) {
                 <span className="font-semibold">12-hour AM/PM</span>
               </div>
 
-              <Link to="/staff/login" className="mt-1.5" onClick={() => setMobileOpen(false)}>
+              <Link to={staffDestination} className="mt-1.5" onClick={() => setMobileOpen(false)}>
                 <Button variant="secondary" size="md" fullWidth>
                   <ShieldCheck className="h-4 w-4 text-brand-primary" />
-                  <span>Staff Sign In</span>
+                  <span>{staffLabel}</span>
                 </Button>
               </Link>
             </nav>
@@ -166,7 +170,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         />
       )}
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">{children ?? <Outlet />}</main>
 
       <footer className="border-t border-border/80 bg-surface py-8 sm:py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-5 px-4 text-sm text-brand-navy/65 sm:flex-row sm:items-center sm:px-6">
@@ -183,8 +187,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
             <Link to="/lookup" className="transition-colors hover:text-brand-primary">
               Find My Ticket
             </Link>
-            <Link to="/staff/login" className="transition-colors hover:text-brand-primary">
-              Staff Sign In
+            <Link to={staffDestination} className="transition-colors hover:text-brand-primary">
+              {staffLabel}
             </Link>
           </div>
         </div>
