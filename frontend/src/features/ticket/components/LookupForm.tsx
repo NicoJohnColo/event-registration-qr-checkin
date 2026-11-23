@@ -76,14 +76,14 @@ export function LookupForm({
     !(apiError instanceof ApiClientError && Object.keys(apiError.fieldErrors).length > 0)
 
   return (
-    <div className="rounded-[24px] border border-border bg-surface p-5 shadow-dock sm:p-7">
-      <div className="mb-5">
-        <h2 className="font-heading text-xl font-extrabold text-brand-navy">{title}</h2>
-        <p className="mt-1 text-sm text-brand-navy/70">{subtitle}</p>
+    <div className="w-full rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-dock sm:p-5">
+      <div className="mb-3.5">
+        <h2 className="heading-card font-heading font-extrabold text-brand-navy">{title}</h2>
+        <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">{subtitle}</p>
       </div>
 
       {showTopAlert && (
-        <div className="mb-5">
+        <div className="mb-3.5">
           <Alert
             tone="error"
             title={isNotFound ? 'Ticket not found' : 'Could not look up ticket'}
@@ -97,7 +97,7 @@ export function LookupForm({
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
         <FormField
           label="Ticket Code"
           htmlFor="lookup-ticket-code"
@@ -108,10 +108,12 @@ export function LookupForm({
           <Input
             id="lookup-ticket-code"
             type="text"
+            inputMode="text"
             autoComplete="off"
+            autoCapitalize="characters"
             spellCheck={false}
             placeholder="CDM-7K3P9Q"
-            className="font-code uppercase tracking-wider"
+            className="font-code pr-11 uppercase tracking-wider"
             leftIcon={<Ticket className="h-4 w-4" />}
             hasError={Boolean(errors.ticketCode)}
             {...register('ticketCode')}
@@ -122,20 +124,23 @@ export function LookupForm({
           label="Registered Email"
           htmlFor="lookup-email"
           error={errors.email?.message}
+          hint="Enter the email address you used when registering."
           required
         >
           <Input
             id="lookup-email"
             type="email"
+            inputMode="email"
             autoComplete="email"
             placeholder="juan.delacruz@example.com"
+            className="pr-11"
             leftIcon={<Mail className="h-4 w-4" />}
             hasError={Boolean(errors.email)}
             {...register('email')}
           />
         </FormField>
 
-        <Button type="submit" variant="primary" size="lg" fullWidth disabled={mutation.isPending}>
+        <Button type="submit" variant="primary" size="md" fullWidth disabled={mutation.isPending}>
           {mutation.isPending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />

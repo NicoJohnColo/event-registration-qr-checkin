@@ -31,7 +31,7 @@ export function EventSearchToolbar({
   counts,
   totalMatching,
   onReset,
-  placeholder = 'Search Cebu events by title, topic, or venue...',
+  placeholder = 'Search events…',
   rightAccessory,
   className = '',
 }: EventSearchToolbarProps) {
@@ -39,9 +39,9 @@ export function EventSearchToolbar({
 
   return (
     <div
-      className={`rounded-2xl border border-border/80 bg-surface p-2.5 shadow-card sm:p-3 ${className}`}
+      className={`rounded-[var(--radius-card)] border border-border/80 bg-surface p-3 shadow-card ${className}`}
     >
-      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="min-w-0 flex-1">
             <Input
@@ -90,8 +90,8 @@ export function EventSearchToolbar({
       </div>
 
       {hasActiveFilters && (
-        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-border/70 pt-2.5 text-xs">
-          <span className="min-w-0 truncate text-brand-navy/70">
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-2.5 text-xs">
+          <span className="min-w-0 truncate text-brand-navy/75">
             Showing <strong className="text-brand-navy">{totalMatching}</strong>{' '}
             {totalMatching === 1 ? 'event' : 'events'}
             {search.trim() ? ` for "${search.trim()}"` : ''}
@@ -99,7 +99,7 @@ export function EventSearchToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="shrink-0 font-bold text-brand-primary hover:underline"
+            className="inline-flex h-10 min-h-[40px] shrink-0 items-center font-bold text-brand-primary hover:underline"
           >
             Clear filters
           </button>

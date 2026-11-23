@@ -49,20 +49,21 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (eventRepository.count() > 0) {
-            return;
-        }
-
         LocalDate today = LocalDate.now(clock.withZone(ManilaTime.ZONE));
         Instant now = Instant.now(clock);
 
-        // S1 (required): Today 8:00 AM - 10:00 PM, cap 30, 3 confirmed -> 27 of 30 spots left
+        if (eventRepository.count() > 0) {
+            refreshSeededEventDates(today);
+            return;
+        }
+
+        // S1 (required): Today 8:00 AM - 11:59 PM, cap 30, 3 confirmed -> 27 of 30 spots left
         Event s1 = eventRepository.save(new Event(
                 "Cebu Dev Meetup 2026",
                 "Monthly gathering for Cebu software engineers, students, and builders. Talks, lightning demos, and networking.",
                 "Ayala Center Cebu, Function Room 2",
                 ManilaTime.atManilaTime(today, 8, 0),
-                ManilaTime.atManilaTime(today, 22, 0),
+                ManilaTime.atManilaTime(today, 23, 59),
                 30,
                 EventStatus.PUBLISHED,
                 "CDM",
@@ -127,6 +128,27 @@ public class DataSeeder implements ApplicationRunner {
         ));
 
         log.info("Seeded Level 1 events (S1-S4) relative to Cebu date {}", today);
+    }
+
+    private void refreshSeededEventDates(LocalDate today) {
+        for (Event event : eventRepository.findAll()) {
+            switch (event.getCodePrefix()) {
+                case "CDM" -> event.updateSchedule(
+                        ManilaTime.atManilaTime(today, 8, 0),
+                        ManilaTime.atManilaTime(today, 23, 59));
+                case "CWD" -> event.updateSchedule(
+                        ManilaTime.atManilaTime(today.plusDays(7), 13, 0),
+                        ManilaTime.atManilaTime(today.plusDays(7), 17, 0));
+                case "CSP" -> event.updateSchedule(
+                        ManilaTime.atManilaTime(today.plusDays(3), 18, 0),
+                        ManilaTime.atManilaTime(today.plusDays(3), 21, 0));
+                case "CCC" -> event.updateSchedule(
+                        ManilaTime.atManilaTime(today.minusDays(7), 9, 0),
+                        ManilaTime.atManilaTime(today.minusDays(7), 15, 0));
+                default -> {}
+            }
+        }
+        log.info("Refreshed seeded event schedules (S1-S4) relative to Cebu date {}", today);
     }
 
     private void seedConfirmed(Event event, Instant registeredAt, List<SeedAttendee> attendees) {

@@ -55,7 +55,7 @@ export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) 
         : null
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-3.5">
       {topError && (
         <div className="animate-toast-in">
           <Alert tone="error" title="Registration could not be completed">
@@ -121,7 +121,7 @@ export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) 
       <Button
         type="submit"
         variant="primary"
-        size="lg"
+        size="md"
         fullWidth
         disabled={mutation.isPending}
       >

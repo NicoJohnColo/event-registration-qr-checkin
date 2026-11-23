@@ -42,20 +42,20 @@ export function RegisterPage() {
 
   return (
     <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 py-8 sm:py-10">
-        <div className="mx-auto flex max-w-5xl items-start justify-between gap-6 px-4 sm:px-6">
-          <div>
+      <section className="bg-sky-header border-b border-brand-sky/80 py-5 sm:py-6">
+        <div className="page-container flex items-start justify-between gap-4">
+          <div className="min-w-0">
             <Link
               to={`/events/${event.id}`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary transition-colors hover:text-brand-primary-hover"
+              className="inline-flex h-10 min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to event details
+              <span>Back to event details</span>
             </Link>
-            <p className="mt-3 text-xs font-extrabold uppercase tracking-[0.16em] text-brand-primary">
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">
               Free Event Registration
             </p>
-            <h1 className="mt-1 font-heading text-2xl font-black text-brand-navy sm:text-3xl">
+            <h1 className="heading-hero mt-0.5 font-heading font-extrabold text-brand-navy">
               {event.title}
             </h1>
           </div>
@@ -63,17 +63,17 @@ export function RegisterPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl grid-cols-1 gap-8 px-4 py-10 sm:px-6 lg:grid-cols-12">
+      <section className="page-container grid grid-cols-1 gap-4 py-5 sm:gap-6 sm:py-8 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <div className="animate-rise rounded-[22px] border border-border bg-surface p-6 shadow-card sm:p-8">
-            <h2 className="font-heading text-xl font-extrabold text-brand-navy">
+          <div className="animate-rise rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-card sm:p-5">
+            <h2 className="heading-card font-heading font-extrabold text-brand-navy">
               Attendee Details
             </h2>
-            <p className="mt-1 text-sm text-brand-navy/70">
+            <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
               One registration per email for this event. Your ticket code is generated immediately.
             </p>
 
-            <div className="mt-6">
+            <div className="mt-4">
               {event.ended ? (
                 <div className="space-y-4">
                   <Alert tone="info" title="Event has ended">
@@ -110,12 +110,12 @@ export function RegisterPage() {
         </div>
 
         <aside className="lg:col-span-5">
-          <div className="sticky top-24 rounded-[22px] border border-border bg-surface p-6 shadow-card">
-            <h3 className="font-heading text-base font-extrabold text-brand-navy">
+          <div className="sticky top-20 rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-card sm:p-5">
+            <h3 className="heading-card font-heading font-extrabold text-brand-navy">
               Event Summary
             </h3>
 
-            <dl className="mt-4 space-y-3 text-sm text-brand-navy/80">
+            <dl className="mt-3 space-y-2 text-xs text-brand-navy/80 sm:text-sm">
               <div className="flex items-start gap-2.5">
                 <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" />
                 <span className="font-semibold">{formatCebuDate(event.startsAt)}</span>

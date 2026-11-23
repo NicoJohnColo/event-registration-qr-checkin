@@ -1,10 +1,10 @@
 export function BrandLogo({ inverted = false }: { inverted?: boolean }) {
   return (
-    <span className="group inline-flex items-center gap-2.5 select-none">
+    <span className="group inline-flex items-center gap-1.5 select-none">
       {/* 4-diamond geometric mark inspired by the brand reference */}
       <svg
-        width="32"
-        height="32"
+        width="23"
+        height="23"
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -54,14 +54,14 @@ export function BrandLogo({ inverted = false }: { inverted?: boolean }) {
       </svg>
       <span className="flex flex-col leading-none">
         <span
-          className={`font-heading text-lg font-black tracking-tight ${
+          className={`font-heading text-sm font-extrabold tracking-tight sm:text-[15px] ${
             inverted ? 'text-white' : 'text-brand-navy'
           }`}
         >
           EventRegister
         </span>
         <span
-          className={`text-[10px] font-bold uppercase tracking-[0.16em] ${
+          className={`mt-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${
             inverted ? 'text-brand-sky/90' : 'text-brand-primary'
           }`}
         >

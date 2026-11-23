@@ -10,46 +10,48 @@ export function TotalsBar({ registeredCount, checkedInCount, capacity }: TotalsB
   const notCheckedIn = Math.max(0, registeredCount - checkedInCount)
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <div className="flex items-center justify-between rounded-2xl border border-brand-sky bg-sky-50/75 px-4 py-3.5">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-brand-primary">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="flex min-w-0 items-center justify-between rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/80 p-2.5 sm:p-3">
+        <div className="min-w-0">
+          <p className="text-[10.5px] font-bold leading-tight tracking-[0.03em] text-brand-primary sm:text-xs">
             Registered
           </p>
-          <p className="font-code mt-0.5 text-xl font-extrabold text-brand-navy">
-            {registeredCount} / {capacity}
+          <p className="font-code mt-0.5 text-sm font-extrabold tabular-nums text-brand-navy sm:text-base">
+            {registeredCount}{' '}
+            <span className="text-[11px] font-semibold text-brand-navy/65">/ {capacity}</span>
           </p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-primary shadow-xs">
-          <Users className="h-5 w-5" />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-emerald-50/75 px-4 py-3.5">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-status-green">
-            Checked In
-          </p>
-          <p className="font-code mt-0.5 text-xl font-extrabold text-brand-navy">
-            {checkedInCount} / {registeredCount}
-          </p>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-status-green shadow-xs">
-          <CheckCircle2 className="h-5 w-5" />
+        <div className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-brand-primary shadow-xs sm:flex">
+          <Users className="h-3.5 w-3.5" />
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3.5">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/60">
-            Awaiting Check-In
+      <div className="flex min-w-0 items-center justify-between rounded-[var(--radius-card)] border border-emerald-200 bg-emerald-50/80 p-2.5 sm:p-3">
+        <div className="min-w-0">
+          <p className="text-[10.5px] font-bold leading-tight tracking-[0.03em] text-status-green sm:text-xs">
+            Checked in
           </p>
-          <p className="font-code mt-0.5 text-xl font-extrabold text-brand-navy">
+          <p className="font-code mt-0.5 text-sm font-extrabold tabular-nums text-brand-navy sm:text-base">
+            {checkedInCount}{' '}
+            <span className="text-[11px] font-semibold text-brand-navy/65">/ {registeredCount}</span>
+          </p>
+        </div>
+        <div className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-status-green shadow-xs sm:flex">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        </div>
+      </div>
+
+      <div className="flex min-w-0 items-center justify-between rounded-[var(--radius-card)] border border-border bg-surface p-2.5 sm:p-3">
+        <div className="min-w-0">
+          <p className="text-[10.5px] font-bold leading-tight tracking-[0.03em] text-brand-navy/75 sm:text-xs">
+            Pending
+          </p>
+          <p className="font-code mt-0.5 text-sm font-extrabold tabular-nums text-brand-navy sm:text-base">
             {notCheckedIn}
           </p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-page text-brand-navy/60">
-          <Clock className="h-5 w-5" />
+        <div className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-page text-brand-navy/70 sm:flex">
+          <Clock className="h-3.5 w-3.5" />
         </div>
       </div>
     </div>

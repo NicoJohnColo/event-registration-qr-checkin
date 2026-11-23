@@ -18,18 +18,18 @@ export function FormField({
   children,
 }: FormFieldProps) {
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-sm font-semibold text-brand-navy">
+    <div className="space-y-1">
+      <label htmlFor={htmlFor} className="block text-xs font-bold text-brand-navy">
         {label}
         {required && <span className="ml-0.5 text-status-red">*</span>}
       </label>
       {children}
       {error ? (
-        <p className="text-xs font-medium text-status-red" role="alert">
+        <p className="text-[11px] font-semibold text-status-red" role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-xs text-brand-navy/60">{hint}</p>
+        <p className="text-[11px] text-brand-navy/70">{hint}</p>
       ) : null}
     </div>
   )

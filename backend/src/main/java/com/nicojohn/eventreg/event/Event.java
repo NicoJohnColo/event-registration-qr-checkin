@@ -80,4 +80,9 @@ public class Event {
     public EventStatus getStatus() { return status; }
     public String getCodePrefix() { return codePrefix; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public void updateSchedule(Instant startsAt, Instant endsAt) {
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+    }
 }

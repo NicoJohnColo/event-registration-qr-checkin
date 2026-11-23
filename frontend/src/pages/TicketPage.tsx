@@ -28,43 +28,43 @@ export function TicketPage() {
   }, [code, stateTicket])
 
   return (
-    <div
-      className={`mx-auto px-4 py-6 sm:px-6 sm:py-8 ${ticket ? 'max-w-3xl' : 'max-w-lg'}`}
-    >
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <Link
-          to="/events"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:underline"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          All Events
-        </Link>
+    <div className="page-container py-6 sm:py-8">
+      <div className={`mx-auto ${ticket ? 'max-w-3xl' : 'max-w-lg'}`}>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to="/events"
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-brand-primary hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>All Events</span>
+          </Link>
 
-        <Link
-          to="/lookup"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-navy/70 transition-colors hover:text-brand-primary"
-        >
-          <Search className="h-3.5 w-3.5" />
-          <span>Find Another Ticket</span>
-        </Link>
-      </div>
-
-      {ticket ? (
-        <TicketCard ticket={ticket} />
-      ) : (
-        <div className="space-y-4">
-          <Alert tone="info" title="Verify your email to view this pass">
-            For privacy, passes opened directly by link require your registered email before
-            displaying attendee details and the QR code.
-          </Alert>
-          <LookupForm
-            initialCode={code}
-            onFound={(found) => setTicket(found)}
-            title="Unlock QR Ticket"
-            subtitle="Confirm the ticket code and your registration email below."
-          />
+          <Link
+            to="/lookup"
+            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-brand-navy/75 transition-colors hover:text-brand-primary"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span>Find Another Ticket</span>
+          </Link>
         </div>
-      )}
+
+        {ticket ? (
+          <TicketCard ticket={ticket} />
+        ) : (
+          <div className="space-y-4">
+            <Alert tone="info" title="Verify your email to view this pass">
+              For privacy, passes opened directly by link require your registered email before
+              displaying attendee details and the QR code.
+            </Alert>
+            <LookupForm
+              initialCode={code}
+              onFound={(found) => setTicket(found)}
+              title="Unlock QR Ticket"
+              subtitle="Confirm the ticket code and your registration email below."
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

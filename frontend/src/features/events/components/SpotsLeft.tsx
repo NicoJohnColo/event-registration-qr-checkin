@@ -36,10 +36,10 @@ export function SpotsLeft({ event, compact = false }: SpotsLeftProps) {
 
   return (
     <div className={compact ? 'space-y-1.5' : 'space-y-2'}>
-      <div className="flex items-center justify-between gap-2 text-xs font-semibold">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
         <span className={labelClass}>{label}</span>
         {!event.ended && (
-          <span className="rounded-full bg-page px-2 py-0.5 text-[11px] font-semibold text-brand-navy/60">
+          <span className="rounded-full bg-page px-2.5 py-0.5 text-xs font-bold text-brand-navy/75">
             {percentFilled}% filled
           </span>
         )}

@@ -42,29 +42,29 @@ export function ResultBanner({ tone, label, title, detail, meta }: ResultBannerP
     <div
       role="status"
       aria-live="polite"
-      className={`animate-pop rounded-[20px] border-2 p-5 shadow-card sm:p-6 ${wrapper}`}
+      className={`animate-pop rounded-[var(--radius-card)] border-2 p-3.5 shadow-card sm:p-4 ${wrapper}`}
     >
-      <div className="flex items-start gap-4">
-        <Icon className="mt-0.5 h-8 w-8 shrink-0" />
+      <div className="flex items-start gap-2.5">
+        <Icon className="mt-0.5 h-5 w-5 shrink-0" />
         <div className="min-w-0 flex-1">
           <span
-            className={`inline-block rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${badge}`}
+            className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${badge}`}
           >
             {label}
           </span>
 
           {title && (
-            <p className="mt-2.5 font-heading text-xl font-black text-brand-navy sm:text-2xl">
+            <p className="heading-card mt-1 font-heading font-extrabold text-brand-navy">
               {title}
             </p>
           )}
 
           {detail && (
-            <p className="mt-1 text-sm font-semibold text-brand-navy/85">{detail}</p>
+            <p className="mt-0.5 text-xs font-semibold text-brand-navy/85 sm:text-sm">{detail}</p>
           )}
 
           {meta && (
-            <p className="font-code mt-2 text-xs font-semibold text-brand-navy/65">{meta}</p>
+            <p className="font-code mt-1 text-xs font-semibold text-brand-navy/75">{meta}</p>
           )}
         </div>
       </div>
