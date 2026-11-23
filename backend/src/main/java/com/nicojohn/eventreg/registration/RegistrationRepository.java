@@ -1,14 +1,20 @@
 package com.nicojohn.eventreg.registration;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.nicojohn.eventreg.staff.StaffUser;
+
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+
+    long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
 
     long countByEventIdAndStatusIn(Long eventId, Collection<RegistrationStatus> statuses);
 
@@ -37,4 +43,30 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     Optional<Registration> findByTicketCodeAndEmailIgnoreCase(
             @Param("ticketCode") String ticketCode,
             @Param("email") String email);
+
+    @Query("""
+            SELECT r
+            FROM Registration r
+            JOIN FETCH r.event
+            LEFT JOIN FETCH r.checkedInBy
+            WHERE r.event.id = :eventId
+              AND r.ticketCode = :ticketCode
+            """)
+    Optional<Registration> findByEventIdAndTicketCode(
+            @Param("eventId") Long eventId,
+            @Param("ticketCode") String ticketCode);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE Registration r
+            SET r.status = com.nicojohn.eventreg.registration.RegistrationStatus.CHECKED_IN,
+                r.checkedInAt = :checkedInAt,
+                r.checkedInBy = :staffUser
+            WHERE r.id = :registrationId
+              AND r.status = com.nicojohn.eventreg.registration.RegistrationStatus.CONFIRMED
+            """)
+    int markCheckedInIfConfirmed(
+            @Param("registrationId") Long registrationId,
+            @Param("checkedInAt") Instant checkedInAt,
+            @Param("staffUser") StaffUser staffUser);
 }

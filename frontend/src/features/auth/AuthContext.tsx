@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { clearCheckInSession } from '../checkin/storage'
 import { fetchStaffMe, loginStaff } from './api'
 import { clearStoredToken, getStoredToken, setStoredToken } from './storage'
 import type { LoginPayload, StaffProfile } from './types'
@@ -58,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     clearStoredToken()
+    clearCheckInSession()
     setToken(null)
     setStaff(null)
   }, [])
