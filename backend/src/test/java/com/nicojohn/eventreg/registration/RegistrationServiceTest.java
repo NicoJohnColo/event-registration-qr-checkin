@@ -26,6 +26,7 @@ import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
+import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
 
 class RegistrationServiceTest {
@@ -145,5 +146,64 @@ class RegistrationServiceTest {
 
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertEquals("This event has already ended.", ex.getMessage());
+    }
+
+    @Test
+    void looksUpTicketWithTrimmedLowercaseCodeAndMixedCaseEmail() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        Registration reg = new Registration(
+                event,
+                "Juan Dela Cruz",
+                "juan.delacruz@example.com",
+                "09171234567",
+                "CDM-7K3P9Q",
+                RegistrationStatus.CONFIRMED,
+                Instant.now(fixedClock));
+        ReflectionTestUtils.setField(reg, "id", 101L);
+
+        when(registrationRepository.findByTicketCodeAndEmailIgnoreCase("CDM-7K3P9Q", "juan.delacruz@example.com"))
+                .thenReturn(Optional.of(reg));
+
+        TicketResponse response = registrationService.lookupTicket(
+                new TicketLookupRequest("  cdm-7k3p9q  ", "  JUAN.DELACRUZ@EXAMPLE.COM "));
+
+        assertEquals(101L, response.registrationId());
+        assertEquals("CDM-7K3P9Q", response.ticketCode());
+        assertEquals("Juan Dela Cruz", response.attendeeName());
+        assertEquals("Cebu Dev Meetup 2026", response.eventTitle());
+    }
+
+    @Test
+    void returnsIdenticalNotFoundForWrongCodeAndWrongEmail() {
+        when(registrationRepository.findByTicketCodeAndEmailIgnoreCase(any(), any()))
+                .thenReturn(Optional.empty());
+
+        ApiException wrongCode = assertThrows(
+                ApiException.class,
+                () -> registrationService.lookupTicket(
+                        new TicketLookupRequest("CDM-ZZZZZZ", "juan.delacruz@example.com")));
+        ApiException wrongEmail = assertThrows(
+                ApiException.class,
+                () -> registrationService.lookupTicket(
+                        new TicketLookupRequest("CDM-7K3P9Q", "other@example.com")));
+
+        assertEquals(HttpStatus.NOT_FOUND, wrongCode.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, wrongEmail.getStatus());
+        assertEquals("Ticket not found", wrongCode.getMessage());
+        assertEquals(wrongCode.getMessage(), wrongEmail.getMessage());
+    }
+
+    @Test
+    void returnsNotFoundForSqlInjectionProbe() {
+        when(registrationRepository.findByTicketCodeAndEmailIgnoreCase("' OR '1'='1", "juan.delacruz@example.com"))
+                .thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(
+                ApiException.class,
+                () -> registrationService.lookupTicket(
+                        new TicketLookupRequest("' OR '1'='1", "juan.delacruz@example.com")));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertEquals("Ticket not found", ex.getMessage());
     }
 }

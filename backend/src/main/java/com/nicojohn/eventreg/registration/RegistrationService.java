@@ -16,6 +16,7 @@ import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
+import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
 
 @Service
@@ -84,6 +85,21 @@ public class RegistrationService {
         } catch (DataIntegrityViolationException ex) {
             throw ApiException.conflict("This email is already registered for this event.");
         }
+    }
+
+    /**
+     * Looks up a ticket by normalized ticket code and email (Rule R11: wrong code
+     * and wrong email produce an identical 404 without revealing which failed).
+     */
+    @Transactional(readOnly = true)
+    public TicketResponse lookupTicket(TicketLookupRequest request) {
+        String normalizedCode = request.ticketCode().trim().toUpperCase(Locale.ROOT);
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
+
+        return registrationRepository
+                .findByTicketCodeAndEmailIgnoreCase(normalizedCode, normalizedEmail)
+                .map(TicketResponse::from)
+                .orElseThrow(() -> ApiException.notFound("Ticket not found"));
     }
 
     private String nextUniqueTicketCode(String prefix) {

@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { FloatingCubeAccent, SpotsLeft, useEvent } from '../features/events'
 import { RegistrationForm } from '../features/registration'
+import { saveCachedTicket } from '../features/ticket'
 import { formatCebuDate, formatCebuTimeRange } from '../lib/formatDate'
 
 export function RegisterPage() {
@@ -96,11 +97,12 @@ export function RegisterPage() {
               ) : (
                 <RegistrationForm
                   eventId={event.id}
-                  onSuccess={(ticket) =>
+                  onSuccess={(ticket) => {
+                    saveCachedTicket(ticket)
                     navigate(`/ticket/${encodeURIComponent(ticket.ticketCode)}`, {
                       state: { ticket },
                     })
-                  }
+                  }}
                 />
               )}
             </div>

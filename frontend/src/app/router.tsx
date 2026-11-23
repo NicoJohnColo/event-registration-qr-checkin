@@ -6,6 +6,7 @@ import { HowItWorksPage } from '../pages/HowItWorksPage'
 import { LandingPage } from '../pages/LandingPage'
 import { PhaseComingSoonPage } from '../pages/PhaseComingSoonPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { TicketLookupPage } from '../pages/TicketLookupPage'
 import { TicketPage } from '../pages/TicketPage'
 
 export function AppRouter() {
@@ -19,16 +20,7 @@ export function AppRouter() {
           <Route path="/events/:id" element={<EventDetailsPage />} />
           <Route path="/events/:id/register" element={<RegisterPage />} />
           <Route path="/ticket/:code" element={<TicketPage />} />
-          <Route
-            path="/lookup"
-            element={
-              <PhaseComingSoonPage
-                phase="Phase 4 · Ticket & QR Lookup"
-                title="Find My Ticket"
-                description="Ticket lookup by ticket code and email will be built in Phase 4."
-              />
-            }
-          />
+          <Route path="/lookup" element={<TicketLookupPage />} />
           <Route
             path="/staff/login"
             element={

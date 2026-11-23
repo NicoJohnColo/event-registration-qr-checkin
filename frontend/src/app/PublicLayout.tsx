@@ -29,6 +29,15 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     }
   }, [pathname, hash])
 
+  useEffect(() => {
+    if (!mobileOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [mobileOpen])
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-bold leading-none transition-all duration-150 ${
       isActive
@@ -92,7 +101,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         </div>
 
         {mobileOpen && (
-          <div className="animate-slide-down border-t border-border/80 bg-white/95 px-4 py-4 shadow-lg backdrop-blur-md md:hidden">
+          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100svh-4rem)] overflow-y-auto border-t border-border/80 bg-white px-4 py-4 shadow-xl md:hidden">
             <nav className="flex flex-col gap-1.5" aria-label="Mobile navigation">
               <NavLink to="/" end className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
                 <span className="inline-flex items-center gap-3">
@@ -148,6 +157,14 @@ export function PublicLayout({ children }: PublicLayoutProps) {
           </div>
         )}
       </header>
+
+      {mobileOpen && (
+        <div
+          className="fixed inset-x-0 top-16 bottom-0 z-30 bg-brand-navy/35 backdrop-blur-[2px] md:hidden"
+          aria-hidden="true"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
       <main className="flex-1">{children}</main>
 
