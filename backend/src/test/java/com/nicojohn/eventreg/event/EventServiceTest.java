@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -108,6 +109,33 @@ class EventServiceTest {
         when(eventRepository.findById(99L)).thenReturn(Optional.of(draft));
 
         ApiException ex = assertThrows(ApiException.class, () -> eventService.getPublishedEvent(99L));
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+    }
+
+    @Test
+    void deleteEventCleansChildRowsAndLogsAudit() {
+        Event target = new Event(
+                "Cleanup Event", "Desc", "Cebu",
+                Instant.now(fixedClock), Instant.now(fixedClock).plusSeconds(3600),
+                10, EventStatus.CLOSED, "CLN", Instant.now(fixedClock));
+        ReflectionTestUtils.setField(target, "id", 55L);
+
+        when(eventRepository.findByIdForUpdate(55L)).thenReturn(Optional.of(target));
+        when(registrationRepository.findIdsByEventId(55L)).thenReturn(List.of(101L, 102L));
+
+        eventService.deleteEvent(55L, 1L);
+
+        verify(auditLogRepository).deleteByEntityTypeAndEntityIdIn("REGISTRATION", List.of(101L, 102L));
+        verify(registrationRepository).deleteAllByEventId(55L);
+        verify(auditLogRepository).deleteByEntityTypeAndEntityIdIn("EVENT", List.of(55L));
+        verify(eventRepository).delete(target);
+        verify(auditLogRepository).save(any());
+    }
+
+    @Test
+    void deleteEventRejectsMissingEvent() {
+        when(eventRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
+        ApiException ex = assertThrows(ApiException.class, () -> eventService.deleteEvent(999L, 1L));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
     }
 }

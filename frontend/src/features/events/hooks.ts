@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   closeStaffEvent,
   createStaffEvent,
+  deleteStaffEvent,
   getEvent,
   getEvents,
   getStaffEvents,
@@ -66,6 +67,21 @@ export function useCloseEvent() {
       qc.invalidateQueries({ queryKey: ['staff-dashboard-metrics'] })
       qc.invalidateQueries({ queryKey: ['events'] })
       qc.invalidateQueries({ queryKey: ['events', String(id)] })
+    },
+  })
+}
+
+export function useDeleteEvent() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => deleteStaffEvent(id),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ['staff-events'] })
+      qc.invalidateQueries({ queryKey: ['staff-dashboard-metrics'] })
+      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.removeQueries({ queryKey: ['events', String(id)] })
+      qc.invalidateQueries({ queryKey: ['staff-attendees'] })
+      qc.invalidateQueries({ queryKey: ['checkin-stats', id] })
     },
   })
 }

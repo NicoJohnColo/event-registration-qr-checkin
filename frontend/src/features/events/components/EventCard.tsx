@@ -1,4 +1,4 @@
-import { ArrowRight, Ban, CalendarCheck2, CheckCircle2, Clock, MapPin } from 'lucide-react'
+import { ArrowRight, CalendarCheck2, CheckCircle2, Clock, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -23,7 +23,7 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
   const topAccentClass = event.ended
     ? 'bg-slate-300'
     : event.full
-      ? 'bg-status-red'
+      ? 'bg-gradient-to-r from-status-amber via-amber-400 to-amber-300'
       : 'bg-gradient-to-r from-brand-primary via-brand-blue to-brand-cyan'
 
   const badge = event.ended ? (
@@ -31,8 +31,8 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
       Ended
     </StatusBadge>
   ) : event.full ? (
-    <StatusBadge tone="red" icon={<Ban className="h-3.5 w-3.5" />}>
-      Full
+    <StatusBadge tone="amber" icon={<Clock className="h-3.5 w-3.5" />}>
+      Waitlist
     </StatusBadge>
   ) : happeningToday ? (
     <StatusBadge tone="blue" pulse icon={<CalendarCheck2 className="h-3.5 w-3.5" />}>
@@ -128,9 +128,12 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
               </Link>
 
               {event.full ? (
-                <Button variant="primary" size="sm" fullWidth disabled>
-                  Full
-                </Button>
+                <Link to={`/events/${event.id}/register`} className="block">
+                  <Button variant="secondary" size="sm" fullWidth className="group/btn">
+                    <span>Join Waitlist</span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-150 group-hover/btn:translate-x-0.5" />
+                  </Button>
+                </Link>
               ) : (
                 <Link to={`/events/${event.id}/register`} className="block">
                   <Button variant="primary" size="sm" fullWidth className="group/btn">

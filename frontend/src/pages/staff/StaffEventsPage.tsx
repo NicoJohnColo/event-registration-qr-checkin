@@ -13,6 +13,7 @@ import {
   EventFormModal,
   StaffEventCard,
   useCloseEvent,
+  useDeleteEvent,
   useStaffEvents,
   useUpdateEvent,
   type StaffEventItem,
@@ -25,6 +26,7 @@ export function StaffEventsPage() {
   const { data: events = [], isLoading, isError, refetch } = useStaffEvents()
   const updateMutation = useUpdateEvent()
   const closeMutation = useCloseEvent()
+  const deleteMutation = useDeleteEvent()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<DashboardStatusFilter>('all')
@@ -197,6 +199,25 @@ export function StaffEventsPage() {
     }
   }
 
+  const handleDeleteEvent = async (ev: StaffEventItem) => {
+    setFeedback(null)
+    setMutatingEventId(ev.id)
+    try {
+      await deleteMutation.mutateAsync(ev.id)
+      setFeedback({
+        tone: 'success',
+        message: `"${ev.title}" has been permanently deleted.`,
+      })
+    } catch (err) {
+      setFeedback({
+        tone: 'error',
+        message: err instanceof Error ? err.message : 'Unable to delete event.',
+      })
+    } finally {
+      setMutatingEventId(null)
+    }
+  }
+
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all'
 
   return (
@@ -218,7 +239,7 @@ export function StaffEventsPage() {
             Manage Events
           </h1>
           <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
-            Create draft events, publish schedules to attendees, adjust capacity, or close registration.
+            Create draft events, publish schedules to attendees, adjust capacity, close, or delete events.
           </p>
         </div>
 
@@ -317,6 +338,7 @@ export function StaffEventsPage() {
               onEdit={handleOpenEdit}
               onPublish={handlePublish}
               onCloseEvent={handleCloseEvent}
+              onDeleteEvent={handleDeleteEvent}
               isMutating={mutatingEventId === ev.id}
               animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
             />
@@ -359,6 +381,7 @@ export function StaffEventsPage() {
                   onEdit={handleOpenEdit}
                   onPublish={handlePublish}
                   onCloseEvent={handleCloseEvent}
+                  onDeleteEvent={handleDeleteEvent}
                   isMutating={mutatingEventId === ev.id}
                   animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
                 />

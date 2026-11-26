@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/events/*/register").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/tickets/lookup").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/tickets/lookup", "/api/tickets/cancel").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

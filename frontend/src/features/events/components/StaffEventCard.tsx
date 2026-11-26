@@ -1,12 +1,12 @@
 import {
   ArrowRight,
-  CheckCircle2,
   Clock,
   Globe,
   Loader2,
   Lock,
   MapPin,
   Pencil,
+  Trash2,
   Users,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -21,6 +21,7 @@ interface StaffEventCardProps {
   onEdit: (event: StaffEventItem) => void
   onPublish: (event: StaffEventItem) => void
   onCloseEvent: (event: StaffEventItem) => void
+  onDeleteEvent: (event: StaffEventItem) => void
   isMutating?: boolean
   animationDelayClass?: string
 }
@@ -41,14 +42,17 @@ export function StaffEventCard({
   onEdit,
   onPublish,
   onCloseEvent,
+  onDeleteEvent,
   isMutating = false,
   animationDelayClass = '',
 }: StaffEventCardProps) {
-  const [confirmingClose, setConfirmingClose] = useState(false)
+  const [pendingAction, setPendingAction] = useState<'close' | 'delete' | null>(null)
   const dateParts = getCebuDateParts(event.startsAt)
   const statusMeta = getStatusMeta(event.status)
 
   const registeredTotal = event.confirmedCount + event.checkedInCount
+  const totalPassCount =
+    event.confirmedCount + event.checkedInCount + event.waitlistCount + event.cancelledCount
   const fillPct =
     event.capacity > 0 ? Math.min(100, Math.round((registeredTotal / event.capacity) * 100)) : 0
 
@@ -66,7 +70,7 @@ export function StaffEventCard({
       <div className={`h-1 w-full shrink-0 ${topAccentClass}`} aria-hidden="true" />
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
-        {/* Top Row: Date Box + Prefix + Status + Timing */}
+        {/* Top Row: Date Box + Prefix + Status + Delete Shortcut */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2.5">
             <div
@@ -103,6 +107,19 @@ export function StaffEventCard({
               </div>
             </div>
           </div>
+
+          {event.status !== 'CLOSED' && (
+            <button
+              type="button"
+              onClick={() => setPendingAction('delete')}
+              disabled={isMutating}
+              aria-label={`Delete ${event.title}`}
+              title="Delete event"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border/80 bg-white text-brand-navy/60 transition-colors hover:border-status-red/50 hover:bg-red-50 hover:text-status-red focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-status-red/20 disabled:opacity-45"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {/* Title & Description */}
@@ -159,32 +176,45 @@ export function StaffEventCard({
 
         {/* Footer Controls */}
         <div className="mt-auto border-t border-border/70 pt-3">
-          {confirmingClose ? (
+          {pendingAction ? (
             <div className="rounded-[var(--radius-control)] border border-status-red/30 bg-red-50/90 p-2">
               <p className="text-center text-xs font-bold text-status-red">
-                Close event &amp; stop registrations?
+                {pendingAction === 'delete'
+                  ? `Permanently delete event${totalPassCount > 0 ? ` & ${totalPassCount} pass(es)` : ''}?`
+                  : 'Close event & stop registrations?'}
               </p>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setConfirmingClose(false)}
+                  onClick={() => setPendingAction(null)}
                   disabled={isMutating}
                   className="min-h-[36px] bg-white"
                 >
-                  Keep Open
+                  Cancel
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => {
-                    setConfirmingClose(false)
-                    onCloseEvent(event)
+                    const action = pendingAction
+                    setPendingAction(null)
+                    if (action === 'delete') {
+                      onDeleteEvent(event)
+                    } else {
+                      onCloseEvent(event)
+                    }
                   }}
                   disabled={isMutating}
                   className="min-h-[36px] !bg-status-red !text-white hover:!bg-red-700"
                 >
-                  {isMutating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Confirm Close'}
+                  {isMutating ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : pendingAction === 'delete' ? (
+                    'Confirm Delete'
+                  ) : (
+                    'Confirm Close'
+                  )}
                 </Button>
               </div>
             </div>
@@ -216,7 +246,7 @@ export function StaffEventCard({
                 <Button
                   variant="danger"
                   size="md"
-                  onClick={() => setConfirmingClose(true)}
+                  onClick={() => setPendingAction('close')}
                   disabled={isMutating}
                   className="px-2"
                 >
@@ -224,9 +254,15 @@ export function StaffEventCard({
                   <span>Close</span>
                 </Button>
               ) : (
-                <Button variant="outline" size="md" disabled className="px-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                  <span>Closed</span>
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={() => setPendingAction('delete')}
+                  disabled={isMutating}
+                  className="px-2"
+                >
+                  <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                  <span>Delete</span>
                 </Button>
               )}
 

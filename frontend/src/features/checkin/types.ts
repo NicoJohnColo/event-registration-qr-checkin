@@ -1,4 +1,10 @@
-export type CheckInOutcome = 'CHECKED_IN' | 'ALREADY_CHECKED_IN' | 'INVALID' | 'WRONG_DAY'
+export type CheckInOutcome =
+  | 'CHECKED_IN'
+  | 'ALREADY_CHECKED_IN'
+  | 'INVALID'
+  | 'WRONG_DAY'
+  | 'WAITLISTED'
+  | 'CANCELLED'
 
 export interface CheckInPayload {
   eventId: number

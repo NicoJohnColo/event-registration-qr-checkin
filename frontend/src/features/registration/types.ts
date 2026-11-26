@@ -1,3 +1,5 @@
+export type RegistrationStatus = 'CONFIRMED' | 'CHECKED_IN' | 'WAITLISTED' | 'CANCELLED'
+
 export interface RegisterPayload {
   fullName: string
   email: string
@@ -7,11 +9,13 @@ export interface RegisterPayload {
 export interface TicketData {
   registrationId: number
   ticketCode: string
-  status: 'CONFIRMED' | 'CHECKED_IN'
+  status: RegistrationStatus
+  waitlistPosition?: number | null
   attendeeName: string
   email: string
   mobile: string
   registeredAt: string
+  cancelledAt?: string | null
   eventId: number
   eventTitle: string
   eventVenue: string

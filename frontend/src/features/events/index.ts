@@ -1,6 +1,7 @@
 export {
   useCloseEvent,
   useCreateEvent,
+  useDeleteEvent,
   useEvent,
   useEvents,
   useStaffEvents,

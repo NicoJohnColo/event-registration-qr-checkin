@@ -9,6 +9,20 @@ export function submitCheckIn(payload: CheckInPayload, token: string): Promise<C
   })
 }
 
+export function submitUndoCheckIn(
+  eventId: number,
+  ticketCode: string,
+  token: string,
+): Promise<CheckInResponse> {
+  return apiRequest<CheckInResponse>(
+    `/api/checkin/events/${eventId}/undo?ticketCode=${encodeURIComponent(ticketCode)}`,
+    {
+      method: 'POST',
+      token,
+    },
+  )
+}
+
 export function fetchCheckInStats(eventId: number, token: string): Promise<CheckInStats> {
   return apiRequest<CheckInStats>(`/api/checkin/stats?eventId=${eventId}`, {
     method: 'GET',

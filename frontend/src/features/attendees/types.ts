@@ -1,13 +1,18 @@
+import type { RegistrationStatus } from '../registration/types'
+
 export interface AttendeeRow {
   id: number
   fullName: string
   email: string
   mobile: string
   ticketCode: string
-  status: 'CONFIRMED' | 'CHECKED_IN'
+  status: RegistrationStatus
+  waitlistPosition: number | null
   registeredAt: string
   checkedInAt: string | null
   checkedInByName: string | null
+  cancelledAt: string | null
+  cancelledByName: string | null
 }
 
 export interface AttendeeListData {

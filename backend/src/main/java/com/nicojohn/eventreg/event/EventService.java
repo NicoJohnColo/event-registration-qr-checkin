@@ -189,6 +189,31 @@ public class EventService {
         return toStaffEventResponse(saved);
     }
 
+    @Transactional
+    public void deleteEvent(Long eventId, Long staffUserId) {
+        Event event = eventRepository.findByIdForUpdate(eventId)
+                .orElseThrow(() -> ApiException.notFound("Event not found."));
+
+        List<Long> regIds = registrationRepository.findIdsByEventId(eventId);
+        if (!regIds.isEmpty()) {
+            auditLogRepository.deleteByEntityTypeAndEntityIdIn("REGISTRATION", regIds);
+            registrationRepository.deleteAllByEventId(eventId);
+        }
+
+        auditLogRepository.deleteByEntityTypeAndEntityIdIn("EVENT", List.of(eventId));
+        eventRepository.delete(event);
+
+        StaffUser staff = staffUserId != null ? staffRepository.findById(staffUserId).orElse(null) : null;
+        auditLogRepository.save(new AuditLog(
+                "DELETE_EVENT",
+                "EVENT",
+                eventId,
+                staff,
+                "Deleted event '" + event.getTitle() + "' (" + regIds.size() + " registrations removed)",
+                Instant.now(clock)
+        ));
+    }
+
     private void validateTimes(Instant startsAt, Instant endsAt) {
         if (!endsAt.isAfter(startsAt)) {
             throw ApiException.badRequest("End time must be after start time.");

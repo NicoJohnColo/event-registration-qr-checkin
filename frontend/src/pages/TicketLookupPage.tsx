@@ -27,7 +27,7 @@ export function TicketLookupPage() {
             </Button>
           </div>
 
-          <TicketCard ticket={ticket} />
+          <TicketCard ticket={ticket} onTicketUpdated={setTicket} />
         </div>
       </div>
     )

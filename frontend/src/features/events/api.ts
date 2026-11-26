@@ -38,3 +38,10 @@ export function closeStaffEvent(id: number): Promise<StaffEventItem> {
     token: getStoredToken(),
   })
 }
+
+export function deleteStaffEvent(id: number): Promise<void> {
+  return apiRequest<void>(`/api/staff/events/${id}`, {
+    method: 'DELETE',
+    token: getStoredToken(),
+  })
+}

@@ -38,7 +38,7 @@ export function RegisterPage() {
     )
   }
 
-  const closed = event.ended || event.full
+  const closed = event.ended
 
   return (
     <div>
@@ -53,7 +53,7 @@ export function RegisterPage() {
               <span>Back to event details</span>
             </Link>
             <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">
-              Free Event Registration
+              {event.full && !event.ended ? 'Waitlist Registration' : 'Free Event Registration'}
             </p>
             <h1 className="heading-hero mt-0.5 font-heading font-extrabold text-brand-navy">
               {event.title}
@@ -85,25 +85,25 @@ export function RegisterPage() {
                     </Button>
                   </Link>
                 </div>
-              ) : event.full ? (
-                <div className="space-y-4">
-                  <Alert tone="error" title="Event is Full">
-                    All {event.capacity} spots have been claimed.
-                  </Alert>
-                  <Button variant="primary" size="lg" fullWidth disabled>
-                    Full — Registration Closed
-                  </Button>
-                </div>
               ) : (
-                <RegistrationForm
-                  eventId={event.id}
-                  onSuccess={(ticket) => {
-                    saveCachedTicket(ticket)
-                    navigate(`/ticket/${encodeURIComponent(ticket.ticketCode)}`, {
-                      state: { ticket },
-                    })
-                  }}
-                />
+                <div className="space-y-4">
+                  {event.full && (
+                    <Alert tone="warning" title="Event is full — joining waitlist">
+                      All {event.capacity} spots are filled. Submitting places you on the waitlist
+                      in order; you can enter once promoted by an organizer.
+                    </Alert>
+                  )}
+                  <RegistrationForm
+                    eventId={event.id}
+                    isWaitlist={event.full}
+                    onSuccess={(ticket) => {
+                      saveCachedTicket(ticket)
+                      navigate(`/ticket/${encodeURIComponent(ticket.ticketCode)}`, {
+                        state: { ticket },
+                      })
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>

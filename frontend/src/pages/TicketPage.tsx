@@ -49,7 +49,7 @@ export function TicketPage() {
         </div>
 
         {ticket ? (
-          <TicketCard ticket={ticket} />
+          <TicketCard ticket={ticket} onTicketUpdated={setTicket} />
         ) : (
           <div className="space-y-4">
             <Alert tone="info" title="Verify your email to view this pass">

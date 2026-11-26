@@ -7,3 +7,10 @@ export function lookupTicket(payload: TicketLookupPayload): Promise<TicketData> 
     body: JSON.stringify(payload),
   })
 }
+
+export function cancelTicket(payload: TicketLookupPayload): Promise<TicketData> {
+  return apiRequest<TicketData>('/api/tickets/cancel', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}

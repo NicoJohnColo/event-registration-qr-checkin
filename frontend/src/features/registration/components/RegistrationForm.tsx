@@ -12,10 +12,15 @@ import type { TicketData } from '../types'
 
 interface RegistrationFormProps {
   eventId: number | string
+  isWaitlist?: boolean
   onSuccess: (ticket: TicketData) => void
 }
 
-export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) {
+export function RegistrationForm({
+  eventId,
+  isWaitlist = false,
+  onSuccess,
+}: RegistrationFormProps) {
   const mutation = useRegisterForEvent(eventId)
   const {
     register,
@@ -128,11 +133,11 @@ export function RegistrationForm({ eventId, onSuccess }: RegistrationFormProps) 
         {mutation.isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Securing your spot...</span>
+            <span>{isWaitlist ? 'Joining waitlist...' : 'Securing your spot...'}</span>
           </>
         ) : (
           <>
-            <span>Confirm Registration</span>
+            <span>{isWaitlist ? 'Join Waitlist' : 'Confirm Registration'}</span>
             <ArrowRight className="h-4 w-4" />
           </>
         )}

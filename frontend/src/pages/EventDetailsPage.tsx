@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  Ban,
   Calendar,
   CalendarCheck2,
   CheckCircle2,
@@ -81,8 +80,8 @@ export function EventDetailsPage() {
                     Ended
                   </StatusBadge>
                 ) : event.full ? (
-                  <StatusBadge tone="red" icon={<Ban className="h-3.5 w-3.5" />}>
-                    Full
+                  <StatusBadge tone="amber" icon={<Clock className="h-3.5 w-3.5" />}>
+                    Waitlist Open
                   </StatusBadge>
                 ) : happeningToday ? (
                   <StatusBadge tone="blue" pulse icon={<CalendarCheck2 className="h-3.5 w-3.5" />}>
@@ -234,12 +233,16 @@ export function EventDetailsPage() {
                   </Alert>
                 ) : event.full ? (
                   <>
-                    <Alert tone="error" title="Event is Full">
-                      All {event.capacity} spots have been claimed.
+                    <Alert tone="warning" title="Event is Full — Join Waitlist">
+                      All {event.capacity} spots are claimed. Join the waitlist to be queued in
+                      order if a spot opens up.
                     </Alert>
-                    <Button variant="primary" size="md" fullWidth disabled>
-                      Full — Registration Closed
-                    </Button>
+                    <Link to={`/events/${event.id}/register`} className="block">
+                      <Button variant="primary" size="md" fullWidth>
+                        <span>Join Waitlist</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </>
                 ) : (
                   <Link to={`/events/${event.id}/register`} className="block">
