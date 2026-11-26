@@ -47,7 +47,7 @@ export function mapOutcomeToBanner(res: CheckInResponse): {
       }
     case 'WAITLISTED':
       return {
-        tone: 'yellow',
+        tone: 'red',
         label: 'On Waitlist',
         title: res.attendeeName ?? res.ticketCode,
         detail: res.message || 'On waitlist — not confirmed',
@@ -89,7 +89,7 @@ export function getScanBadge(scan: CheckInResponse): { tone: BadgeTone; text: st
     case 'ALREADY_CHECKED_IN':
       return { tone: 'amber', text: 'Already Checked In' }
     case 'WAITLISTED':
-      return { tone: 'amber', text: 'Waitlisted' }
+      return { tone: 'red', text: 'Waitlisted' }
     case 'CANCELLED':
       return { tone: 'red', text: 'Cancelled' }
     case 'WRONG_DAY':

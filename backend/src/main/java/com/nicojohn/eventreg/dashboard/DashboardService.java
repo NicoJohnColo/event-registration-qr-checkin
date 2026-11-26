@@ -80,17 +80,19 @@ public class DashboardService {
         List<Registration> list = registrationRepository.findAllByEventIdOrderByRegisteredAtDesc(eventId);
 
         StringWriter sw = new StringWriter();
+        // Prepend UTF-8 BOM so Microsoft Excel on Windows decodes ñ and Unicode names accurately.
+        sw.write('\uFEFF');
         PrintWriter pw = new PrintWriter(sw);
 
         // CSV Header
         pw.println("Ticket Code,Full Name,Email,Mobile,Status,Waitlist Position,Registered At (Manila),Checked In At (Manila),Checked In By,Cancelled At (Manila)");
 
         for (Registration r : list) {
-            pw.printf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"%n",
+            pw.printf("\"%s\",\"%s\",\"%s\",%s,\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"%n",
                     escapeCsv(r.getTicketCode()),
                     escapeCsv(r.getFullName()),
                     escapeCsv(r.getEmail()),
-                    escapeCsv(r.getMobile()),
+                    formatMobileCsv(r.getMobile()),
                     r.getStatus().name(),
                     r.getWaitlistPosition() != null ? r.getWaitlistPosition().toString() : "",
                     r.getRegisteredAt() != null ? ManilaTime.formatDate(r.getRegisteredAt()) + " " + ManilaTime.formatTime(r.getRegisteredAt()) : "",
@@ -101,6 +103,15 @@ public class DashboardService {
         }
         pw.flush();
         return sw.toString();
+    }
+
+    /** Formats PH mobile numbers as Excel text formulas so leading zeroes are preserved on open. */
+    private String formatMobileCsv(String mobile) {
+        if (mobile == null || mobile.isBlank()) {
+            return "\"\"";
+        }
+        String sanitized = mobile.trim().replace("\"", "");
+        return "=\"" + sanitized + "\"";
     }
 
     private String escapeCsv(String str) {
