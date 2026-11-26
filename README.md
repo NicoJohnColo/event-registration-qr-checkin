@@ -142,12 +142,22 @@ cd frontend ; npm run build
 
 ---
 
-## 7. Official Level 1 Acceptance Baseline (`L1-01`–`L1-12`)
+## 7. Official Level 1 Acceptance Checklist (`L1-01`–`L1-12`)
 
-| ID | Acceptance Check | Status |
-|---|---|---|
-| **L1-01** – **L1-06** | Mobile QR registration, QR code payload parity, email+code ticket lookup, privacy-safe 404, duplicate email guard, multi-field validation | **Pass** |
-| **L1-07** – **L1-12** | Full-event state (extended to Waitlist in L2), unauthenticated staff redirect (`401`), green Check-In / yellow Already Checked In / red Invalid, roster totals | **Pass** |
+| ID | Level | Acceptance Check | Local | Final | Notes |
+|---|---|---|---|---|---|
+| **L1-01** | Level 1 | Register for Cebu Dev Meetup 2026 on a phone-sized screen and see a ticket with a QR code | **Pass** | **Pass** | Verified at `375×667` & `390×844`; generates unique `CDM-XXXXXX` code + SVG QR pass |
+| **L1-02** | Level 1 | Scan the QR with any phone QR app: it shows the same ticket code | **Pass** | **Pass** | `<QRCodeSVG value={ticketCode} />` encodes the exact ticket code string |
+| **L1-03** | Level 1 | Refresh the browser, then find the ticket again with ticket code + email | **Pass** | **Pass** | `POST /api/tickets/lookup` restores full ticket & QR pass (case/whitespace insensitive) |
+| **L1-04** | Level 1 | A wrong ticket code or wrong email shows "Ticket not found" and no details | **Pass** | **Pass** | Both return identical HTTP `404` `{"message":"Ticket not found"}` (`R11`) |
+| **L1-05** | Level 1 | Register the same email twice for one event: the second attempt is blocked | **Pass** | **Pass** | Blocked with HTTP `409` friendly message across any letter casing |
+| **L1-06** | Level 1 | Submit the form with a bad email and a 10-digit mobile number: both show errors | **Pass** | **Pass** | Both inline field errors render simultaneously on client and server (`400` `fieldErrors`) |
+| **L1-07** | Level 1 | Open the seeded full event: it shows "Full" and blocks confirmed overbooking | **Pass** | **Pass** | `S3` (`Cebu Startup Pitch Night`, `5/5`) displays `Full · 0 of 5 spots left` (and routes to Waitlist in Level 2, `L2-04`) |
+| **L1-08** | Level 1 | Open a staff page while signed out: you are sent to the sign-in page | **Pass** | **Pass** | `ProtectedRoute` redirects to `/staff/login`; unauthenticated API calls return HTTP `401` |
+| **L1-09** | Level 1 | Check in a valid ticket: green "Checked in" with the name | **Pass** | **Pass** | Displays green `Checked In` banner with attendee full name, timestamp, and verifier name |
+| **L1-10** | Level 1 | Check in the same ticket again: yellow "Already checked in" with the first time | **Pass** | **Pass** | Displays yellow `Already Checked In` banner with the original Asia/Manila check-in time |
+| **L1-11** | Level 1 | Enter a made-up code, and a real code from a different event: both show "Invalid ticket" | **Pass** | **Pass** | Unknown code (`CDM-ZZZZZZ`) and cross-event code (`CSP-...` on `S1`) both show red `Invalid Ticket` |
+| **L1-12** | Level 1 | The attendee list shows correct registered and checked-in totals | **Pass** | **Pass** | Totals bar (`Registered / Capacity`, `Checked in / Registered`) matches roster rows and filters by name/code |
 
 ---
 
