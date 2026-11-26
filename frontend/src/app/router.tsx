@@ -9,6 +9,8 @@ import { TicketLookupPage } from '../pages/TicketLookupPage'
 import { TicketPage } from '../pages/TicketPage'
 import { AttendeeListPage } from '../pages/staff/AttendeeListPage'
 import { StaffCheckInPage } from '../pages/staff/StaffCheckInPage'
+import { StaffDashboardPage } from '../pages/staff/StaffDashboardPage'
+import { StaffEventsPage } from '../pages/staff/StaffEventsPage'
 import { StaffLoginPage } from '../pages/staff/StaffLoginPage'
 import { PublicLayout } from './PublicLayout'
 import { StaffLayout } from './StaffLayout'
@@ -32,7 +34,9 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<StaffLayout />}>
-            <Route path="/staff" element={<Navigate to="/staff/check-in" replace />} />
+            <Route path="/staff" element={<Navigate to="/staff/dashboard" replace />} />
+            <Route path="/staff/dashboard" element={<StaffDashboardPage />} />
+            <Route path="/staff/events" element={<StaffEventsPage />} />
             <Route path="/staff/check-in" element={<StaffCheckInPage />} />
             <Route path="/staff/attendees" element={<AttendeeListPage />} />
             <Route path="/staff/events/:id/attendees" element={<AttendeeListPage />} />

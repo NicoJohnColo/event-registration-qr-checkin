@@ -1,6 +1,8 @@
 import {
+  Calendar,
   ChevronRight,
   ExternalLink,
+  LayoutDashboard,
   LogOut,
   Menu,
   ScanLine,
@@ -58,13 +60,14 @@ export function StaffLayout() {
 
   const roleLabel = staff?.role === 'DOOR_STAFF' ? 'Door Staff' : 'Organizer'
   const attendeesActive = pathname.startsWith('/staff/attendees') || pathname.includes('/attendees')
+  const isOrganizer = staff?.role === 'ORGANIZER'
 
   return (
     <div className="flex min-h-dvh flex-col bg-page text-brand-navy">
       <header className={siteHeaderClass}>
         <div className={siteHeaderInnerClass}>
           <div className="flex items-center gap-2">
-            <Link to="/staff/check-in" className="shrink-0">
+            <Link to="/staff/dashboard" className="shrink-0">
               <BrandLogo />
             </Link>
             <span className="hidden rounded-full border border-brand-sky bg-sky-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-brand-primary sm:inline-block">
@@ -73,10 +76,23 @@ export function StaffLayout() {
           </div>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Staff navigation">
+            <NavLink to="/staff/dashboard" className={navLinkClass}>
+              <LayoutDashboard className="h-4 w-4 shrink-0" />
+              <span>Dashboard</span>
+            </NavLink>
+
+            {isOrganizer && (
+              <NavLink to="/staff/events" className={navLinkClass}>
+                <Calendar className="h-4 w-4 shrink-0" />
+                <span>Events</span>
+              </NavLink>
+            )}
+
             <NavLink to="/staff/check-in" className={navLinkClass}>
               <ScanLine className="h-4 w-4 shrink-0" />
               <span>Check-In</span>
             </NavLink>
+
             <NavLink
               to="/staff/attendees"
               className={({ isActive }) => navLinkClass({ isActive: isActive || attendeesActive })}
@@ -141,6 +157,19 @@ export function StaffLayout() {
               )}
 
               <div className="flex flex-col gap-1">
+                {isOrganizer && (
+                  <Link
+                    to="/staff/events"
+                    className="flex h-9.5 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-xs font-bold text-brand-navy/85 hover:bg-page"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
+                      <span>Manage Events</span>
+                    </span>
+                    <ChevronRight className="h-3.5 w-3.5 text-brand-navy/45" />
+                  </Link>
+                )}
+
                 <Link
                   to="/"
                   className="flex h-9.5 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-xs font-bold text-brand-navy/85 hover:bg-page"
@@ -181,11 +210,26 @@ export function StaffLayout() {
         <Outlet />
       </main>
 
-      {/* Fixed 1-tap Mobile Bottom Tab Bar (56px + safe-area) */}
+      {/* Fixed 1-tap Mobile Bottom Tab Bar (3 tabs: Dashboard, Check-In, Attendees) */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(3,25,91,0.06)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(3,25,91,0.06)] backdrop-blur-md md:hidden"
         aria-label="Mobile staff tabs"
       >
+        <NavLink to="/staff/dashboard" className={mobileTabClass}>
+          {({ isActive }) => (
+            <>
+              <span
+                className={`inline-flex h-6 w-11 items-center justify-center rounded-full transition-colors ${
+                  isActive ? 'bg-sky-50 text-brand-primary' : ''
+                }`}
+              >
+                <LayoutDashboard className="h-[18px] w-[18px]" />
+              </span>
+              <span>Dashboard</span>
+            </>
+          )}
+        </NavLink>
+
         <NavLink to="/staff/check-in" className={mobileTabClass}>
           {({ isActive }) => (
             <>
