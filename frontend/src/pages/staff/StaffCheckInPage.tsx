@@ -145,7 +145,7 @@ export function StaffCheckInPage() {
           <div className="flex flex-col gap-2.5 border-b border-border/80 bg-page/65 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <div className="min-w-0">
               <div className="flex flex-col items-start gap-1.5 xs:flex-row xs:flex-wrap xs:items-center xs:gap-2">
-                <h1 className="heading-card font-heading font-extrabold text-brand-navy">
+                <h1 className="heading-hero font-heading font-extrabold text-brand-navy">
                   Door Check-In
                 </h1>
                 {selectedEvent && (

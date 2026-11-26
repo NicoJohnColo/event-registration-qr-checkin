@@ -91,7 +91,7 @@ export function LandingPage() {
         <AmbientBackdrop />
         <div className="page-container relative z-10 grid grid-cols-1 items-center gap-6 md:grid-cols-12 lg:gap-8">
           <div className="animate-rise min-w-0 md:col-span-7 lg:col-span-6">
-            <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/85 px-2.5 py-0.5 text-[10.5px] font-bold text-brand-navy shadow-xs backdrop-blur-md sm:text-xs">
+            <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/85 px-2.5 py-0.5 text-[11px] font-bold text-brand-navy shadow-xs backdrop-blur-md sm:text-xs">
               <Sparkles className="h-3 w-3 shrink-0 text-brand-primary" />
               <span className="truncate">Cebu Tech Events · Asia/Manila (UTC+8)</span>
             </div>
@@ -243,13 +243,13 @@ export function LandingPage() {
         <div className="page-container grid grid-cols-1 gap-2.5 sm:gap-4 md:grid-cols-2">
           <div className="flex flex-col justify-between gap-2.5 rounded-[var(--radius-card)] border border-border bg-surface p-3.5 shadow-card sm:flex-row sm:items-center sm:p-4">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-brand-primary">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-brand-primary">
                 For Attendees
               </p>
               <h3 className="heading-card mt-0.5 font-heading font-extrabold text-brand-navy">
                 Already registered?
               </h3>
-              <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75">
+              <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
                 Retrieve your QR pass anytime using your ticket code and email.
               </p>
             </div>
@@ -263,13 +263,13 @@ export function LandingPage() {
 
           <div className="flex flex-col justify-between gap-2.5 rounded-[var(--radius-card)] border border-brand-navy/10 bg-brand-navy p-3.5 text-white shadow-card sm:flex-row sm:items-center sm:p-4">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-brand-cyan">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-brand-cyan">
                 For Door Staff
               </p>
               <h3 className="heading-card mt-0.5 font-heading font-extrabold text-white">
                 Managing check-in?
               </h3>
-              <p className="mt-0.5 text-xs leading-relaxed text-white/80">
+              <p className="mt-0.5 text-xs leading-relaxed text-white/80 sm:text-sm">
                 Sign in to scan ticket codes and view live attendee counts.
               </p>
             </div>

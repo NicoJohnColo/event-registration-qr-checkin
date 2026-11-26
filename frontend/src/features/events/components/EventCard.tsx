@@ -59,27 +59,24 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <div
-                className={`flex h-9.5 w-9.5 shrink-0 flex-col items-center justify-center rounded-[8px] border text-center ${
+                className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[8px] border text-center ${
                   event.ended
                     ? 'border-slate-200 bg-slate-50 text-slate-600'
                     : 'border-brand-sky bg-sky-50/80 text-brand-navy'
                 }`}
               >
-                <span className="text-[8.5px] font-bold uppercase tracking-wider text-brand-primary">
+                <span className="text-[11px] font-bold uppercase leading-none text-brand-primary">
                   {dateParts.month}
                 </span>
-                <span className="font-heading text-[13px] font-extrabold leading-none">
+                <span className="font-heading mt-0.5 text-sm font-extrabold leading-none">
                   {dateParts.day}
-                </span>
-                <span className="mt-0.5 text-[8px] font-semibold uppercase text-brand-navy/65">
-                  {dateParts.weekday}
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold text-brand-navy/85 sm:text-xs">
+                <p className="text-xs font-bold text-brand-navy/85">
                   {formatCebuDate(event.startsAt)}
                 </p>
-                <p className="font-code mt-0.5 hidden text-[10px] font-semibold text-brand-navy/60 min-[360px]:block">
+                <p className="font-code mt-0.5 hidden text-[11px] font-semibold text-brand-navy/65 min-[360px]:block">
                   Prefix: {event.codePrefix}
                 </p>
               </div>

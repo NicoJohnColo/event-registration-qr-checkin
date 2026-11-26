@@ -98,7 +98,7 @@ export function AttendeeListPage() {
           <h1 className="heading-hero font-heading font-extrabold text-brand-navy">
             Attendee Roster
           </h1>
-          <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75">
+          <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
             Registered attendees, ticket codes, and Cebu check-in status.
           </p>
         </div>

@@ -107,10 +107,10 @@ export function StaffLoginPage() {
             <span className="font-code block text-sm font-bold uppercase tracking-[0.32em] text-brand-navy/60">
               THE
             </span>
-            <p className="font-heading bg-gradient-to-r from-brand-navy via-brand-primary to-[#5B8EFF] bg-clip-text pb-1 text-6xl font-black leading-none tracking-tight text-transparent xl:text-[68px]">
+            <p className="font-heading bg-gradient-to-r from-brand-navy via-brand-primary to-[#5B8EFF] bg-clip-text pb-1 text-5xl font-black leading-none tracking-tight text-transparent xl:text-[54px]">
               EventRegister
             </p>
-            <p className="font-code text-sm font-bold uppercase tracking-[0.24em] text-brand-navy/65">
+            <p className="font-code text-xs font-bold uppercase tracking-[0.24em] text-brand-navy/65 sm:text-sm">
               Staff Portal · Asia/Manila (UTC+8)
             </p>
           </div>
@@ -119,7 +119,7 @@ export function StaffLoginPage() {
             {SHOWCASE_BUBBLES.map((bubble) => (
               <div
                 key={bubble.text}
-                className={`animate-bubble-in ${bubble.delay} ${bubble.opacity} w-fit rounded-2xl border border-white/80 px-5 py-3 text-sm font-semibold backdrop-blur-md xl:text-[15px]`}
+                className={`animate-bubble-in ${bubble.delay} ${bubble.opacity} w-fit rounded-2xl border border-white/80 px-5 py-3 text-sm font-semibold backdrop-blur-md`}
               >
                 {bubble.text}
               </div>
@@ -129,17 +129,17 @@ export function StaffLoginPage() {
 
         {/* Mobile Compact Glass Status Pill */}
         <div className="flex justify-center lg:hidden">
-          <div className="animate-bubble-in inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/85 px-2.5 py-1 text-[11px] font-bold text-brand-navy shadow-xs backdrop-blur-md">
+          <div className="animate-bubble-in inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/85 px-3 py-1 text-[11px] font-bold text-brand-navy shadow-xs backdrop-blur-md">
             <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-brand-primary" />
-            <span className="truncate">Verify your staff identity to open check-in</span>
+            <span className="truncate">Verify your staff identity to open staff tools</span>
           </div>
         </div>
 
         {/* Right Floating Pure-White Login Card */}
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <div className="animate-card-float-in w-full max-w-[360px] rounded-[var(--radius-card)] border border-white/90 bg-white/95 p-3.5 shadow-card backdrop-blur-xl sm:max-w-[390px] sm:p-5">
+          <div className="animate-card-float-in w-full max-w-[380px] rounded-[var(--radius-card)] border border-white/90 bg-white/95 p-4 shadow-card backdrop-blur-xl sm:max-w-[400px] sm:p-5">
             <div>
-              <h1 className="heading-card font-heading font-extrabold text-brand-navy">
+              <h1 className="heading-section font-heading font-extrabold text-brand-navy">
                 Sign in to EventRegister
               </h1>
 
@@ -147,7 +147,7 @@ export function StaffLoginPage() {
                 <span className="border-b-2 border-brand-primary pb-1.5 text-xs font-bold text-brand-navy">
                   Staff Login
                 </span>
-                <span className="inline-flex min-w-0 items-center gap-1 pb-1.5 text-[10.5px] font-semibold text-brand-navy/65">
+                <span className="inline-flex min-w-0 items-center gap-1 pb-1.5 text-[11px] font-semibold text-brand-navy/65">
                   <Sparkles className="h-3 w-3 shrink-0 text-brand-primary" />
                   <span className="truncate">Door &amp; Organizer</span>
                 </span>
@@ -176,8 +176,8 @@ export function StaffLoginPage() {
                   autoCapitalize="none"
                   spellCheck={false}
                   placeholder="Enter username (e.g. organizer)"
-                  className="!border-transparent !bg-[#F3F5F9] pr-10 focus:!border-brand-primary focus:!bg-white"
-                  leftIcon={<User className="h-3.5 w-3.5" />}
+                  className="pr-10"
+                  leftIcon={<User className="h-4 w-4" />}
                   hasError={Boolean(errors.username)}
                   {...register('username')}
                 />
@@ -195,8 +195,8 @@ export function StaffLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="!border-transparent !bg-[#F3F5F9] pr-16 focus:!border-brand-primary focus:!bg-white"
-                    leftIcon={<Lock className="h-3.5 w-3.5" />}
+                    className="pr-16"
+                    leftIcon={<Lock className="h-4 w-4" />}
                     hasError={Boolean(errors.password)}
                     {...register('password')}
                   />
@@ -206,7 +206,7 @@ export function StaffLoginPage() {
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-brand-navy/65 transition-colors hover:bg-white hover:text-brand-navy"
                   >
-                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </FormField>
@@ -214,7 +214,7 @@ export function StaffLoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-electric inline-flex h-[var(--control-h)] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-xs font-bold text-white sm:text-[13px]"
+                className="btn-electric inline-flex h-[var(--control-h)] min-h-[40px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-[13px] font-bold text-white sm:text-sm"
               >
                 {isSubmitting ? (
                   <>

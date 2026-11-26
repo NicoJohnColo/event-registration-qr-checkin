@@ -115,7 +115,7 @@ export function AttendeeTable({ attendees, hasFilter, onClearFilters }: Attendee
             <li key={row.id} className="grid grid-cols-1 gap-0.5 px-3 py-2.5">
               {/* Row 1: Name (left) + Status Pill (right) */}
               <div className="flex min-w-0 items-center justify-between gap-2">
-                <p className="min-w-0 truncate font-heading text-[13px] font-extrabold text-brand-navy">
+                <p className="min-w-0 truncate font-heading text-sm font-extrabold text-brand-navy">
                   {row.fullName}
                 </p>
                 <div className="shrink-0">
@@ -144,7 +144,7 @@ export function AttendeeTable({ attendees, hasFilter, onClearFilters }: Attendee
               </p>
 
               {/* Row 4: Timestamp on its own dedicated line */}
-              <p className="text-[10.5px] text-brand-navy/60">
+              <p className="text-[11px] text-brand-navy/60">
                 Registered {formatCebuDateTime(row.registeredAt)}
               </p>
             </li>

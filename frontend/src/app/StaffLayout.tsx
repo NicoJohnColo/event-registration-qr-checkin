@@ -1,10 +1,11 @@
 import {
   Calendar,
   ChevronRight,
+  Clock,
   ExternalLink,
   LayoutDashboard,
   LogOut,
-  Menu,
+  PanelLeft,
   ScanLine,
   Users,
   X,
@@ -12,214 +13,320 @@ import {
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { BrandLogo } from '../components/ui/BrandLogo'
-import { siteHeaderClass, siteHeaderInnerClass } from '../components/ui/siteHeader'
 import { useAuth } from '../features/auth'
 
+function getInitials(name?: string): string {
+  if (!name) return 'ST'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+}
+
+function getSectionLabel(pathname: string): string {
+  if (pathname.startsWith('/staff/events') && pathname.includes('/attendees')) {
+    return 'Attendee Roster'
+  }
+  if (pathname.startsWith('/staff/events')) return 'Manage Events'
+  if (pathname.startsWith('/staff/check-in')) return 'Door Check-In'
+  if (pathname.startsWith('/staff/attendees')) return 'Attendee Roster'
+  return 'Operations Dashboard'
+}
+
 export function StaffLayout() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const { staff, logout } = useAuth()
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    setMobileOpen(false)
+    setMobileSidebarOpen(false)
   }, [pathname])
 
   useEffect(() => {
-    if (!mobileOpen) return
+    if (!mobileSidebarOpen) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false)
+      if (e.key === 'Escape') setMobileSidebarOpen(false)
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => {
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [mobileOpen])
+  }, [mobileSidebarOpen])
 
   const handleSignOut = () => {
     logout()
     navigate('/staff/login', { replace: true })
   }
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `inline-flex h-8.5 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 ${
+  const sidebarLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex h-10 min-h-[40px] items-center gap-2.5 rounded-[var(--radius-control)] px-3 text-[13px] font-bold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 ${
       isActive
-        ? 'bg-sky-50 text-brand-primary shadow-xs ring-1 ring-brand-sky'
-        : 'text-brand-navy/80 hover:bg-page hover:text-brand-navy'
+        ? 'bg-white text-brand-primary shadow-sm ring-1 ring-brand-sky'
+        : 'text-brand-navy/75 hover:bg-white/65 hover:text-brand-navy'
     }`
 
   const mobileTabClass = ({ isActive }: { isActive: boolean }) =>
     `flex h-[var(--bottom-nav-h)] flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition-colors ${
-      isActive
-        ? 'text-brand-primary'
-        : 'text-brand-navy/70 hover:text-brand-navy'
+      isActive ? 'text-brand-primary' : 'text-brand-navy/70 hover:text-brand-navy'
     }`
 
   const roleLabel = staff?.role === 'DOOR_STAFF' ? 'Door Staff' : 'Organizer'
   const attendeesActive = pathname.startsWith('/staff/attendees') || pathname.includes('/attendees')
   const isOrganizer = staff?.role === 'ORGANIZER'
+  const initials = getInitials(staff?.name)
+  const sectionLabel = getSectionLabel(pathname)
+
+  const renderSidebarLinks = (onNavigate?: () => void) => (
+    <>
+      <p className="px-3 pb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/50">
+        Operations
+      </p>
+
+      <NavLink to="/staff/dashboard" className={sidebarLinkClass} onClick={onNavigate}>
+        <LayoutDashboard className="h-[18px] w-[18px] shrink-0" />
+        <span className="truncate">Dashboard</span>
+      </NavLink>
+
+      {isOrganizer && (
+        <NavLink to="/staff/events" className={sidebarLinkClass} onClick={onNavigate}>
+          <Calendar className="h-[18px] w-[18px] shrink-0" />
+          <span className="truncate">Manage Events</span>
+        </NavLink>
+      )}
+
+      <NavLink to="/staff/check-in" className={sidebarLinkClass} onClick={onNavigate}>
+        <ScanLine className="h-[18px] w-[18px] shrink-0" />
+        <span className="truncate">Door Check-In</span>
+      </NavLink>
+
+      <NavLink
+        to="/staff/attendees"
+        className={({ isActive }) =>
+          sidebarLinkClass({ isActive: isActive || attendeesActive })
+        }
+        onClick={onNavigate}
+      >
+        <Users className="h-[18px] w-[18px] shrink-0" />
+        <span className="truncate">Attendee Roster</span>
+      </NavLink>
+
+      <div className="my-3.5 border-t border-brand-sky/70 pt-3.5">
+        <p className="px-3 pb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/50">
+          Attendee Portal
+        </p>
+        <Link
+          to="/"
+          onClick={onNavigate}
+          className="group flex h-10 min-h-[40px] items-center justify-between rounded-[var(--radius-control)] px-3 text-[13px] font-bold text-brand-navy/75 transition-colors hover:bg-white/65 hover:text-brand-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
+        >
+          <span className="inline-flex items-center gap-2.5">
+            <ExternalLink className="h-[18px] w-[18px] shrink-0" />
+            <span>Public Site</span>
+          </span>
+          <ChevronRight className="h-3.5 w-3.5 text-brand-navy/40 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-primary" />
+        </Link>
+      </div>
+    </>
+  )
 
   return (
-    <div className="flex min-h-dvh flex-col bg-page text-brand-navy">
-      <header className={siteHeaderClass}>
-        <div className={siteHeaderInnerClass}>
-          <div className="flex items-center gap-2">
-            <Link to="/staff/dashboard" className="shrink-0">
-              <BrandLogo />
-            </Link>
-            <span className="hidden rounded-full border border-brand-sky bg-sky-50 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-brand-primary sm:inline-block">
-              Staff Portal
-            </span>
-          </div>
+    <div className="bg-staff-canvas flex min-h-dvh flex-col text-brand-navy">
+      {/* Fixed Static Left Sidebar on Tablet / Desktop (>= 768px) */}
+      <aside
+        className="bg-sidebar-sky fixed inset-y-0 left-0 z-30 hidden w-[236px] flex-col border-r border-brand-sky/75 shadow-[4px_0_24px_-12px_rgba(25,81,252,0.12)] md:flex"
+        aria-label="Staff sidebar"
+      >
+        <div className="flex h-[60px] shrink-0 items-center border-b border-brand-sky/60 px-4">
+          <Link to="/staff/dashboard" className="min-w-0 shrink-0 focus-visible:outline-none">
+            <BrandLogo />
+          </Link>
+        </div>
 
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Staff navigation">
-            <NavLink to="/staff/dashboard" className={navLinkClass}>
-              <LayoutDashboard className="h-4 w-4 shrink-0" />
-              <span>Dashboard</span>
-            </NavLink>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Staff desktop navigation">
+          {renderSidebarLinks()}
+        </nav>
 
-            {isOrganizer && (
-              <NavLink to="/staff/events" className={navLinkClass}>
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>Events</span>
-              </NavLink>
-            )}
+        <div className="relative shrink-0 overflow-hidden border-t border-brand-sky/50 px-5 py-5">
+          <div
+            className="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-brand-primary/10 blur-xl"
+            aria-hidden="true"
+          />
+          <p className="font-heading text-xs font-extrabold leading-relaxed text-brand-primary/85">
+            Smarter Events.
+            <br />
+            Instant QR Entry.
+            <br />
+            Cebu Ready.
+          </p>
+          <span className="mt-2 inline-block h-0.5 w-7 rounded-full bg-brand-primary/35" />
+        </div>
+      </aside>
 
-            <NavLink to="/staff/check-in" className={navLinkClass}>
-              <ScanLine className="h-4 w-4 shrink-0" />
-              <span>Check-In</span>
-            </NavLink>
+      {/* Mobile Slide-Out Left Sky Sidebar Drawer (< 768px) */}
+      {mobileSidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-brand-navy/35 backdrop-blur-[2px] md:hidden"
+            aria-hidden="true"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <aside
+            className="bg-sidebar-sky animate-slide-in-left fixed inset-y-0 left-0 z-50 flex w-[240px] max-w-[82vw] flex-col border-r border-brand-sky/80 shadow-2xl md:hidden"
+            aria-label="Mobile staff sidebar"
+          >
+            <div className="flex h-[var(--header-h)] shrink-0 items-center justify-between border-b border-brand-sky/60 px-3.5">
+              <Link
+                to="/staff/dashboard"
+                className="min-w-0 shrink-0"
+                onClick={() => setMobileSidebarOpen(false)}
+              >
+                <BrandLogo />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                aria-label="Close staff sidebar"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-control)] border border-brand-sky/80 bg-white/80 text-brand-navy transition-colors hover:bg-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-            <NavLink
-              to="/staff/attendees"
-              className={({ isActive }) => navLinkClass({ isActive: isActive || attendeesActive })}
-            >
-              <Users className="h-4 w-4 shrink-0" />
-              <span>Attendees</span>
-            </NavLink>
-          </nav>
-
-          <div className="hidden items-center gap-2.5 md:flex">
             {staff && (
-              <div className="flex items-center gap-2 rounded-full border border-border bg-white/80 px-2.5 py-1 text-xs">
-                <span className="font-bold text-brand-navy">{staff.name}</span>
-                <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand-primary ring-1 ring-brand-sky">
-                  {roleLabel}
-                </span>
+              <div className="mx-3 mt-3 flex items-center gap-2.5 rounded-[var(--radius-control)] border border-brand-sky/80 bg-white/90 px-2.5 py-2 shadow-2xs">
+                <div className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-blue text-[11px] font-extrabold text-white">
+                  {initials}
+                </div>
+                <div className="min-w-0 flex-1 leading-tight">
+                  <p className="truncate text-xs font-extrabold text-brand-navy">{staff.name}</p>
+                  <p className="truncate text-[11px] font-semibold text-brand-primary">{roleLabel}</p>
+                </div>
               </div>
             )}
 
-            <Link
-              to="/"
-              className="inline-flex h-10 min-h-[40px] items-center gap-1 px-2 text-xs font-bold text-brand-navy/75 hover:text-brand-primary"
-            >
-              <span>Public Site</span>
-              <ExternalLink className="h-3.5 w-3.5" />
-            </Link>
+            <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3" aria-label="Mobile drawer links">
+              {renderSidebarLinks(() => setMobileSidebarOpen(false))}
+            </nav>
+
+            <div className="shrink-0 border-t border-brand-sky/60 bg-white/55 p-3">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex h-10 min-h-[40px] w-full items-center justify-center gap-1.5 rounded-[var(--radius-control)] border border-status-red/30 bg-red-50 px-3 text-xs font-bold text-status-red transition-colors hover:bg-red-100"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </aside>
+        </>
+      )}
+
+      {/* Main Content Shell */}
+      <div className="flex min-w-0 flex-1 flex-col md:pl-[236px]">
+        {/* Fixed Desktop Header (>= 768px) */}
+        <header className="fixed top-0 right-0 z-20 hidden h-[60px] items-center justify-between gap-4 border-b border-brand-sky/75 bg-white/92 px-5 backdrop-blur-xl md:left-[236px] md:flex lg:px-7">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-sky bg-sky-50/90 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" aria-hidden="true" />
+              Staff Portal
+            </span>
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-brand-navy/40" aria-hidden="true" />
+            <span className="truncate text-sm font-extrabold text-brand-navy">
+              {sectionLabel}
+            </span>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2.5">
+            <div className="hidden items-center gap-1.5 rounded-full border border-brand-sky/80 bg-page px-2.5 py-1 text-[11px] font-bold text-brand-navy/75 lg:inline-flex">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
+              <span>Asia/Manila (UTC+8)</span>
+            </div>
+
+            {staff && (
+              <div className="flex items-center gap-2.5 rounded-full border border-border/90 bg-white py-1 pl-1.5 pr-3 shadow-2xs">
+                <div className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-blue text-xs font-extrabold text-white">
+                  {initials}
+                </div>
+                <div className="leading-tight">
+                  <p className="text-xs font-extrabold text-brand-navy">{staff.name}</p>
+                  <p className="text-[11px] font-semibold text-brand-navy/65">{roleLabel}</p>
+                </div>
+              </div>
+            )}
 
             <button
               type="button"
               onClick={handleSignOut}
-              className="inline-flex h-10 min-h-[40px] items-center gap-1.5 rounded-[var(--radius-control)] border border-border bg-white px-3 text-xs font-bold text-brand-navy transition-colors hover:border-brand-primary hover:text-brand-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
+              className="inline-flex h-10 min-h-[40px] items-center gap-1.5 rounded-[var(--radius-control)] border border-border bg-white px-3 text-xs font-bold text-brand-navy transition-colors hover:border-status-red/40 hover:bg-red-50 hover:text-status-red focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Sign Out</span>
             </button>
           </div>
+        </header>
 
-          <button
-            type="button"
-            className="inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-brand-navy transition-colors hover:bg-page focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 md:hidden"
-            onClick={() => setMobileOpen((prev) => !prev)}
-            aria-label={mobileOpen ? 'Close staff menu' : 'Open staff menu'}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
-        </div>
+        {/* Fixed Compact Mobile Header (< 768px) with Left Sidebar Toggle */}
+        <header className="fixed top-0 inset-x-0 z-30 border-b border-brand-sky/75 bg-white/95 text-brand-navy backdrop-blur-xl md:hidden">
+          <div className="page-container flex h-[var(--header-h)] items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                aria-label="Open staff sidebar"
+                aria-expanded={mobileSidebarOpen}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-brand-sky bg-sky-50/75 text-brand-primary transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
+              >
+                <PanelLeft className="h-4 w-4" />
+              </button>
 
-        {mobileOpen && (
-          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-var(--header-h))] overflow-y-auto border-t border-border/80 bg-white py-2.5 text-brand-navy shadow-xl md:hidden">
-            <div className="page-container">
+              <Link to="/staff/dashboard" className="min-w-0 shrink-0">
+                <BrandLogo />
+              </Link>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5">
               {staff && (
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-control)] border border-border bg-page px-3 py-2">
-                  <div>
-                    <p className="text-xs font-extrabold text-brand-navy">{staff.name}</p>
-                    <p className="text-[11px] text-brand-navy/70">@{staff.username}</p>
-                  </div>
-                  <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold uppercase text-brand-primary ring-1 ring-brand-sky">
-                    {roleLabel}
-                  </span>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-1">
-                {isOrganizer && (
-                  <Link
-                    to="/staff/events"
-                    className="flex h-9.5 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-xs font-bold text-brand-navy/85 hover:bg-page"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
-                      <span>Manage Events</span>
-                    </span>
-                    <ChevronRight className="h-3.5 w-3.5 text-brand-navy/45" />
-                  </Link>
-                )}
-
-                <Link
-                  to="/"
-                  className="flex h-9.5 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-xs font-bold text-brand-navy/85 hover:bg-page"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <ExternalLink className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
-                    <span>Public Site</span>
-                  </span>
-                  <ChevronRight className="h-3.5 w-3.5 text-brand-navy/45" />
-                </Link>
-
                 <button
                   type="button"
-                  onClick={handleSignOut}
-                  className="mt-0.5 flex h-9.5 w-full items-center justify-center gap-1.5 rounded-[var(--radius-control)] border border-status-red/30 bg-red-50 px-3 text-xs font-bold text-status-red transition-colors hover:bg-red-100"
+                  onClick={() => setMobileSidebarOpen(true)}
+                  aria-label="Staff account menu"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-0.5 pl-0.5 pr-2 text-[11px] font-bold text-brand-navy"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Sign Out</span>
+                  <span className="flex h-6.5 w-6.5 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-blue text-[11px] font-extrabold text-white">
+                    {initials}
+                  </span>
+                  <span className="hidden xs:inline truncate max-w-[85px]">{staff.name}</span>
                 </button>
-              </div>
+              )}
             </div>
           </div>
-        )}
-      </header>
+        </header>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-x-0 top-[var(--header-h)] bottom-0 z-30 bg-brand-navy/35 backdrop-blur-[2px] md:hidden"
-          aria-hidden="true"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+        {/* Main Workspace */}
+        <main
+          key={pathname}
+          className="animate-page-in relative z-10 min-w-0 flex-1 pt-[var(--header-h)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+14px)] md:pt-[60px] md:pb-8"
+        >
+          <Outlet />
+        </main>
+      </div>
 
-      <main
-        key={pathname}
-        className="animate-page-in relative z-10 flex-1 pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+16px)] md:pb-8"
-      >
-        <Outlet />
-      </main>
-
-      {/* Fixed 1-tap Mobile Bottom Tab Bar (3 tabs: Dashboard, Check-In, Attendees) */}
+      {/* Fixed Compact 1-tap Mobile Bottom Tab Bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(3,25,91,0.06)] backdrop-blur-md md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-30 grid border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(3,25,91,0.06)] backdrop-blur-md md:hidden ${
+          isOrganizer ? 'grid-cols-4' : 'grid-cols-3'
+        }`}
         aria-label="Mobile staff tabs"
       >
         <NavLink to="/staff/dashboard" className={mobileTabClass}>
           {({ isActive }) => (
             <>
               <span
-                className={`inline-flex h-6 w-11 items-center justify-center rounded-full transition-colors ${
+                className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
                   isActive ? 'bg-sky-50 text-brand-primary' : ''
                 }`}
               >
@@ -230,11 +337,28 @@ export function StaffLayout() {
           )}
         </NavLink>
 
+        {isOrganizer && (
+          <NavLink to="/staff/events" className={mobileTabClass}>
+            {({ isActive }) => (
+              <>
+                <span
+                  className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
+                    isActive ? 'bg-sky-50 text-brand-primary' : ''
+                  }`}
+                >
+                  <Calendar className="h-[18px] w-[18px]" />
+                </span>
+                <span>Events</span>
+              </>
+            )}
+          </NavLink>
+        )}
+
         <NavLink to="/staff/check-in" className={mobileTabClass}>
           {({ isActive }) => (
             <>
               <span
-                className={`inline-flex h-6 w-11 items-center justify-center rounded-full transition-colors ${
+                className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
                   isActive ? 'bg-sky-50 text-brand-primary' : ''
                 }`}
               >
@@ -247,14 +371,16 @@ export function StaffLayout() {
 
         <NavLink
           to="/staff/attendees"
-          className={({ isActive }) => mobileTabClass({ isActive: isActive || attendeesActive })}
+          className={({ isActive }) =>
+            mobileTabClass({ isActive: isActive || attendeesActive })
+          }
         >
           {({ isActive }) => {
             const active = isActive || attendeesActive
             return (
               <>
                 <span
-                  className={`inline-flex h-6 w-11 items-center justify-center rounded-full transition-colors ${
+                  className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
                     active ? 'bg-sky-50 text-brand-primary' : ''
                   }`}
                 >

@@ -22,21 +22,22 @@
   --bottom-nav-h: 52px;
 
   /* Card & Control tokens */
-  --card-pad: clamp(12px, 3.2vw, 16px);
-  --card-gap: clamp(8px, 2.2vw, 12px);
+  --card-pad: clamp(12px, 2.8vw, 16px);
+  --card-gap: clamp(8px, 2vw, 12px);
   --radius-card: 14px;
   --radius-control: 10px;
-  --control-h: 38px;
-  --control-h-sm: 34px;
+  --control-h: 40px;
+  --control-h-sm: 36px;
 
-  /* Sleek mobile-first typography scale */
-  --text-body: 0.8125rem; /* 13px mobile base */
+  /* Consistent mobile-first typography scale (never below 11px) */
+  --text-body: clamp(0.8125rem, 1.2vw + 0.45rem, 0.875rem); /* 13px mobile -> 14px desktop */
   --text-sm: 0.75rem;     /* 12px */
-  --text-xs: 0.6875rem;   /* 11px */
-  --text-input: 0.8125rem;
-  --text-h1: clamp(1.35rem, 5vw, 2.125rem);        /* 21.6px mobile -> 34px desktop */
-  --text-h2: clamp(1.0625rem, 3.6vw, 1.45rem);     /* 17px mobile -> 23px desktop */
-  --text-card-title: clamp(0.9375rem, 2.6vw, 1.0625rem); /* 15px mobile -> 17px desktop */
+  --text-xs: 0.6875rem;   /* 11px floor */
+  --text-input: 1rem;     /* 16px mobile prevents iOS zoom */
+  --text-h1: clamp(1.375rem, 3.2vw, 1.875rem);          /* 22px mobile -> 30px desktop */
+  --text-h2: clamp(1.0625rem, 2.2vw, 1.375rem);         /* 17px mobile -> 22px desktop */
+  --text-card-title: clamp(0.9375rem, 1.5vw, 1.0625rem); /* 15px mobile -> 17px desktop */
+  --text-kpi: clamp(1.125rem, 2vw, 1.375rem);           /* 18px mobile -> 22px desktop */
 
   /* Soft elevation shadow */
   --shadow-soft:
@@ -140,6 +141,17 @@
   letter-spacing: -0.01em;
 }
 
+.text-kpi {
+  font-size: var(--text-kpi);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.text-body {
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
 /* Right-edge scroll affordance fade for horizontally scrollable chip bars */
 .scroll-fade-right {
   position: relative;
@@ -205,6 +217,28 @@
     radial-gradient(circle at 80% 18%, rgba(163, 212, 255, 0.55) 0%, transparent 48%),
     radial-gradient(circle at 18% 82%, rgba(139, 173, 255, 0.42) 0%, transparent 52%),
     linear-gradient(145deg, #F6F9FF 0%, #E6F0FF 48%, #DDEAFF 100%);
+}
+
+/* Soft atmospheric ice-blue canvas & sidebar for Staff Portal */
+.bg-staff-canvas {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(186, 224, 255, 0.48) 0%, transparent 45%),
+    radial-gradient(circle at 12% 92%, rgba(203, 233, 253, 0.45) 0%, transparent 48%),
+    linear-gradient(160deg, #F7FAFF 0%, #EDF4FF 52%, #E5F0FF 100%);
+}
+
+.bg-sidebar-sky {
+  background:
+    radial-gradient(circle at 18% 92%, rgba(54, 135, 255, 0.14) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(238, 246, 255, 0.96) 62%, rgba(223, 238, 255, 0.95) 100%);
+}
+
+.staff-surface-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 230, 247, 0.95);
+  box-shadow: var(--shadow-soft);
 }
 
 /* Translucent glass panels with specular top highlight */
@@ -356,6 +390,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -533,6 +578,10 @@
 
 .animate-slide-down {
   animation: slideDown 240ms var(--ease) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 240ms var(--ease) both;
 }
 
 .animate-float,

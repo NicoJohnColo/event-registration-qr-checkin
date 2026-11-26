@@ -52,7 +52,7 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
             spellCheck={false}
             autoFocus
             disabled={disabled}
-            className={`font-code h-[var(--control-h)] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] pl-8.5 pr-10 text-xs font-bold uppercase tracking-wider text-brand-navy placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:outline-none focus:ring-3 sm:text-sm ${
+            className={`font-code h-[var(--control-h)] min-h-[40px] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] pl-8.5 pr-10 text-base font-bold uppercase tracking-wider text-brand-navy placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:outline-none focus:ring-3 sm:text-sm ${
               localError
                 ? 'border-status-red focus:border-status-red focus:ring-status-red/15'
                 : 'border-transparent focus:border-brand-primary focus:bg-white focus:ring-brand-primary/15'
