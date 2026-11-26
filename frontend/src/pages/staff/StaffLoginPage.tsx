@@ -21,17 +21,22 @@ const SHOWCASE_BUBBLES = [
 ] as const
 
 export function StaffLoginPage() {
-  const { isAuthenticated, isLoading, login } = useAuth()
+  const { isAuthenticated, isLoading, staff, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const redirectTo =
+  const fromPath =
     (location.state as { from?: string } | null)?.from &&
     !(location.state as { from?: string } | null)?.from?.startsWith('/staff/login')
       ? (location.state as { from: string }).from
-      : '/staff/check-in'
+      : null
+
+  const getDefaultDestination = (role?: string) =>
+    role === 'DOOR_STAFF' ? '/staff/check-in' : '/staff/dashboard'
+
+  const redirectTo = fromPath ?? getDefaultDestination(staff?.role)
 
   const {
     register,
@@ -61,11 +66,11 @@ export function StaffLoginPage() {
   const onSubmit = async (values: LoginFormValues) => {
     setSubmitError(null)
     try {
-      await login({
+      const signedInStaff = await login({
         username: values.username.trim(),
         password: values.password,
       })
-      navigate(redirectTo, { replace: true })
+      navigate(fromPath ?? getDefaultDestination(signedInStaff.role), { replace: true })
     } catch (err) {
       if (err instanceof ApiClientError && Object.keys(err.fieldErrors).length > 0) {
         Object.entries(err.fieldErrors).forEach(([field, message]) => {
@@ -175,8 +180,7 @@ export function StaffLoginPage() {
                   autoComplete="username"
                   autoCapitalize="none"
                   spellCheck={false}
-                  placeholder="Enter username (e.g. organizer)"
-                  className="pr-10"
+                  placeholder="Enter your username"
                   leftIcon={<User className="h-4 w-4" />}
                   hasError={Boolean(errors.username)}
                   {...register('username')}
@@ -195,7 +199,7 @@ export function StaffLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="pr-16"
+                    className="pr-11"
                     leftIcon={<Lock className="h-4 w-4" />}
                     hasError={Boolean(errors.password)}
                     {...register('password')}

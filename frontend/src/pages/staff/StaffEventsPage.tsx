@@ -1,46 +1,436 @@
-import { ArrowLeft, Calendar, Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Calendar, CalendarX2, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
+import { EmptyState } from '../../components/ui/EmptyState'
 import { StatusBadge } from '../../components/ui/StatusBadge'
+import {
+  DashboardToolbar,
+  type DashboardStatusFilter,
+  type DashboardViewMode,
+} from '../../features/dashboard'
+import {
+  EventFormModal,
+  StaffEventCard,
+  useCloseEvent,
+  useStaffEvents,
+  useUpdateEvent,
+  type StaffEventItem,
+} from '../../features/events'
+
+const MOBILE_BREAKPOINT = 768
+const DELAY_CLASSES = ['', 'delay-75', 'delay-150', 'delay-225']
 
 export function StaffEventsPage() {
+  const { data: events = [], isLoading, isError, refetch } = useStaffEvents()
+  const updateMutation = useUpdateEvent()
+  const closeMutation = useCloseEvent()
+
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<DashboardStatusFilter>('all')
+  const [viewMode, setViewMode] = useState<DashboardViewMode>(() =>
+    typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT ? 'carousel' : 'grid',
+  )
+  const userToggledViewRef = useRef(false)
+
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<StaffEventItem | null>(null)
+  const [mutatingEventId, setMutatingEventId] = useState<number | null>(null)
+  const [feedback, setFeedback] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
+
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (userToggledViewRef.current) return
+      setViewMode(window.innerWidth < MOBILE_BREAKPOINT ? 'carousel' : 'grid')
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const handleViewModeChange = (mode: DashboardViewMode) => {
+    userToggledViewRef.current = true
+    setViewMode(mode)
+  }
+
+  const counts = useMemo(
+    () => ({
+      all: events.length,
+      published: events.filter((e) => e.status === 'PUBLISHED').length,
+      draft: events.filter((e) => e.status === 'DRAFT').length,
+      closed: events.filter((e) => e.status === 'CLOSED').length,
+    }),
+    [events],
+  )
+
+  const filteredEvents = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    const filtered = events.filter((event) => {
+      if (statusFilter === 'published' && event.status !== 'PUBLISHED') return false
+      if (statusFilter === 'draft' && event.status !== 'DRAFT') return false
+      if (statusFilter === 'closed' && event.status !== 'CLOSED') return false
+      if (!q) return true
+      return (
+        event.title.toLowerCase().includes(q) ||
+        event.venue.toLowerCase().includes(q) ||
+        event.codePrefix.toLowerCase().includes(q)
+      )
+    })
+
+    return [...filtered].sort((a, b) => {
+      const aDone = a.ended || a.status === 'CLOSED'
+      const bDone = b.ended || b.status === 'CLOSED'
+      if (aDone !== bDone) return aDone ? 1 : -1
+      return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+    })
+  }, [events, search, statusFilter])
+
+  const syncCarouselState = useCallback(() => {
+    const el = trackRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    setCanPrev(scrollLeft > 4)
+    setCanNext(scrollLeft + clientWidth < scrollWidth - 4)
+    const firstCard = el.firstElementChild as HTMLElement | null
+    if (firstCard) {
+      const gap = window.innerWidth >= 768 ? 16 : 12
+      const step = firstCard.getBoundingClientRect().width + gap
+      if (step > 0) {
+        setActiveIndex(
+          Math.min(Math.max(filteredEvents.length - 1, 0), Math.max(0, Math.round(scrollLeft / step))),
+        )
+      }
+    }
+  }, [filteredEvents.length])
+
+  useEffect(() => {
+    if (viewMode !== 'carousel') return
+    syncCarouselState()
+    window.addEventListener('resize', syncCarouselState)
+    return () => window.removeEventListener('resize', syncCarouselState)
+  }, [viewMode, syncCarouselState, filteredEvents.length])
+
+  const scrollByCard = (direction: -1 | 1) => {
+    const el = trackRef.current
+    if (!el) return
+    const firstCard = el.firstElementChild as HTMLElement | null
+    const gap = window.innerWidth >= 768 ? 16 : 12
+    const step = firstCard ? firstCard.getBoundingClientRect().width + gap : 320
+    el.scrollBy({ left: direction * step, behavior: 'smooth' })
+  }
+
+  const scrollToIndex = (index: number) => {
+    const el = trackRef.current
+    if (!el) return
+    const firstCard = el.firstElementChild as HTMLElement | null
+    const gap = window.innerWidth >= 768 ? 16 : 12
+    const step = firstCard ? firstCard.getBoundingClientRect().width + gap : 320
+    el.scrollTo({ left: index * step, behavior: 'smooth' })
+  }
+
+  const resetFilters = () => {
+    setSearch('')
+    setStatusFilter('all')
+  }
+
+  const handleOpenCreate = () => {
+    setEditingEvent(null)
+    setModalOpen(true)
+  }
+
+  const handleOpenEdit = (ev: StaffEventItem) => {
+    setEditingEvent(ev)
+    setModalOpen(true)
+  }
+
+  const handlePublish = async (ev: StaffEventItem) => {
+    setFeedback(null)
+    setMutatingEventId(ev.id)
+    try {
+      await updateMutation.mutateAsync({
+        id: ev.id,
+        payload: {
+          title: ev.title,
+          description: ev.description,
+          venue: ev.venue,
+          startsAt: ev.startsAt,
+          endsAt: ev.endsAt,
+          capacity: ev.capacity,
+          status: 'PUBLISHED',
+          codePrefix: ev.codePrefix,
+        },
+      })
+      setFeedback({
+        tone: 'success',
+        message: `"${ev.title}" is now Published and visible to attendees.`,
+      })
+    } catch (err) {
+      setFeedback({
+        tone: 'error',
+        message: err instanceof Error ? err.message : 'Unable to publish event.',
+      })
+    } finally {
+      setMutatingEventId(null)
+    }
+  }
+
+  const handleCloseEvent = async (ev: StaffEventItem) => {
+    setFeedback(null)
+    setMutatingEventId(ev.id)
+    try {
+      await closeMutation.mutateAsync(ev.id)
+      setFeedback({
+        tone: 'success',
+        message: `"${ev.title}" has been Closed. New registrations are stopped.`,
+      })
+    } catch (err) {
+      setFeedback({
+        tone: 'error',
+        message: err instanceof Error ? err.message : 'Unable to close event.',
+      })
+    } finally {
+      setMutatingEventId(null)
+    }
+  }
+
+  const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all'
+
   return (
-    <div className="page-container animate-rise space-y-3.5 py-4 sm:space-y-4 sm:py-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="page-container animate-rise space-y-3 py-3 sm:space-y-4 sm:py-5">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/staff/dashboard"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-brand-navy/75 hover:text-brand-primary md:hidden"
-              aria-label="Back to dashboard"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
+          <div className="flex flex-wrap items-center gap-1.5">
             <StatusBadge tone="blue" icon={<Calendar className="h-3.5 w-3.5" />}>
               Organizer Tools · Asia/Manila
             </StatusBadge>
+            {!isLoading && (
+              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-brand-navy/75">
+                {events.length} {events.length === 1 ? 'event' : 'events'}
+              </span>
+            )}
           </div>
-          <h1 className="heading-hero font-heading mt-2 font-extrabold text-brand-navy">
+          <h1 className="heading-hero font-heading mt-1.5 font-extrabold text-brand-navy">
             Manage Events
           </h1>
           <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
-            Create new events, publish drafts, edit schedules, and close registrations.
+            Create draft events, publish schedules to attendees, adjust capacity, or close registration.
           </p>
         </div>
 
-        <Button variant="primary" size="md" className="min-h-[40px] self-start sm:self-auto">
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handleOpenCreate}
+          className="w-full sm:w-auto sm:shrink-0"
+        >
           <Plus className="h-4 w-4 shrink-0" />
           <span>New Event</span>
         </Button>
       </div>
 
-      <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-surface p-8 text-center shadow-card">
-        <Calendar className="mx-auto mb-2 h-8 w-8 text-brand-primary/45" />
-        <p className="text-sm font-bold text-brand-navy">Event Management view coming up next</p>
-        <p className="mt-1 text-xs text-brand-navy/65">
-          Connects to backend CRUD endpoints (Create, Edit, Publish/Draft, and Close).
-        </p>
-      </div>
+      {feedback && (
+        <Alert tone={feedback.tone}>
+          <div className="flex items-center justify-between gap-2">
+            <span>{feedback.message}</span>
+            <button
+              type="button"
+              onClick={() => setFeedback(null)}
+              className="text-xs font-bold underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        </Alert>
+      )}
+
+      {/* Search, Filter Tabs & View Toggle */}
+      <DashboardToolbar
+        search={search}
+        onSearchChange={setSearch}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        counts={counts}
+        totalMatching={filteredEvents.length}
+        onReset={resetFilters}
+      />
+
+      {/* Event List: Loading / Error / Empty / Grid / Mobile Carousel */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2 xl:grid-cols-3" aria-label="Loading events">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="staff-surface-card h-[310px] rounded-[var(--radius-card)] p-4">
+              <div className="h-10 w-36 rounded skeleton-shimmer" />
+              <div className="mt-3 h-5 w-3/4 rounded skeleton-shimmer" />
+              <div className="mt-3 h-14 w-full rounded skeleton-shimmer" />
+              <div className="mt-3 h-16 w-full rounded skeleton-shimmer" />
+              <div className="mt-4 h-10 w-full rounded skeleton-shimmer" />
+            </div>
+          ))}
+        </div>
+      ) : isError ? (
+        <Alert
+          tone="error"
+          title="Could not load organizer events"
+          action={
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          }
+        >
+          Please ensure the backend is running and you are signed in as an organizer.
+        </Alert>
+      ) : filteredEvents.length === 0 ? (
+        <EmptyState
+          icon={<CalendarX2 className="h-6 w-6" />}
+          title={hasActiveFilters ? 'No matching events' : 'No events created yet'}
+          description={
+            hasActiveFilters
+              ? 'Try clearing your search or switching event status tabs.'
+              : 'Create your first Cebu event to generate QR passes and open registration.'
+          }
+          action={
+            hasActiveFilters ? (
+              <Button variant="secondary" size="md" onClick={resetFilters}>
+                Clear search &amp; filters
+              </Button>
+            ) : (
+              <Button variant="primary" size="md" onClick={handleOpenCreate}>
+                <Plus className="h-4 w-4" />
+                <span>New Event</span>
+              </Button>
+            )
+          }
+        />
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2 xl:grid-cols-3">
+          {filteredEvents.map((ev, idx) => (
+            <StaffEventCard
+              key={ev.id}
+              event={ev}
+              onEdit={handleOpenEdit}
+              onPublish={handlePublish}
+              onCloseEvent={handleCloseEvent}
+              isMutating={mutatingEventId === ev.id}
+              animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            disabled={!canPrev}
+            aria-label="Previous event"
+            className="absolute -left-4 top-[45%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-brand-navy shadow-dock backdrop-blur-sm transition-all hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-0 md:flex"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            disabled={!canNext}
+            aria-label="Next event"
+            className="absolute -right-4 top-[45%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white/95 text-brand-navy shadow-dock backdrop-blur-sm transition-all hover:border-brand-primary hover:text-brand-primary disabled:pointer-events-none disabled:opacity-0 md:flex"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          <div
+            ref={trackRef}
+            onScroll={syncCarouselState}
+            className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 [-webkit-overflow-scrolling:touch] [touch-action:pan-x_pan-y] md:gap-4"
+          >
+            {filteredEvents.map((ev, idx) => (
+              <div
+                key={ev.id}
+                className="flex w-[84%] max-w-[325px] shrink-0 snap-start sm:w-[350px] sm:max-w-none lg:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]"
+              >
+                <StaffEventCard
+                  event={ev}
+                  onEdit={handleOpenEdit}
+                  onPublish={handlePublish}
+                  onCloseEvent={handleCloseEvent}
+                  isMutating={mutatingEventId === ev.id}
+                  animationDelayClass={DELAY_CLASSES[idx % DELAY_CLASSES.length]}
+                />
+              </div>
+            ))}
+          </div>
+
+          {filteredEvents.length > 1 && (
+            <div className="mt-2.5 flex items-center justify-between gap-2.5">
+              <button
+                type="button"
+                onClick={() => scrollByCard(-1)}
+                disabled={!canPrev}
+                aria-label="Previous event"
+                className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Prev</span>
+              </button>
+
+              <div className="flex items-center gap-1" role="tablist" aria-label="Manage events slides">
+                {filteredEvents.map((ev, idx) => (
+                  <button
+                    key={ev.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={idx === activeIndex}
+                    aria-label={`View ${ev.title}`}
+                    onClick={() => scrollToIndex(idx)}
+                    className="inline-flex min-h-[40px] min-w-[26px] items-center justify-center px-1"
+                  >
+                    <span
+                      className={`h-2 rounded-full transition-all duration-200 ${
+                        idx === activeIndex
+                          ? 'w-5 bg-brand-primary'
+                          : 'w-2 bg-brand-navy/25 hover:bg-brand-navy/45'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => scrollByCard(1)}
+                disabled={!canNext}
+                aria-label="Next event"
+                className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-4 w-4 shrink-0" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Create / Edit Modal */}
+      <EventFormModal
+        open={modalOpen}
+        event={editingEvent}
+        onClose={() => setModalOpen(false)}
+        onSaved={(saved, mode) => {
+          setFeedback({
+            tone: 'success',
+            message:
+              mode === 'create'
+                ? `Created "${saved.title}" (${saved.status}).`
+                : `Updated "${saved.title}" (${saved.status}).`,
+          })
+        }}
+      />
     </div>
   )
 }

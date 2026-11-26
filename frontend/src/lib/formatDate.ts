@@ -77,3 +77,27 @@ export function isTodayInManila(startsAt: string, endsAt: string): boolean {
   const end = isoDateFormatter.format(new Date(endsAt))
   return today >= start && today <= end
 }
+
+const time24Formatter = new Intl.DateTimeFormat('en-GB', {
+  timeZone: APP_TIMEZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+export function toManilaDateInput(iso: string): string {
+  return isoDateFormatter.format(new Date(iso))
+}
+
+export function getTodayManilaDateInput(): string {
+  return isoDateFormatter.format(new Date())
+}
+
+export function toManilaTimeInput(iso: string): string {
+  const formatted = time24Formatter.format(new Date(iso))
+  return formatted.startsWith('24:') ? `00:${formatted.slice(3)}` : formatted
+}
+
+export function fromManilaDateAndTime(dateStr: string, timeStr: string): string {
+  return new Date(`${dateStr}T${timeStr}:00+08:00`).toISOString()
+}

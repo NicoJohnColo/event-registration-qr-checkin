@@ -1,4 +1,5 @@
 import { apiRequest } from '../../lib/apiClient'
+import { API_URL } from '../../lib/constants'
 import { getStoredToken } from '../auth/storage'
 
 export interface EventMetrics {
@@ -28,7 +29,7 @@ export async function fetchDashboardMetrics(): Promise<EventMetrics[]> {
 
 export async function downloadRosterCsv(eventId: number, eventTitle: string): Promise<void> {
   const token = getStoredToken()
-  const res = await fetch(`/api/staff/dashboard/events/${eventId}/export-csv`, {
+  const res = await fetch(`${API_URL}/api/staff/dashboard/events/${eventId}/export-csv`, {
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },

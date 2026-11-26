@@ -68,11 +68,6 @@ export function StaffLayout() {
         : 'text-brand-navy/75 hover:bg-white/65 hover:text-brand-navy'
     }`
 
-  const mobileTabClass = ({ isActive }: { isActive: boolean }) =>
-    `flex h-[var(--bottom-nav-h)] flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition-colors ${
-      isActive ? 'text-brand-primary' : 'text-brand-navy/70 hover:text-brand-navy'
-    }`
-
   const roleLabel = staff?.role === 'DOOR_STAFF' ? 'Door Staff' : 'Organizer'
   const attendeesActive = pathname.startsWith('/staff/attendees') || pathname.includes('/attendees')
   const isOrganizer = staff?.role === 'ORGANIZER'
@@ -178,13 +173,10 @@ export function StaffLayout() {
             aria-label="Mobile staff sidebar"
           >
             <div className="flex h-[var(--header-h)] shrink-0 items-center justify-between border-b border-brand-sky/60 px-3.5">
-              <Link
-                to="/staff/dashboard"
-                className="min-w-0 shrink-0"
-                onClick={() => setMobileSidebarOpen(false)}
-              >
-                <BrandLogo />
-              </Link>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-sky bg-white/85 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-brand-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" aria-hidden="true" />
+                Staff Portal
+              </span>
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(false)}
@@ -294,7 +286,7 @@ export function StaffLayout() {
                   type="button"
                   onClick={() => setMobileSidebarOpen(true)}
                   aria-label="Staff account menu"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-0.5 pl-0.5 pr-2 text-[11px] font-bold text-brand-navy"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white p-0.5 text-[11px] font-bold text-brand-navy xs:pr-2.5"
                 >
                   <span className="flex h-6.5 w-6.5 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-blue text-[11px] font-extrabold text-white">
                     {initials}
@@ -309,89 +301,11 @@ export function StaffLayout() {
         {/* Main Workspace */}
         <main
           key={pathname}
-          className="animate-page-in relative z-10 min-w-0 flex-1 pt-[var(--header-h)] pb-[calc(var(--bottom-nav-h)+env(safe-area-inset-bottom)+14px)] md:pt-[60px] md:pb-8"
+          className="animate-page-in relative min-w-0 flex-1 pt-[var(--header-h)] pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-8"
         >
           <Outlet />
         </main>
       </div>
-
-      {/* Fixed Compact 1-tap Mobile Bottom Tab Bar */}
-      <nav
-        className={`fixed inset-x-0 bottom-0 z-30 grid border-t border-border bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(3,25,91,0.06)] backdrop-blur-md md:hidden ${
-          isOrganizer ? 'grid-cols-4' : 'grid-cols-3'
-        }`}
-        aria-label="Mobile staff tabs"
-      >
-        <NavLink to="/staff/dashboard" className={mobileTabClass}>
-          {({ isActive }) => (
-            <>
-              <span
-                className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
-                  isActive ? 'bg-sky-50 text-brand-primary' : ''
-                }`}
-              >
-                <LayoutDashboard className="h-[18px] w-[18px]" />
-              </span>
-              <span>Dashboard</span>
-            </>
-          )}
-        </NavLink>
-
-        {isOrganizer && (
-          <NavLink to="/staff/events" className={mobileTabClass}>
-            {({ isActive }) => (
-              <>
-                <span
-                  className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
-                    isActive ? 'bg-sky-50 text-brand-primary' : ''
-                  }`}
-                >
-                  <Calendar className="h-[18px] w-[18px]" />
-                </span>
-                <span>Events</span>
-              </>
-            )}
-          </NavLink>
-        )}
-
-        <NavLink to="/staff/check-in" className={mobileTabClass}>
-          {({ isActive }) => (
-            <>
-              <span
-                className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
-                  isActive ? 'bg-sky-50 text-brand-primary' : ''
-                }`}
-              >
-                <ScanLine className="h-[18px] w-[18px]" />
-              </span>
-              <span>Check-In</span>
-            </>
-          )}
-        </NavLink>
-
-        <NavLink
-          to="/staff/attendees"
-          className={({ isActive }) =>
-            mobileTabClass({ isActive: isActive || attendeesActive })
-          }
-        >
-          {({ isActive }) => {
-            const active = isActive || attendeesActive
-            return (
-              <>
-                <span
-                  className={`inline-flex h-6 w-10 items-center justify-center rounded-full transition-colors ${
-                    active ? 'bg-sky-50 text-brand-primary' : ''
-                  }`}
-                >
-                  <Users className="h-[18px] w-[18px]" />
-                </span>
-                <span>Attendees</span>
-              </>
-            )
-          }}
-        </NavLink>
-      </nav>
     </div>
   )
 }

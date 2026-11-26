@@ -195,7 +195,7 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
       </div>
 
       {/* Right: Compact Registration Status Donut */}
-      <div className="staff-surface-card flex flex-col justify-between rounded-[var(--radius-card)] p-3 sm:p-4 lg:col-span-5">
+      <div className="staff-surface-card flex flex-col rounded-[var(--radius-card)] p-3 sm:p-4 lg:col-span-5">
         <div>
           <h2 className="heading-card font-heading font-extrabold text-brand-navy">
             Registration Status
@@ -205,7 +205,7 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
           </p>
         </div>
 
-        <div className="mt-2.5 flex items-center justify-between gap-3 sm:mt-3.5 sm:gap-4">
+        <div className="mt-3 flex flex-1 items-center justify-between gap-3 sm:mt-4 sm:gap-4">
           <div className="relative h-24 w-24 shrink-0 sm:h-30 sm:w-30">
             <svg viewBox="0 0 120 120" className="h-full w-full" role="img" aria-label="Registration status donut chart">
               <circle

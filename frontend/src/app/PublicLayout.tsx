@@ -27,8 +27,12 @@ interface PublicLayoutProps {
 export function PublicLayout({ children }: PublicLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname, hash } = useLocation()
-  const { isAuthenticated } = useAuth()
-  const staffDestination = isAuthenticated ? '/staff/check-in' : '/staff/login'
+  const { isAuthenticated, staff } = useAuth()
+  const staffDestination = isAuthenticated
+    ? staff?.role === 'DOOR_STAFF'
+      ? '/staff/check-in'
+      : '/staff/dashboard'
+    : '/staff/login'
   const staffLabel = isAuthenticated ? 'Staff Portal' : 'Staff Sign In'
 
   useEffect(() => {

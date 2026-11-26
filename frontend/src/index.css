@@ -19,7 +19,6 @@
   --container-max: 1140px;
   --page-gutter: clamp(12px, 3.8vw, 24px);
   --header-h: 50px;
-  --bottom-nav-h: 52px;
 
   /* Card & Control tokens */
   --card-pad: clamp(12px, 2.8vw, 16px);
@@ -85,6 +84,7 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 72px;
     font-family: var(--font);
     overflow-x: hidden;
     max-width: 100%;
