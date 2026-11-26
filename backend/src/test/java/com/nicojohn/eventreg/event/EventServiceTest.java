@@ -20,15 +20,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.common.exception.ApiException;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.dto.EventResponse;
 import com.nicojohn.eventreg.registration.RegistrationRepository;
+import com.nicojohn.eventreg.staff.StaffRepository;
 
 class EventServiceTest {
 
     private EventRepository eventRepository;
     private RegistrationRepository registrationRepository;
+    private AuditLogRepository auditLogRepository;
+    private StaffRepository staffRepository;
     private Clock fixedClock;
     private EventService eventService;
 
@@ -36,9 +40,11 @@ class EventServiceTest {
     void setUp() {
         eventRepository = mock(EventRepository.class);
         registrationRepository = mock(RegistrationRepository.class);
+        auditLogRepository = mock(AuditLogRepository.class);
+        staffRepository = mock(StaffRepository.class);
         LocalDate today = LocalDate.of(2026, 11, 23);
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
-        eventService = new EventService(eventRepository, registrationRepository, fixedClock);
+        eventService = new EventService(eventRepository, registrationRepository, auditLogRepository, staffRepository, fixedClock);
     }
 
     @Test

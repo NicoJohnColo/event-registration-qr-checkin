@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
 import com.nicojohn.eventreg.common.security.StaffPrincipal;
@@ -38,6 +39,7 @@ class CheckInServiceTest {
     private EventRepository eventRepository;
     private RegistrationRepository registrationRepository;
     private StaffRepository staffRepository;
+    private AuditLogRepository auditLogRepository;
     private Clock fixedClock;
     private CheckInService checkInService;
 
@@ -49,8 +51,9 @@ class CheckInServiceTest {
         eventRepository = mock(EventRepository.class);
         registrationRepository = mock(RegistrationRepository.class);
         staffRepository = mock(StaffRepository.class);
+        auditLogRepository = mock(AuditLogRepository.class);
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 9, 15), ManilaTime.ZONE);
-        checkInService = new CheckInService(eventRepository, registrationRepository, staffRepository, fixedClock);
+        checkInService = new CheckInService(eventRepository, registrationRepository, staffRepository, auditLogRepository, fixedClock);
     }
 
     private Event sampleEvent(Long id, LocalDate day) {

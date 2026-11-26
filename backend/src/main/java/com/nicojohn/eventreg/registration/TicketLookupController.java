@@ -24,4 +24,9 @@ public class TicketLookupController {
     public TicketResponse lookup(@Valid @RequestBody TicketLookupRequest request) {
         return registrationService.lookupTicket(request);
     }
+
+    @PostMapping("/cancel")
+    public TicketResponse cancel(@Valid @RequestBody TicketLookupRequest request) {
+        return registrationService.attendeeCancel(request);
+    }
 }

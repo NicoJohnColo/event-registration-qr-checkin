@@ -13,9 +13,12 @@ public record AttendeeRowResponse(
         String mobile,
         String ticketCode,
         RegistrationStatus status,
+        Integer waitlistPosition,
         Instant registeredAt,
         Instant checkedInAt,
-        String checkedInByName) {
+        String checkedInByName,
+        Instant cancelledAt,
+        String cancelledByName) {
 
     public static AttendeeRowResponse from(Registration reg) {
         return new AttendeeRowResponse(
@@ -25,8 +28,11 @@ public record AttendeeRowResponse(
                 reg.getMobile(),
                 reg.getTicketCode(),
                 reg.getStatus(),
+                reg.getWaitlistPosition(),
                 reg.getRegisteredAt(),
                 reg.getCheckedInAt(),
-                reg.getCheckedInBy() != null ? reg.getCheckedInBy().getName() : null);
+                reg.getCheckedInBy() != null ? reg.getCheckedInBy().getName() : null,
+                reg.getCancelledAt(),
+                reg.getCancelledByStaff() != null ? reg.getCancelledByStaff().getName() : null);
     }
 }

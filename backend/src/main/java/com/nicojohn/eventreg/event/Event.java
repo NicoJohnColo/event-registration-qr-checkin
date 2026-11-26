@@ -60,14 +60,14 @@ public class Event {
             String codePrefix,
             Instant createdAt) {
         this.title = title;
-        this.description = description;
+        this.description = description != null ? description : "";
         this.venue = venue;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
         this.capacity = capacity;
         this.status = status;
         this.codePrefix = codePrefix;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt != null ? createdAt : Instant.now();
     }
 
     public Long getId() { return id; }
@@ -84,5 +84,23 @@ public class Event {
     public void updateSchedule(Instant startsAt, Instant endsAt) {
         this.startsAt = startsAt;
         this.endsAt = endsAt;
+    }
+
+    public void updateDetails(String title, String description, String venue, Instant startsAt, Instant endsAt, int capacity, EventStatus status) {
+        this.title = title;
+        this.description = description != null ? description : "";
+        this.venue = venue;
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+        this.capacity = capacity;
+        this.status = status;
+    }
+
+    public void close() {
+        this.status = EventStatus.CLOSED;
+    }
+
+    public void publish() {
+        this.status = EventStatus.PUBLISHED;
     }
 }

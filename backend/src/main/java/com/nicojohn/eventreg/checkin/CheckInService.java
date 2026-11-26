@@ -10,6 +10,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nicojohn.eventreg.audit.AuditLog;
+import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
 import com.nicojohn.eventreg.checkin.dto.CheckInStatsResponse;
@@ -33,24 +35,29 @@ public class CheckInService {
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
     private final StaffRepository staffRepository;
+    private final AuditLogRepository auditLogRepository;
     private final Clock clock;
 
     public CheckInService(
             EventRepository eventRepository,
             RegistrationRepository registrationRepository,
             StaffRepository staffRepository,
+            AuditLogRepository auditLogRepository,
             Clock clock) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
         this.staffRepository = staffRepository;
+        this.auditLogRepository = auditLogRepository;
         this.clock = clock;
     }
 
     /**
-     * Enforces Rules R3, R4, and R7 in order:
-     * 1) ticket must exist for the selected event,
-     * 2) duplicate scans return ALREADY_CHECKED_IN with original timestamp,
-     * 3) only CONFIRMED tickets on the event day (Asia/Manila) are updated atomically.
+     * Enforces Level 1 and Level 2 check-in logic:
+     * 1) Ticket must exist for selected event,
+     * 2) If WAITLISTED -> "On waitlist — not confirmed",
+     * 3) If CANCELLED -> "Cancelled",
+     * 4) If already CHECKED_IN -> ALREADY_CHECKED_IN with original timestamp,
+     * 5) Only CONFIRMED tickets on event day (Asia/Manila) are checked in.
      */
     @Transactional
     public CheckInResponse checkIn(CheckInRequest request, StaffPrincipal principal) {
@@ -76,6 +83,30 @@ public class CheckInService {
                     "Invalid ticket",
                     normalizedCode,
                     null,
+                    null,
+                    null,
+                    checkedInCount,
+                    registeredCount);
+        }
+
+        if (reg.getStatus() == RegistrationStatus.WAITLISTED) {
+            return new CheckInResponse(
+                    CheckInOutcome.WAITLISTED,
+                    "On waitlist — not confirmed",
+                    reg.getTicketCode(),
+                    reg.getFullName(),
+                    null,
+                    null,
+                    checkedInCount,
+                    registeredCount);
+        }
+
+        if (reg.getStatus() == RegistrationStatus.CANCELLED) {
+            return new CheckInResponse(
+                    CheckInOutcome.CANCELLED,
+                    "Cancelled",
+                    reg.getTicketCode(),
+                    reg.getFullName(),
                     null,
                     null,
                     checkedInCount,
@@ -125,6 +156,14 @@ public class CheckInService {
         int updated = registrationRepository.markCheckedInIfConfirmed(reg.getId(), now, staffRef);
 
         if (updated == 1) {
+            auditLogRepository.save(new AuditLog(
+                    "CHECK_IN",
+                    "REGISTRATION",
+                    reg.getId(),
+                    staffRef,
+                    "Checked in attendee '" + reg.getFullName() + "' (" + reg.getTicketCode() + ")",
+                    now));
+
             return new CheckInResponse(
                     CheckInOutcome.CHECKED_IN,
                     "Checked in",
@@ -149,6 +188,55 @@ public class CheckInService {
                 latest.getCheckedInAt(),
                 latest.getCheckedInBy() != null ? latest.getCheckedInBy().getName() : null,
                 freshCheckedIn,
+                registeredCount);
+    }
+
+    /**
+     * Feature 11: Undo Check-In
+     */
+    @Transactional
+    public CheckInResponse undoCheckIn(Long eventId, String ticketCode, StaffPrincipal principal) {
+        if (principal == null) {
+            throw ApiException.unauthorized("Authentication required.");
+        }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> ApiException.notFound("Event not found."));
+
+        String normalizedCode = ticketCode.trim().toUpperCase(Locale.ROOT);
+        Registration reg = registrationRepository
+                .findByEventIdAndTicketCode(event.getId(), normalizedCode)
+                .orElseThrow(() -> ApiException.notFound("Registration not found for event."));
+
+        if (reg.getStatus() != RegistrationStatus.CHECKED_IN) {
+            throw ApiException.badRequest("Cannot undo check-in for ticket with status " + reg.getStatus());
+        }
+
+        StaffUser staff = staffRepository.getReferenceById(principal.id());
+        Instant now = Instant.now(clock);
+
+        reg.undoCheckIn();
+        registrationRepository.save(reg);
+
+        auditLogRepository.save(new AuditLog(
+                "UNDO_CHECK_IN",
+                "REGISTRATION",
+                reg.getId(),
+                staff,
+                "Undid check-in for attendee '" + reg.getFullName() + "' (" + reg.getTicketCode() + ")",
+                now));
+
+        long registeredCount = registrationRepository.countByEventIdAndStatusIn(event.getId(), ACTIVE_STATUSES);
+        long checkedInCount = registrationRepository.countByEventIdAndStatus(event.getId(), RegistrationStatus.CHECKED_IN);
+
+        return new CheckInResponse(
+                CheckInOutcome.CHECKED_IN,
+                "Check-in undone. Ticket is now confirmed and eligible for check-in again.",
+                reg.getTicketCode(),
+                reg.getFullName(),
+                null,
+                null,
+                checkedInCount,
                 registeredCount);
     }
 

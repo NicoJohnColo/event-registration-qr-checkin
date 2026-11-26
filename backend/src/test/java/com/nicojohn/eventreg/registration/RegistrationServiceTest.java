@@ -27,14 +27,18 @@ import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
 import com.nicojohn.eventreg.registration.dto.AttendeeListResponse;
+import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
 import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
+import com.nicojohn.eventreg.staff.StaffRepository;
 
 class RegistrationServiceTest {
 
     private EventRepository eventRepository;
     private RegistrationRepository registrationRepository;
+    private AuditLogRepository auditLogRepository;
+    private StaffRepository staffRepository;
     private Clock fixedClock;
     private RegistrationService registrationService;
 
@@ -42,10 +46,17 @@ class RegistrationServiceTest {
     void setUp() {
         eventRepository = mock(EventRepository.class);
         registrationRepository = mock(RegistrationRepository.class);
+        auditLogRepository = mock(AuditLogRepository.class);
+        staffRepository = mock(StaffRepository.class);
         LocalDate today = LocalDate.of(2026, 11, 23);
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
         registrationService = new RegistrationService(
-                eventRepository, registrationRepository, new TicketCodeGenerator(), fixedClock);
+                eventRepository,
+                registrationRepository,
+                new TicketCodeGenerator(),
+                auditLogRepository,
+                staffRepository,
+                fixedClock);
     }
 
     private Event sampleEvent(Long id, int capacity, LocalDate day, EventStatus status) {
@@ -84,20 +95,26 @@ class RegistrationServiceTest {
     }
 
     @Test
-    void rejectsRegistrationWhenEventIsFull() {
+    void queuesAttendeeOnWaitlistWhenEventIsFull() {
         Event fullEvent = sampleEvent(3L, 5, LocalDate.of(2026, 11, 26), EventStatus.PUBLISHED);
         when(eventRepository.findByIdForUpdate(3L)).thenReturn(Optional.of(fullEvent));
         when(registrationRepository.existsByEventIdAndEmailIgnoreCaseAndStatusIn(
                 eq(3L), eq("juan.delacruz@example.com"), anyCollection())).thenReturn(false);
         when(registrationRepository.countByEventIdAndStatusIn(eq(3L), anyCollection())).thenReturn(5L);
+        when(registrationRepository.findMaxWaitlistPosition(3L)).thenReturn(2);
+        when(registrationRepository.existsByTicketCode(any())).thenReturn(false);
+        when(registrationRepository.saveAndFlush(any(Registration.class))).thenAnswer(inv -> {
+            Registration r = inv.getArgument(0);
+            ReflectionTestUtils.setField(r, "id", 201L);
+            return r;
+        });
 
-        ApiException ex = assertThrows(
-                ApiException.class,
-                () -> registrationService.register(
-                        3L, new RegisterRequest("Juan Dela Cruz", "juan.delacruz@example.com", "09171234567")));
+        TicketResponse res = registrationService.register(
+                3L, new RegisterRequest("Juan Dela Cruz", "juan.delacruz@example.com", "09171234567"));
 
-        assertEquals(HttpStatus.CONFLICT, ex.getStatus());
-        assertEquals("This event is full. No spots remaining.", ex.getMessage());
+        assertEquals(RegistrationStatus.WAITLISTED, res.status());
+        assertEquals(3, res.waitlistPosition());
+        assertEquals("Juan Dela Cruz", res.attendeeName());
     }
 
     @Test
