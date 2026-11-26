@@ -1,9 +1,11 @@
-import { Calendar, Clock } from 'lucide-react'
+import { Calendar, Camera, CameraOff, Clock } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Alert } from '../../components/ui/Alert'
+import { Button } from '../../components/ui/Button'
 import { Spinner } from '../../components/ui/Spinner'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import {
+  CameraQrScanner,
   CheckInForm,
   CheckInOutcomePanel,
   EventSelector,
@@ -47,6 +49,7 @@ export function StaffCheckInPage() {
   const checkInMutation = useCheckIn()
   const undoMutation = useUndoCheckIn()
   const [undoingCode, setUndoingCode] = useState<string | null>(null)
+  const [cameraOpen, setCameraOpen] = useState(false)
 
   const handleEventChange = (nextEventId: number) => {
     setSelectedEventId(nextEventId)
@@ -177,10 +180,43 @@ export function StaffCheckInPage() {
               onChange={handleEventChange}
             />
 
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-bold text-brand-navy/75">
+                Scan via device camera or enter code manually
+              </span>
+              <Button
+                type="button"
+                variant={cameraOpen ? 'secondary' : 'outline'}
+                size="sm"
+                disabled={!selectedEventId}
+                onClick={() => setCameraOpen((prev) => !prev)}
+                className={cameraOpen ? '' : 'bg-white'}
+              >
+                {cameraOpen ? (
+                  <>
+                    <CameraOff className="h-3.5 w-3.5 text-brand-primary" />
+                    <span>Hide Camera</span>
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-3.5 w-3.5 text-brand-primary" />
+                    <span>Scan with Camera</span>
+                  </>
+                )}
+              </Button>
+            </div>
+
             <CheckInForm
               onSubmitCode={handleSubmitCode}
               isPending={checkInMutation.isPending}
               disabled={!selectedEventId}
+            />
+
+            <CameraQrScanner
+              active={cameraOpen}
+              disabled={!selectedEventId}
+              onClose={() => setCameraOpen(false)}
+              onScanPayload={handleSubmitCode}
             />
 
             {checkInMutation.isError && (
