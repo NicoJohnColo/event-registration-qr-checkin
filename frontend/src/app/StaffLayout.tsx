@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Clock,
   ExternalLink,
+  History,
   LayoutDashboard,
   LogOut,
   PanelLeft,
@@ -27,6 +28,7 @@ function getSectionLabel(pathname: string): string {
     return 'Attendee Roster'
   }
   if (pathname.startsWith('/staff/events')) return 'Manage Events'
+  if (pathname.startsWith('/staff/audit-logs')) return 'Audit Logs'
   if (pathname.startsWith('/staff/check-in')) return 'Door Check-In'
   if (pathname.startsWith('/staff/attendees')) return 'Attendee Roster'
   return 'Operations Dashboard'
@@ -80,10 +82,12 @@ export function StaffLayout() {
         Operations
       </p>
 
-      <NavLink to="/staff/dashboard" className={sidebarLinkClass} onClick={onNavigate}>
-        <LayoutDashboard className="h-[18px] w-[18px] shrink-0" />
-        <span className="truncate">Dashboard</span>
-      </NavLink>
+      {isOrganizer && (
+        <NavLink to="/staff/dashboard" className={sidebarLinkClass} onClick={onNavigate}>
+          <LayoutDashboard className="h-[18px] w-[18px] shrink-0" />
+          <span className="truncate">Dashboard</span>
+        </NavLink>
+      )}
 
       {isOrganizer && (
         <NavLink to="/staff/events" className={sidebarLinkClass} onClick={onNavigate}>
@@ -107,6 +111,13 @@ export function StaffLayout() {
         <Users className="h-[18px] w-[18px] shrink-0" />
         <span className="truncate">Attendee Roster</span>
       </NavLink>
+
+      {isOrganizer && (
+        <NavLink to="/staff/audit-logs" className={sidebarLinkClass} onClick={onNavigate}>
+          <History className="h-[18px] w-[18px] shrink-0" />
+          <span className="truncate">Audit Logs</span>
+        </NavLink>
+      )}
 
       <div className="my-3.5 border-t border-brand-sky/70 pt-3.5">
         <p className="px-3 pb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/50">
@@ -135,7 +146,7 @@ export function StaffLayout() {
         aria-label="Staff sidebar"
       >
         <div className="flex h-[60px] shrink-0 items-center border-b border-brand-sky/60 px-4">
-          <Link to="/staff/dashboard" className="min-w-0 shrink-0 focus-visible:outline-none">
+          <Link to={isOrganizer ? '/staff/dashboard' : '/staff/check-in'} className="min-w-0 shrink-0 focus-visible:outline-none">
             <BrandLogo />
           </Link>
         </div>
@@ -275,7 +286,7 @@ export function StaffLayout() {
                 <PanelLeft className="h-4 w-4" />
               </button>
 
-              <Link to="/staff/dashboard" className="min-w-0 shrink-0">
+              <Link to={isOrganizer ? '/staff/dashboard' : '/staff/check-in'} className="min-w-0 shrink-0">
                 <BrandLogo />
               </Link>
             </div>

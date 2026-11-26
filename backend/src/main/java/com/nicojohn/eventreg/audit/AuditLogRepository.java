@@ -3,6 +3,7 @@ package com.nicojohn.eventreg.audit;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByEntityTypeAndEntityIdOrderByCreatedAtDesc(String entityType, Long entityId);
+
+    @Query("""
+            SELECT a FROM AuditLog a
+            LEFT JOIN FETCH a.performedBy
+            ORDER BY a.createdAt DESC, a.id DESC
+            """)
+    List<AuditLog> findRecentWithActor(Pageable pageable);
+
+    @Query("""
+            SELECT a FROM AuditLog a
+            LEFT JOIN FETCH a.performedBy
+            WHERE a.action = :action
+            ORDER BY a.createdAt DESC, a.id DESC
+            """)
+    List<AuditLog> findRecentByActionWithActor(@Param("action") String action, Pageable pageable);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM AuditLog a WHERE a.entityType = :entityType AND a.entityId IN :entityIds")
