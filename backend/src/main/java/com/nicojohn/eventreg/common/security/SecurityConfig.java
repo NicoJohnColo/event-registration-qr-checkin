@@ -1,5 +1,8 @@
 package com.nicojohn.eventreg.common.security;
 
+import java.time.Clock;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,14 +33,23 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
+    private final boolean rateLimitEnabled;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ObjectMapper objectMapper) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ObjectMapper objectMapper,
+            Clock clock,
+            @Value("${app.rate-limit.enabled:true}") boolean rateLimitEnabled) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.objectMapper = objectMapper;
+        this.clock = clock;
+        this.rateLimitEnabled = rateLimitEnabled;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        RateLimitFilter rateLimitFilter = new RateLimitFilter(objectMapper, clock, rateLimitEnabled);
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
@@ -57,7 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/checkin/**").hasAnyRole("ORGANIZER", "DOOR_STAFF")
                 .requestMatchers("/api/staff/**").hasRole("ORGANIZER")
                 .anyRequest().authenticated())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 

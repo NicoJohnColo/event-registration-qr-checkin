@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 
 interface TicketQRProps {
   ticketCode: string
+  qrPayload?: string | null
   caption?: string
 }
 
 export function TicketQR({
   ticketCode,
+  qrPayload,
   caption = 'Show this QR code at the venue entrance',
 }: TicketQRProps) {
   const [copied, setCopied] = useState(false)
@@ -32,7 +34,7 @@ export function TicketQR({
     <div className="flex flex-col items-center text-center">
       <div className="inline-flex items-center justify-center rounded-[var(--radius-card)] border border-border/80 bg-white p-2 shadow-xs">
         <QRCodeSVG
-          value={ticketCode}
+          value={qrPayload || ticketCode}
           size={136}
           level="M"
           fgColor="#000000"

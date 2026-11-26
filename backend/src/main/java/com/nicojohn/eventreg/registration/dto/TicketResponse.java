@@ -2,6 +2,7 @@ package com.nicojohn.eventreg.registration.dto;
 
 import java.time.Instant;
 
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.registration.Registration;
 import com.nicojohn.eventreg.registration.RegistrationStatus;
@@ -10,6 +11,7 @@ import com.nicojohn.eventreg.registration.RegistrationStatus;
 public record TicketResponse(
         Long registrationId,
         String ticketCode,
+        String qrPayload,
         RegistrationStatus status,
         Integer waitlistPosition,
         String attendeeName,
@@ -24,10 +26,18 @@ public record TicketResponse(
         Instant eventEndsAt) {
 
     public static TicketResponse from(Registration reg) {
+        return from(reg, null);
+    }
+
+    public static TicketResponse from(Registration reg, QrTokenService qrTokenService) {
         Event event = reg.getEvent();
+        String qrPayload = qrTokenService != null
+                ? qrTokenService.sign(event.getId(), reg.getTicketCode())
+                : reg.getTicketCode();
         return new TicketResponse(
                 reg.getId(),
                 reg.getTicketCode(),
+                qrPayload,
                 reg.getStatus(),
                 reg.getWaitlistPosition(),
                 reg.getFullName(),

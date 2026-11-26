@@ -25,6 +25,7 @@ import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
 import com.nicojohn.eventreg.common.exception.ApiException;
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.common.security.StaffPrincipal;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
@@ -43,6 +44,7 @@ class CheckInServiceTest {
     private RegistrationRepository registrationRepository;
     private StaffRepository staffRepository;
     private AuditLogRepository auditLogRepository;
+    private QrTokenService qrTokenService;
     private Clock fixedClock;
     private CheckInService checkInService;
 
@@ -55,8 +57,10 @@ class CheckInServiceTest {
         registrationRepository = mock(RegistrationRepository.class);
         staffRepository = mock(StaffRepository.class);
         auditLogRepository = mock(AuditLogRepository.class);
+        qrTokenService = new QrTokenService("eventreg-checkin-test-qr-secret-at-least-32chars");
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 9, 15), ManilaTime.ZONE);
-        checkInService = new CheckInService(eventRepository, registrationRepository, staffRepository, auditLogRepository, fixedClock);
+        checkInService = new CheckInService(
+                eventRepository, registrationRepository, staffRepository, auditLogRepository, qrTokenService, fixedClock);
     }
 
     private Event sampleEvent(Long id, LocalDate day) {
@@ -250,5 +254,31 @@ class CheckInServiceTest {
                 ApiException.class,
                 () -> checkInService.undoCheckIn(1L, "CDM-CONF01", organizer));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
+    void acceptsValidSignedQrPayloadAndRejectsTamperedToken() {
+        Event s1 = sampleEvent(1L, today);
+        Registration confirmed = sampleReg(s1, "CDM-7K3P9Q", RegistrationStatus.CONFIRMED, null);
+        StaffUser staffRef = mock(StaffUser.class);
+        String validQr = qrTokenService.sign(1L, "CDM-7K3P9Q");
+        String tamperedQr = validQr.substring(0, validQr.length() - 1)
+                + (validQr.endsWith("A") ? "B" : "A");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(s1));
+        when(registrationRepository.findByEventIdAndTicketCode(1L, "CDM-7K3P9Q"))
+                .thenReturn(Optional.of(confirmed));
+        when(staffRepository.getReferenceById(1L)).thenReturn(staffRef);
+        when(registrationRepository.markCheckedInIfConfirmed(eq(10L), any(Instant.class), eq(staffRef))).thenReturn(1);
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(4L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(0L);
+
+        CheckInResponse forged = checkInService.checkIn(new CheckInRequest(1L, tamperedQr), organizer);
+        assertEquals(CheckInOutcome.INVALID, forged.outcome());
+        verify(registrationRepository, never()).findByEventIdAndTicketCode(1L, "CDM-7K3P9Q");
+
+        CheckInResponse valid = checkInService.checkIn(new CheckInRequest(1L, validQr), organizer);
+        assertEquals(CheckInOutcome.CHECKED_IN, valid.outcome());
+        assertEquals("CDM-7K3P9Q", valid.ticketCode());
     }
 }

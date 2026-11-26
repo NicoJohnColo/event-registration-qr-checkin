@@ -29,6 +29,7 @@ import com.nicojohn.eventreg.checkin.CheckInOutcome;
 import com.nicojohn.eventreg.checkin.CheckInService;
 import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.common.security.StaffPrincipal;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
@@ -63,7 +64,8 @@ class ConcurrencyRaceTest {
         Clock fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
         RegistrationService registrationService = new RegistrationService(
                 eventRepository, registrationRepository, new TicketCodeGenerator(),
-                auditLogRepository, staffRepository, fixedClock);
+                auditLogRepository, staffRepository,
+                new QrTokenService("eventreg-race-test-qr-secret-at-least-32chars"), fixedClock);
 
         Event event = new Event(
                 "Pitch Night", "Desc", "Cebu",
@@ -142,7 +144,8 @@ class ConcurrencyRaceTest {
         Instant now = ManilaTime.atManilaTime(today, 10, 0);
         Clock fixedClock = Clock.fixed(now, ManilaTime.ZONE);
         CheckInService checkInService = new CheckInService(
-                eventRepository, registrationRepository, staffRepository, auditLogRepository, fixedClock);
+                eventRepository, registrationRepository, staffRepository, auditLogRepository,
+                new QrTokenService("eventreg-race-test-qr-secret-at-least-32chars"), fixedClock);
 
         Event todayEvent = new Event(
                 "Cebu Dev Meetup", "Desc", "Ayala",

@@ -46,7 +46,7 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
               setCode(e.target.value)
               if (localError) setLocalError(null)
             }}
-            placeholder="CDM-7K3P9Q"
+            placeholder="CDM-7K3P9Q or scan QR"
             autoComplete="off"
             autoCapitalize="characters"
             spellCheck={false}
@@ -84,7 +84,7 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
         </p>
       ) : (
         <p className="text-xs leading-relaxed text-brand-navy/75">
-          Case-insensitive &amp; whitespace trimmed automatically. Press Enter after typing or scanning.
+          Supports short ticket codes and signed QR passes cleanly. Press Enter after typing or scanning.
         </p>
       )}
     </form>

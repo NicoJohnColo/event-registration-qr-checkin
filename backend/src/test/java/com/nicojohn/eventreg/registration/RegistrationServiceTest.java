@@ -21,13 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.common.exception.ApiException;
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
 import com.nicojohn.eventreg.event.EventStatus;
 import com.nicojohn.eventreg.registration.dto.AttendeeListResponse;
-import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
 import com.nicojohn.eventreg.registration.dto.TicketLookupRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
@@ -39,6 +40,7 @@ class RegistrationServiceTest {
     private RegistrationRepository registrationRepository;
     private AuditLogRepository auditLogRepository;
     private StaffRepository staffRepository;
+    private QrTokenService qrTokenService;
     private Clock fixedClock;
     private RegistrationService registrationService;
 
@@ -48,6 +50,7 @@ class RegistrationServiceTest {
         registrationRepository = mock(RegistrationRepository.class);
         auditLogRepository = mock(AuditLogRepository.class);
         staffRepository = mock(StaffRepository.class);
+        qrTokenService = new QrTokenService("eventreg-test-qr-secret-with-at-least-32-chars");
         LocalDate today = LocalDate.of(2026, 11, 23);
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
         registrationService = new RegistrationService(
@@ -56,6 +59,7 @@ class RegistrationServiceTest {
                 new TicketCodeGenerator(),
                 auditLogRepository,
                 staffRepository,
+                qrTokenService,
                 fixedClock);
     }
 

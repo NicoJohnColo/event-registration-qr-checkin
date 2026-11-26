@@ -37,3 +37,7 @@ app:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
   jwt:
     secret: ${JWT_SECRET}
+  qr:
+    hmac-secret: ${QR_HMAC_SECRET:${JWT_SECRET}}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}

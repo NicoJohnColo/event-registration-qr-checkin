@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nicojohn.eventreg.audit.AuditLog;
 import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.common.exception.ApiException;
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
 import com.nicojohn.eventreg.event.EventRepository;
@@ -37,6 +38,7 @@ public class RegistrationService {
     private final TicketCodeGenerator ticketCodeGenerator;
     private final AuditLogRepository auditLogRepository;
     private final StaffRepository staffRepository;
+    private final QrTokenService qrTokenService;
     private final Clock clock;
 
     public RegistrationService(
@@ -45,12 +47,14 @@ public class RegistrationService {
             TicketCodeGenerator ticketCodeGenerator,
             AuditLogRepository auditLogRepository,
             StaffRepository staffRepository,
+            QrTokenService qrTokenService,
             Clock clock) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
         this.ticketCodeGenerator = ticketCodeGenerator;
         this.auditLogRepository = auditLogRepository;
         this.staffRepository = staffRepository;
+        this.qrTokenService = qrTokenService;
         this.clock = clock;
     }
 
@@ -108,24 +112,19 @@ public class RegistrationService {
 
         try {
             Registration saved = registrationRepository.saveAndFlush(registration);
-            return TicketResponse.from(saved);
+            return TicketResponse.from(saved, qrTokenService);
         } catch (DataIntegrityViolationException ex) {
             throw ApiException.conflict("This email is already registered for this event.");
         }
     }
 
     /**
-     * Looks up a ticket by normalized ticket code and email.
+     * Looks up a ticket by normalized ticket code (or signed QR payload) and email.
      */
     @Transactional(readOnly = true)
     public TicketResponse lookupTicket(TicketLookupRequest request) {
-        String normalizedCode = request.ticketCode().trim().toUpperCase(Locale.ROOT);
-        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
-
-        return registrationRepository
-                .findByTicketCodeAndEmailIgnoreCase(normalizedCode, normalizedEmail)
-                .map(TicketResponse::from)
-                .orElseThrow(() -> ApiException.notFound("Ticket not found"));
+        Registration reg = findVerifiedTicket(request);
+        return TicketResponse.from(reg, qrTokenService);
     }
 
     /**
@@ -133,12 +132,7 @@ public class RegistrationService {
      */
     @Transactional
     public TicketResponse attendeeCancel(TicketLookupRequest request) {
-        String normalizedCode = request.ticketCode().trim().toUpperCase(Locale.ROOT);
-        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
-
-        Registration reg = registrationRepository
-                .findByTicketCodeAndEmailIgnoreCase(normalizedCode, normalizedEmail)
-                .orElseThrow(() -> ApiException.notFound("Ticket not found"));
+        Registration reg = findVerifiedTicket(request);
 
         if (reg.getStatus() == RegistrationStatus.CHECKED_IN) {
             throw ApiException.badRequest("Checked-in registrations cannot be cancelled.");
@@ -163,7 +157,21 @@ public class RegistrationService {
                 "Attendee cancelled registration for '" + reg.getFullName() + "' (" + reg.getTicketCode() + ")",
                 Instant.now(clock)));
 
-        return TicketResponse.from(saved);
+        return TicketResponse.from(saved, qrTokenService);
+    }
+
+    private Registration findVerifiedTicket(TicketLookupRequest request) {
+        String candidateCode = qrTokenService.extractCandidateCode(request.ticketCode());
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
+
+        Registration reg = registrationRepository
+                .findByTicketCodeAndEmailIgnoreCase(candidateCode, normalizedEmail)
+                .orElseThrow(() -> ApiException.notFound("Ticket not found"));
+
+        if (!qrTokenService.isValidTicketOrToken(request.ticketCode(), reg.getEvent().getId(), reg.getTicketCode())) {
+            throw ApiException.notFound("Ticket not found");
+        }
+        return reg;
     }
 
     /**
@@ -199,7 +207,7 @@ public class RegistrationService {
                 "Staff cancelled registration for '" + reg.getFullName() + "' (" + reg.getTicketCode() + ")",
                 Instant.now(clock)));
 
-        return TicketResponse.from(saved);
+        return TicketResponse.from(saved, qrTokenService);
     }
 
     /**
@@ -232,7 +240,7 @@ public class RegistrationService {
                 "Promoted attendee '" + saved.getFullName() + "' (" + saved.getTicketCode() + ") from waitlist to confirmed",
                 Instant.now(clock)));
 
-        return TicketResponse.from(saved);
+        return TicketResponse.from(saved, qrTokenService);
     }
 
     /**
