@@ -1,13 +1,13 @@
 # EventRegister — Cebu Event Registration & QR Check-in
 
-A mobile-first, full-stack event registration and door QR check-in application built for Cebu tech and community events (**Asia/Manila · UTC+8**). Attendees browse events, reserve a free seat with Philippine mobile validation (`09XXXXXXXXX`), receive an instant QR boarding pass, and retrieve their pass anytime without leaking personal details. Organizers and door staff sign in via BCrypt + JWT authentication to verify tickets at the entrance and monitor live attendance rosters.
+A mobile-first, full-stack event registration, waitlist management, and door QR check-in application built for Cebu tech and community events (**Asia/Manila · UTC+8**). Attendees browse published events, reserve a free seat or join the waitlist when capacity is full, receive an instant QR pass, retrieve or self-cancel passes without leaking personal details, and verify entry at the door. Organizers manage draft/published/closed/deleted event lifecycles, promote waitlisted attendees, undo mistaken check-ins with full audit trails, monitor live operations metrics, and export UTF-8 roster CSVs.
 
 ---
 
 ## 1. Level Reached
 
-- **Current Baseline:** **Level 1 — Core (12 / 12 Acceptance Checks Passing, `TC-101`–`TC-142` Verified)**
-- **Target Level:** **Level 2 — Intermediate** (locking Level 1 first before starting Level 2 features)
+- **Current Baseline:** **Level 2 — Intermediate (`10 / 10` Level 2 Checks Passing: `L2-01`–`L2-10`, plus `12 / 12` Level 1 Core Checks `L1-01`–`L1-12`)**
+- **Target Level:** **Level 2 Complete** (camera QR scanner & outbound email remain scoped for Level 3)
 
 ---
 
@@ -15,7 +15,7 @@ A mobile-first, full-stack event registration and door QR check-in application b
 
 | Layer | Technology |
 |---|---|
-| **Backend** | Java 21 · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256` + BCrypt) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway |
+| **Backend** | Java 21+ · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256` + BCrypt, Role-based `ORGANIZER` / `DOOR_STAFF`) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway |
 | **Database** | PostgreSQL 17 (Supabase Session Pooler) |
 | **Frontend** | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS v4 · React Router 7 · TanStack Query v5 · React Hook Form + Zod · `qrcode.react` · `lucide-react` |
 | **Time Zone** | Enforced server-side and client-side in `Asia/Manila` (`UTC+8`), rendered in 12-hour `AM/PM` format |
@@ -25,7 +25,7 @@ A mobile-first, full-stack event registration and door QR check-in application b
 ## 3. Setup & Run Instructions
 
 ### Prerequisites
-- **Java 21+** (or JDK 21+ with Maven Wrapper `./mvnw` / `.\mvnw.cmd`)
+- **Java 21+** with Maven Wrapper (`./mvnw` / `.\mvnw.cmd`)
 - **Node.js 20+** and `npm`
 - **PostgreSQL 15+** (or a Supabase PostgreSQL project)
 
@@ -40,23 +40,17 @@ Required variables in `.env`:
 
 | Variable | Description | Example |
 |---|---|---|
-| `DB_URL` | JDBC PostgreSQL connection URL | `jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres` |
-| `DB_USER` | Database username | `postgres.yourprojectref` |
-| `DB_PASSWORD` | Database password | `your-db-password` |
-| `JWT_SECRET` | HMAC-SHA256 signing secret (≥32 chars) | `change-me-to-a-long-random-secret-key-at-least-32-chars` |
-| `JWT_EXP_HOURS` | Staff JWT token validity in hours | `24` |
-| `CORS_ALLOWED_ORIGINS` | Allowed frontend origin(s) | `http://localhost:5173` |
+| `SPRING_DATASOURCE_URL` | JDBC PostgreSQL connection URL | `jdbc:postgresql://<pooler-host>:5432/postgres` |
+| `SPRING_DATASOURCE_USERNAME` | Database username | `postgres.<project-ref>` |
+| `SPRING_DATASOURCE_PASSWORD` | Database password | `your-db-password` |
+| `JWT_SECRET` | HMAC-SHA256 signing secret (≥32 chars) | `change-me-long-random-secret-key-at-least-32-chars` |
+| `CORS_ALLOWED_ORIGIN` | Allowed frontend origin | `http://localhost:5173` |
 | `VITE_API_URL` | Backend base URL for Vite frontend | `http://localhost:8080` |
+| `APP_TIMEZONE` | Default server timezone | `Asia/Manila` |
 
 ### Step 2 — Start the Backend (`http://localhost:8080`)
-Flyway migrations (`V1__init.sql`, `V2__seed_staff.sql`) and the idempotent relative-date `DataSeeder` run automatically on startup.
+Flyway migrations (`V1__init.sql`, `V2__seed_staff.sql`, `V3__level2_extensions.sql`) and the idempotent relative-date `DataSeeder` run automatically on startup.
 
-```powershell
-cd backend
-$env:MAVEN_OPTS="-Xms128m -Xmx512m"; .\mvnw.cmd spring-boot:run
-```
-
-*(Or build and run the packaged JAR for lower memory usage)*:
 ```powershell
 cd backend
 .\mvnw.cmd -DskipTests package
@@ -78,76 +72,96 @@ npm run dev
 
 Open `http://localhost:5173` in your browser (or run `npm run dev -- --host` to test on a phone over local Wi-Fi).
 
+### Step 4 — Verification Commands
+```powershell
+# Backend unit & domain tests
+cd backend ; .\mvnw.cmd test
+
+# Frontend TypeScript & Vite production build
+cd frontend ; npm run build
+```
+
 ---
 
-## 4. Seed Data & Demo Staff Logins
+## 4. Seed Data & Demo Staff Login
 
 ### How Seed Data Loads
-1. **`V1__init.sql` (Flyway):** Creates `staff_users`, `events`, and `registrations` tables with strict `CHECK` constraints and the partial unique index `uq_reg_active_email` on `(event_id, lower(email))` where `status IN ('CONFIRMED', 'CHECKED_IN', 'WAITLISTED')`.
-2. **`V2__seed_staff.sql` (Flyway):** Seeds the BCrypt-hashed demo staff accounts (`$2a$10$...`).
-3. **`DataSeeder.java` (Spring `ApplicationRunner`):** Seeds 4 events (`S1`–`S4`) with dates computed **relative to today in `Asia/Manila`** so the event-day check-in rule (`R3`) always works out of the box for any reviewer on any day:
-   - **`S1` — Cebu Dev Meetup 2026 (`CDM`)**: Scheduled **Today** (`8:00 AM – 10:00 PM` PHT), capacity `30`, pre-seeded with `3` confirmed attendees so it starts with open seats and can be tested immediately on the Door Check-In screen.
-   - **`S2` — Cebu Web Design Workshop (`CWD`)**: Scheduled **Today + 7 days** (`1:00 PM – 5:00 PM` PHT), capacity `50`, `0` registrations (used for cross-event check-in rejection tests).
-   - **`S3` — Cebu Startup Pitch Night (`CSP`)**: Scheduled **Today + 3 days** (`6:00 PM – 9:00 PM` PHT), capacity `5`, pre-seeded with `5` confirmed attendees (**Full · 0 of 5 spots left**).
-   - **`S4` — Cebu Code Camp (`CCC`)**: Scheduled **Today − 7 days** (`9:00 AM – 3:00 PM` PHT), capacity `40`, marked **Ended** with registration closed.
+1. **`V1__init.sql` & `V3__level2_extensions.sql` (Flyway):** Creates `staff_users`, `events`, `registrations` (including `WAITLISTED` / `CANCELLED` states and waitlist position constraints), and `audit_logs`.
+2. **`V2__seed_staff.sql` (Flyway):** Seeds the BCrypt-hashed organizer account.
+3. **`DataSeeder.java` (Spring `ApplicationRunner`):** Seeds 4 published events (`S1`–`S4`) with dates kept relative to **today in `Asia/Manila`**:
+   - **`S1` — Cebu Dev Meetup 2026 (`CDM`)**: Scheduled **Today** (`8:00 AM – 11:59 PM` PHT), capacity `30`, `3` seeded confirmed attendees (`27` spots left).
+   - **`S2` — Cebu Web Design Workshop (`CWD`)**: Scheduled **Today + 7 days** (`1:00 PM – 5:00 PM` PHT), capacity `50`, `0` registrations.
+   - **`S3` — Cebu Startup Pitch Night (`CSP`)**: Scheduled **Today + 3 days** (`6:00 PM – 9:00 PM` PHT), capacity `5`, `5` seeded attendees (**Full · Waitlist Open**).
+   - **`S4` — Cebu Code Camp (`CCC`)**: Scheduled **Today − 7 days** (`9:00 AM – 3:00 PM` PHT), capacity `40`, marked **Ended**.
 
-### Demo Staff Credentials (`/staff/login`)
+### Seeded Staff Credentials (`/staff/login`)
 
 | Role | Username | Password | Access |
 |---|---|---|---|
-| **Organizer** (Primary Demo Login) | `organizer` | `Demo@Cebu2026` | Door Check-In, Attendee Roster, Event Management |
-| **Door Staff** | `doorstaff` | `Door@Cebu2026` | Door Check-In, Attendee Roster |
+| **Organizer** (Demo Login) | `organizer` | `Demo@Cebu2026` | Operations Dashboard & CSV Export, Manage Events (Create/Edit/Publish/Close/Delete), Door Check-In + Undo, Attendee Roster + Promote/Cancel |
+
+*(The schema and JWT security filter also support `DOOR_STAFF` accounts for door check-in, undo check-in, and read-only roster access without event CRUD or organizer cancel/promote permissions.)*
 
 ---
 
 ## 5. Data Model & Integrity Rules
 
-### Database Schema (`V1__init.sql`)
+### Database Schema (`V1__init.sql` + `V3__level2_extensions.sql`)
 
 | Table | Key Columns & Constraints |
 |---|---|
 | `staff_users` | `id`, `name`, `username` (`UNIQUE`), `password_hash` (BCrypt), `role` (`CHECK IN ('ORGANIZER', 'DOOR_STAFF')`), `created_at` |
-| `events` | `id`, `title`, `description`, `venue`, `code_prefix`, `starts_at` (`TIMESTAMPTZ`), `ends_at` (`CHECK ends_at > starts_at`), `capacity` (`CHECK capacity >= 1`), `status` (`CHECK IN ('DRAFT', 'PUBLISHED', 'CLOSED')`), `created_by`, `created_at`, `updated_at` |
-| `registrations` | `id`, `event_id` (`FK -> events`), `full_name`, `email`, `mobile`, `ticket_code` (`UNIQUE`), `status` (`CHECK IN ('CONFIRMED', 'WAITLISTED', 'CHECKED_IN', 'CANCELLED')`), `registered_at`, `checked_in_at`, `checked_in_by` (`FK -> staff_users`), `undone_at`, `undone_by`, `cancelled_at` |
+| `events` | `id`, `title`, `description`, `venue`, `code_prefix`, `starts_at` (`TIMESTAMPTZ`), `ends_at` (`CHECK ends_at > starts_at`), `capacity` (`CHECK capacity >= 1`), `status` (`CHECK IN ('DRAFT', 'PUBLISHED', 'CLOSED')`), `created_at` |
+| `registrations` | `id`, `event_id` (`FK -> events`), `full_name`, `email`, `mobile`, `ticket_code` (`UNIQUE`), `status` (`CHECK IN ('CONFIRMED', 'WAITLISTED', 'CHECKED_IN', 'CANCELLED')`), `waitlist_position`, `registered_at`, `checked_in_at`, `checked_in_by` (`FK -> staff_users`), `cancelled_at`, `cancelled_by_staff_id` (`FK -> staff_users`) |
+| `audit_logs` | `id`, `action`, `entity_type`, `entity_id`, `performed_by_id` (`FK -> staff_users`), `details`, `created_at` |
 
 ### Concurrency & Security Guarantees
-- **Last-Spot Race Protection (`R1`, `TC-117`):** `RegistrationService.register()` acquires a `PESSIMISTIC_WRITE` row lock (`SELECT ... FOR UPDATE`) on the `Event` row inside a single `@Transactional` boundary before counting `CONFIRMED + CHECKED_IN` registrations, guaranteeing capacity is never exceeded under concurrent requests.
-- **Case-Insensitive Duplicate Email Prevention (`R2`, `TC-113`, `TC-114`):** Enforced both in application logic and at the database level via `CREATE UNIQUE INDEX uq_reg_active_email ON registrations (event_id, lower(email)) WHERE status IN ('CONFIRMED', 'CHECKED_IN', 'WAITLISTED')`.
-- **Atomic Door Check-In (`R3`, `R4`, `R7`, `TC-130`–`TC-136`):** `CheckInService` verifies that the ticket belongs to the selected event, checks its status, validates that today is the event day in `Asia/Manila`, and executes an atomic conditional update (`UPDATE registrations SET status = 'CHECKED_IN', ... WHERE id = :id AND status = 'CONFIRMED'`). If a second scan arrives simultaneously, `updated == 0` reloads the record and returns `ALREADY_CHECKED_IN` with the original check-in timestamp.
-- **Privacy-Preserving Ticket Lookup (`R11`, `TC-122`, `TC-123`):** `POST /api/tickets/lookup` requires both `ticketCode` and `email`. Whether the code is unknown or the email does not match, the server returns the exact same HTTP `404` `"Ticket not found"` payload with zero personal or event details leaked.
+- **Last-Spot Lock & Waitlist Queuing (`R1`, `L2-04`):** `RegistrationService.register()` acquires a `PESSIMISTIC_WRITE` row lock (`SELECT ... FOR UPDATE`) on the `Event` row inside `@Transactional` before counting `CONFIRMED + CHECKED_IN` registrations; once full, new registrants automatically receive `WAITLISTED` status with a unique consecutive `waitlist_position`.
+- **Duplicate Email Prevention (`R2`):** Enforced in application logic and via partial unique index `uq_reg_active_email` on `(event_id, lower(email))` while active (`CONFIRMED`, `CHECKED_IN`, `WAITLISTED`), allowing re-registration only if previously `CANCELLED`.
+- **Atomic Door Check-In & Undo Audit (`R3`, `L2-05`, `L2-06`, `L2-09`):** Rejects `WAITLISTED` (`"On waitlist — not confirmed"`), `CANCELLED` (`"Cancelled"`), wrong-day, and cross-event tickets. Valid check-ins use a conditional `UPDATE ... WHERE status = 'CONFIRMED'`; `POST /api/checkin/events/{eventId}/undo` reverts to `CONFIRMED` and logs an `UNDO_CHECK_IN` `AuditLog` with staff identity and timestamp.
+- **Privacy-Preserving Lookup & Self-Cancel (`R11`, `L2-06`):** Both `POST /api/tickets/lookup` and `POST /api/tickets/cancel` require matching `ticketCode` + registered `email`, returning uniform `404` `"Ticket not found"` on mismatch and blocking cancellation once `CHECKED_IN` (`400`, `L2-08`).
 
 ---
 
-## 6. Completed Features & Known Limitations
+## 6. Completed Features & Scope
 
-### Completed (Level 1 Core)
-- Public events directory (`/`, `/events`) and event details (`/events/:id`) with server-computed `spotsLeft`, `full`, and `ended` states, search, filter chips, and 12-hour Cebu (`Asia/Manila`) schedules.
-- Attendee registration (`/events/:id/register`) with client-side Zod + server-side Bean Validation (all fields required, valid email, 11-digit PH mobile starting with `09`), simultaneous multi-field error display, duplicate email guard, and locked server capacity re-check.
-- Instant digital boarding pass (`/ticket/:code`) with high-contrast SVG QR code (`qrcode.react`) encoding the exact ticket code, one-tap copy, and direct-URL email verification guard.
-- Public ticket retrieval (`/lookup`) by ticket code + registered email with case/whitespace normalization and uniform `404` response on mismatch.
-- Staff authentication (`/staff/login`) with BCrypt password verification, stateless HMAC-SHA256 JWT tokens, `ProtectedRoute` client guard, and server-side `401 Unauthorized` enforcement on `/api/checkin/**` and `/api/staff/**`.
-- Staff Door Check-In console (`/staff/check-in`) with active event selector, manual/scanner ticket code input, accessible text + icon + color `ResultBanner` (`CHECKED_IN` green, `ALREADY_CHECKED_IN` yellow with original check-in time, `INVALID` / `WRONG_DAY` red), live counter, and shift scan history.
-- Staff Attendee Roster (`/staff/attendees`, `/staff/events/:id/attendees`) with `Registered / Capacity`, `Checked in / Registered`, and `Pending` totals bar, debounced search by attendee name or ticket code, status filter tabs, and responsive mobile list / desktop table views.
+### Completed — Level 1 Core
+- Public events directory (`/`, `/events`) and details (`/events/:id`) with server-computed capacity, `Asia/Manila` 12-hour schedules, search, and filter chips.
+- Registration form (`/events/:id/register`) with Zod + Bean Validation, PH mobile format validation (`09XXXXXXXXX`), QR boarding pass (`/ticket/:code`), and email-guarded retrieval (`/lookup`).
+- Stateless JWT staff login (`/staff/login`) and Door Check-In (`/staff/check-in`) with color + icon + text outcome banners and shift scan history.
 
-### Known Limitations (Scoped for Level 2 / Level 3)
-- Waitlist joining/promotion, registration cancellation, check-in undo, event creation/editing UI, and CSV export are Level 2 features and will be added in the Level 2 phases.
-- Camera-based live QR scanning (`html5-qrcode`) and sandbox email notifications are Level 3 features (Level 1 uses text/USB/keyboard QR code input on the check-in screen).
+### Completed — Level 2 Intermediate
+- **Event Management (`/staff/events`):** Create, edit, publish drafts (`DRAFT` -> `PUBLISHED` -> `CLOSED`), validate schedule order (`endsAt > startsAt`) and active capacity floors, and permanently **Delete** events (`DELETE /api/staff/events/{id}`) with registration cleanup.
+- **Waitlist Queue & FIFO Promotion (`L2-04`, `L2-05`, `L2-07`):** Full active events offer **Join Waitlist**, issue numbered `#X on the waitlist` passes, block premature door entry, and let Organizers promote `#1` cleanly once seats open (auto-compacting remaining positions).
+- **Self & Staff Cancellation (`L2-06`, `L2-08`):** Confirmed/waitlisted attendees can cancel directly from their ticket pass (`POST /api/tickets/cancel`), and Organizers can cancel registrations from the roster (`POST /api/staff/registrations/{id}/cancel`), releasing spots and rejecting cancellation on already checked-in passes.
+- **Undo Check-In (`L2-09`):** Door staff and Organizers can undo check-ins from both the Door Check-In banner/scan list and Attendee Roster (`POST /api/checkin/events/{eventId}/undo`), with `UNDO_CHECK_IN` audit records.
+- **Operations Dashboard & CSV Export (`/staff/dashboard`, `L2-10`):** Real-time KPI summary strip, dual seat/check-in bars, SVG status donut, Manila-time no-show tracking, mobile snap-scroll carousel, desktop fixed sky sidebar shell, and UTF-8 CSV download (`GET /api/staff/dashboard/events/{id}/export-csv`).
+
+### Scoped for Level 3
+- Camera-based live QR scanning (`html5-qrcode`) and automated confirmation / promotion email notifications.
 
 ---
 
-## 7. Official Acceptance Checklist (Level 1)
+## 7. Official Level 1 Acceptance Baseline (`L1-01`–`L1-12`)
 
-| ID | Level | Acceptance Check | Local | Final | Notes |
-|---|---|---|---|---|---|
-| **L1-01** | Level 1 | Register for Cebu Dev Meetup 2026 on a phone-sized screen and see a ticket with a QR code | **Pass** | **Pass** | Verified at `375×667` & `390×844`; generates unique `CDM-XXXXXX` code + SVG QR pass |
-| **L1-02** | Level 1 | Scan the QR with any phone QR app: it shows the same ticket code | **Pass** | **Pass** | `<QRCodeSVG value={ticketCode} />` encodes the exact ticket code string |
-| **L1-03** | Level 1 | Refresh the browser, then find the ticket again with ticket code + email | **Pass** | **Pass** | `POST /api/tickets/lookup` restores full ticket & QR pass (case/whitespace insensitive) |
-| **L1-04** | Level 1 | A wrong ticket code or wrong email shows "Ticket not found" and no details | **Pass** | **Pass** | Both return identical HTTP `404` `{"message":"Ticket not found"}` (`R11`) |
-| **L1-05** | Level 1 | Register the same email twice for one event: the second attempt is blocked | **Pass** | **Pass** | Blocked with HTTP `409` friendly message across any letter casing |
-| **L1-06** | Level 1 | Submit the form with a bad email and a 10-digit mobile number: both show errors | **Pass** | **Pass** | Both inline field errors render simultaneously on client and server (`400` `fieldErrors`) |
-| **L1-07** | Level 1 | Open the seeded full event: it shows "Full" and the Register button is disabled | **Pass** | **Pass** | `S3` (`Cebu Startup Pitch Night`, `5/5`) displays `Full` badge, disabled button, and `409` on direct API POST |
-| **L1-08** | Level 1 | Open a staff page while signed out: you are sent to the sign-in page | **Pass** | **Pass** | `ProtectedRoute` redirects to `/staff/login`; unauthenticated API calls return HTTP `401` |
-| **L1-09** | Level 1 | Check in a valid ticket: green "Checked in" with the name | **Pass** | **Pass** | Displays green `Checked In` banner with attendee full name, timestamp, and verifier name |
-| **L1-10** | Level 1 | Check in the same ticket again: yellow "Already checked in" with the first time | **Pass** | **Pass** | Displays yellow `Already Checked In` banner with the original Asia/Manila check-in time |
-| **L1-11** | Level 1 | Enter a made-up code, and a real code from a different event: both show "Invalid ticket" | **Pass** | **Pass** | Unknown code (`CDM-ZZZZZZ`) and cross-event code (`CSP-...` on `S1`) both show red `Invalid Ticket` |
-| **L1-12** | Level 1 | The attendee list shows correct registered and checked-in totals | **Pass** | **Pass** | Totals bar (`Registered / Capacity`, `Checked in / Registered`) matches roster rows and filters by name/code |
+| ID | Acceptance Check | Status |
+|---|---|---|
+| **L1-01** – **L1-06** | Mobile QR registration, QR code payload parity, email+code ticket lookup, privacy-safe 404, duplicate email guard, multi-field validation | **Pass** |
+| **L1-07** – **L1-12** | Full-event state (extended to Waitlist in L2), unauthenticated staff redirect (`401`), green Check-In / yellow Already Checked In / red Invalid, roster totals | **Pass** |
+
+---
+
+## 8. Official Level 2 Acceptance Checklist (`L2-01`–`L2-10`)
+
+| ID | Acceptance Check | Status | Verification |
+|---|---|---|---|
+| **L2-01** | Draft event hidden from attendees; visible once published | **Pass** | Verified in `EventServiceTest` & live browser |
+| **L2-02** | Event with end time before start time is blocked | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & API |
+| **L2-03** | Lowering capacity below active registered count is blocked with descriptive message | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & API |
+| **L2-04** | Registering for a full event places attendee on waitlist with exact position | **Pass** | Verified in `RegistrationServiceTest` (`WAITLISTED #1`, `#2`) & API |
+| **L2-05** | Scanning waitlisted ticket shows *"On waitlist — not confirmed"* | **Pass** | Verified in `CheckInServiceTest` (`CheckInOutcome.WAITLISTED`) & API |
+| **L2-06** | Cancelling confirmed ticket frees spot; scanning cancelled ticket shows *"Cancelled"* | **Pass** | Verified in `RegistrationServiceTest`, `CheckInServiceTest`, & `/api/tickets/cancel` |
+| **L2-07** | Promoting #1 waitlist attendee allows successful check-in and compacts queue | **Pass** | Verified in `RegistrationServiceTest` & `/api/staff/events/{id}/promote-waitlist` |
+| **L2-08** | Attempting to cancel a checked-in registration is rejected | **Pass** | Rejected (`400`) in `RegistrationServiceTest` & both cancel endpoints |
+| **L2-09** | Undoing check-in permits re-checking-in and logs staff identity & timestamp | **Pass** | Verified in `CheckInServiceTest` (`UNDO_CHECK_IN` AuditLog) & `/api/checkin/events/{id}/undo` |
+| **L2-10** | Dashboard metrics match database counts; CSV export downloads cleanly | **Pass** | `DashboardService` metrics & UTF-8 CSV verified live (`HTTP 200`) |

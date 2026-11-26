@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,8 @@ import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.common.exception.ApiException;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.dto.EventResponse;
+import com.nicojohn.eventreg.event.dto.EventUpsertRequest;
+import com.nicojohn.eventreg.event.dto.StaffEventResponse;
 import com.nicojohn.eventreg.registration.RegistrationRepository;
 import com.nicojohn.eventreg.staff.StaffRepository;
 
@@ -137,5 +140,65 @@ class EventServiceTest {
         when(eventRepository.findByIdForUpdate(999L)).thenReturn(Optional.empty());
         ApiException ex = assertThrows(ApiException.class, () -> eventService.deleteEvent(999L, 1L));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+    }
+
+    @Test
+    void createEventRejectsEndBeforeStart() {
+        Instant start = ManilaTime.atManilaTime(LocalDate.of(2026, 11, 28), 17, 0);
+        Instant end = ManilaTime.atManilaTime(LocalDate.of(2026, 11, 28), 13, 0);
+        EventUpsertRequest req = new EventUpsertRequest(
+                "Inverted Time Event", "Desc", "Cebu IT Park", start, end, 30, EventStatus.DRAFT, "ITE");
+
+        ApiException ex = assertThrows(ApiException.class, () -> eventService.createEvent(req, 1L));
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        assertEquals("End time must be after start time.", ex.getMessage());
+    }
+
+    @Test
+    void updateEventRejectsCapacityBelowRegisteredCount() {
+        LocalDate day = LocalDate.of(2026, 11, 28);
+        Event existing = new Event(
+                "Meetup", "Desc", "Ayala",
+                ManilaTime.atManilaTime(day, 9, 0),
+                ManilaTime.atManilaTime(day, 17, 0),
+                30, EventStatus.PUBLISHED, "CDM", Instant.now(fixedClock));
+        ReflectionTestUtils.setField(existing, "id", 1L);
+
+        when(eventRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(existing));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(6L);
+
+        EventUpsertRequest req = new EventUpsertRequest(
+                "Meetup", "Desc", "Ayala",
+                ManilaTime.atManilaTime(day, 9, 0),
+                ManilaTime.atManilaTime(day, 17, 0),
+                4, EventStatus.PUBLISHED, "CDM");
+
+        ApiException ex = assertThrows(ApiException.class, () -> eventService.updateEvent(1L, req, 1L));
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        assertTrue(ex.getMessage().contains("6"));
+    }
+
+    @Test
+    void publishDraftTransitionsStatusToPublished() {
+        LocalDate day = LocalDate.of(2026, 11, 28);
+        Event draft = new Event(
+                "Draft Event", "Desc", "Cebu",
+                ManilaTime.atManilaTime(day, 9, 0),
+                ManilaTime.atManilaTime(day, 17, 0),
+                20, EventStatus.DRAFT, "DRF", Instant.now(fixedClock));
+        ReflectionTestUtils.setField(draft, "id", 12L);
+
+        when(eventRepository.findByIdForUpdate(12L)).thenReturn(Optional.of(draft));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(12L), anyCollection())).thenReturn(0L);
+        when(eventRepository.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        EventUpsertRequest publishReq = new EventUpsertRequest(
+                "Draft Event", "Desc", "Cebu",
+                ManilaTime.atManilaTime(day, 9, 0),
+                ManilaTime.atManilaTime(day, 17, 0),
+                20, EventStatus.PUBLISHED, "DRF");
+
+        StaffEventResponse updated = eventService.updateEvent(12L, publishReq, 1L);
+        assertEquals(EventStatus.PUBLISHED, updated.status());
     }
 }

@@ -2,6 +2,7 @@ package com.nicojohn.eventreg.checkin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,11 +18,13 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.nicojohn.eventreg.audit.AuditLogRepository;
 import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
+import com.nicojohn.eventreg.common.exception.ApiException;
 import com.nicojohn.eventreg.common.security.StaffPrincipal;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
@@ -173,5 +176,79 @@ class CheckInServiceTest {
         assertEquals(CheckInOutcome.ALREADY_CHECKED_IN, res.outcome());
         assertEquals(winnerTime, res.checkedInAt());
         assertEquals(1L, res.checkedInCount());
+    }
+
+    @Test
+    void rejectsWaitlistedTicketWithWaitlistOutcome() {
+        Event s1 = sampleEvent(1L, today);
+        Registration waitlisted = sampleReg(s1, "CDM-WAIT01", RegistrationStatus.WAITLISTED, null);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(s1));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(30L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(10L);
+        when(registrationRepository.findByEventIdAndTicketCode(1L, "CDM-WAIT01"))
+                .thenReturn(Optional.of(waitlisted));
+
+        CheckInResponse res = checkInService.checkIn(new CheckInRequest(1L, "CDM-WAIT01"), organizer);
+
+        assertEquals(CheckInOutcome.WAITLISTED, res.outcome());
+        assertEquals("On waitlist — not confirmed", res.message());
+        verify(registrationRepository, never()).markCheckedInIfConfirmed(any(), any(), any());
+    }
+
+    @Test
+    void rejectsCancelledTicketWithCancelledOutcome() {
+        Event s1 = sampleEvent(1L, today);
+        Registration cancelled = sampleReg(s1, "CDM-CANC01", RegistrationStatus.CANCELLED, null);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(s1));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(29L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(10L);
+        when(registrationRepository.findByEventIdAndTicketCode(1L, "CDM-CANC01"))
+                .thenReturn(Optional.of(cancelled));
+
+        CheckInResponse res = checkInService.checkIn(new CheckInRequest(1L, "CDM-CANC01"), organizer);
+
+        assertEquals(CheckInOutcome.CANCELLED, res.outcome());
+        assertEquals("Cancelled", res.message());
+        verify(registrationRepository, never()).markCheckedInIfConfirmed(any(), any(), any());
+    }
+
+    @Test
+    void undoesCheckInAndLogsAudit() {
+        Event s1 = sampleEvent(1L, today);
+        Registration checkedIn = sampleReg(s1, "CDM-7K3P9Q", RegistrationStatus.CHECKED_IN, Instant.now(fixedClock));
+        StaffUser staffRef = mock(StaffUser.class);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(s1));
+        when(registrationRepository.findByEventIdAndTicketCode(1L, "CDM-7K3P9Q"))
+                .thenReturn(Optional.of(checkedIn));
+        when(staffRepository.getReferenceById(1L)).thenReturn(staffRef);
+        when(registrationRepository.save(any(Registration.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(1L), anyCollection())).thenReturn(4L);
+        when(registrationRepository.countByEventIdAndStatus(1L, RegistrationStatus.CHECKED_IN)).thenReturn(0L);
+
+        CheckInResponse res = checkInService.undoCheckIn(1L, "  cdm-7k3p9q ", organizer);
+
+        assertEquals(RegistrationStatus.CONFIRMED, checkedIn.getStatus());
+        assertNull(checkedIn.getCheckedInAt());
+        assertNull(res.checkedInAt());
+        assertEquals(0L, res.checkedInCount());
+        verify(auditLogRepository).save(any());
+    }
+
+    @Test
+    void rejectsUndoWhenTicketIsNotCheckedIn() {
+        Event s1 = sampleEvent(1L, today);
+        Registration confirmed = sampleReg(s1, "CDM-CONF01", RegistrationStatus.CONFIRMED, null);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(s1));
+        when(registrationRepository.findByEventIdAndTicketCode(1L, "CDM-CONF01"))
+                .thenReturn(Optional.of(confirmed));
+
+        ApiException ex = assertThrows(
+                ApiException.class,
+                () -> checkInService.undoCheckIn(1L, "CDM-CONF01", organizer));
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 }

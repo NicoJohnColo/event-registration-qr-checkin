@@ -276,4 +276,74 @@ class RegistrationServiceTest {
         assertEquals(1, res.attendees().size());
         assertEquals("CDM-BES2VQ", res.attendees().get(0).ticketCode());
     }
+
+    @Test
+    void attendeeCancelCancelsConfirmedPassAndLogsAudit() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        Registration reg = new Registration(
+                event, "Alice", "alice@example.com", "09171234567",
+                "CDM-CAN001", RegistrationStatus.CONFIRMED, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(reg, "id", 301L);
+
+        when(registrationRepository.findByTicketCodeAndEmailIgnoreCase("CDM-CAN001", "alice@example.com"))
+                .thenReturn(Optional.of(reg));
+        when(registrationRepository.save(any(Registration.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        TicketResponse res = registrationService.attendeeCancel(
+                new TicketLookupRequest(" cdm-can001 ", " ALICE@EXAMPLE.COM "));
+
+        assertEquals(RegistrationStatus.CANCELLED, res.status());
+        verify(auditLogRepository).save(any());
+    }
+
+    @Test
+    void rejectsCancellingCheckedInRegistrationForAttendeeAndStaff() {
+        Event event = sampleEvent(1L, 30, LocalDate.of(2026, 11, 23), EventStatus.PUBLISHED);
+        Registration reg = new Registration(
+                event, "Bob", "bob@example.com", "09171234567",
+                "CDM-CHK001", RegistrationStatus.CHECKED_IN, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(reg, "id", 302L);
+
+        when(registrationRepository.findByTicketCodeAndEmailIgnoreCase("CDM-CHK001", "bob@example.com"))
+                .thenReturn(Optional.of(reg));
+        when(registrationRepository.findById(302L)).thenReturn(Optional.of(reg));
+
+        ApiException attendeeEx = assertThrows(
+                ApiException.class,
+                () -> registrationService.attendeeCancel(
+                        new TicketLookupRequest("CDM-CHK001", "bob@example.com")));
+        ApiException staffEx = assertThrows(
+                ApiException.class,
+                () -> registrationService.staffCancel(302L, 1L));
+
+        assertEquals(HttpStatus.BAD_REQUEST, attendeeEx.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, staffEx.getStatus());
+    }
+
+    @Test
+    void promotesFirstWaitlistAttendeeAndRecompactsRemainingQueue() {
+        Event event = sampleEvent(3L, 5, LocalDate.of(2026, 11, 26), EventStatus.PUBLISHED);
+        Registration first = new Registration(
+                event, "Wait One", "wait1@example.com", "09171110001",
+                "CSP-WAIT01", RegistrationStatus.WAITLISTED, 1, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(first, "id", 401L);
+
+        Registration second = new Registration(
+                event, "Wait Two", "wait2@example.com", "09171110002",
+                "CSP-WAIT02", RegistrationStatus.WAITLISTED, 2, Instant.now(fixedClock));
+        ReflectionTestUtils.setField(second, "id", 402L);
+
+        when(eventRepository.findByIdForUpdate(3L)).thenReturn(Optional.of(event));
+        when(registrationRepository.countByEventIdAndStatusIn(eq(3L), anyCollection())).thenReturn(4L);
+        when(registrationRepository.findFirstWaitlistByEventId(3L)).thenReturn(Optional.of(first));
+        when(registrationRepository.save(any(Registration.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(registrationRepository.findWaitlistByEventIdOrderByPosition(3L)).thenReturn(List.of(second));
+
+        TicketResponse promoted = registrationService.promoteFirstWaitlist(3L, 1L);
+
+        assertEquals(RegistrationStatus.CONFIRMED, promoted.status());
+        assertEquals(null, promoted.waitlistPosition());
+        assertEquals(1, second.getWaitlistPosition());
+        verify(auditLogRepository).save(any());
+    }
 }
