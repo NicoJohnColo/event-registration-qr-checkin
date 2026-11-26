@@ -40,6 +40,7 @@ import com.nicojohn.eventreg.registration.RegistrationRepository;
 import com.nicojohn.eventreg.registration.RegistrationService;
 import com.nicojohn.eventreg.registration.RegistrationStatus;
 import com.nicojohn.eventreg.registration.TicketCodeGenerator;
+import com.nicojohn.eventreg.registration.TicketEmailService;
 import com.nicojohn.eventreg.registration.dto.RegisterRequest;
 import com.nicojohn.eventreg.registration.dto.TicketResponse;
 import com.nicojohn.eventreg.staff.Role;
@@ -65,7 +66,9 @@ class ConcurrencyRaceTest {
         RegistrationService registrationService = new RegistrationService(
                 eventRepository, registrationRepository, new TicketCodeGenerator(),
                 auditLogRepository, staffRepository,
-                new QrTokenService("eventreg-race-test-qr-secret-at-least-32chars"), fixedClock);
+                new QrTokenService("eventreg-race-test-qr-secret-at-least-32chars"),
+                mock(TicketEmailService.class),
+                fixedClock);
 
         Event event = new Event(
                 "Pitch Night", "Desc", "Cebu",

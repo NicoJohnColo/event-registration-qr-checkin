@@ -41,6 +41,7 @@ class RegistrationServiceTest {
     private AuditLogRepository auditLogRepository;
     private StaffRepository staffRepository;
     private QrTokenService qrTokenService;
+    private TicketEmailService ticketEmailService;
     private Clock fixedClock;
     private RegistrationService registrationService;
 
@@ -51,6 +52,7 @@ class RegistrationServiceTest {
         auditLogRepository = mock(AuditLogRepository.class);
         staffRepository = mock(StaffRepository.class);
         qrTokenService = new QrTokenService("eventreg-test-qr-secret-with-at-least-32-chars");
+        ticketEmailService = mock(TicketEmailService.class);
         LocalDate today = LocalDate.of(2026, 11, 23);
         fixedClock = Clock.fixed(ManilaTime.atManilaTime(today, 10, 0), ManilaTime.ZONE);
         registrationService = new RegistrationService(
@@ -60,6 +62,7 @@ class RegistrationServiceTest {
                 auditLogRepository,
                 staffRepository,
                 qrTokenService,
+                ticketEmailService,
                 fixedClock);
     }
 
@@ -349,5 +352,6 @@ class RegistrationServiceTest {
         assertEquals(null, promoted.waitlistPosition());
         assertEquals(1, second.getWaitlistPosition());
         verify(auditLogRepository).save(any());
+        verify(ticketEmailService).sendPromotionEmail(promoted);
     }
 }

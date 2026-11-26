@@ -10,6 +10,8 @@ import java.util.Set;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.nicojohn.eventreg.audit.AuditLog;
 import com.nicojohn.eventreg.audit.AuditLogRepository;
@@ -39,6 +41,7 @@ public class RegistrationService {
     private final AuditLogRepository auditLogRepository;
     private final StaffRepository staffRepository;
     private final QrTokenService qrTokenService;
+    private final TicketEmailService ticketEmailService;
     private final Clock clock;
 
     public RegistrationService(
@@ -48,6 +51,7 @@ public class RegistrationService {
             AuditLogRepository auditLogRepository,
             StaffRepository staffRepository,
             QrTokenService qrTokenService,
+            TicketEmailService ticketEmailService,
             Clock clock) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
@@ -55,6 +59,7 @@ public class RegistrationService {
         this.auditLogRepository = auditLogRepository;
         this.staffRepository = staffRepository;
         this.qrTokenService = qrTokenService;
+        this.ticketEmailService = ticketEmailService;
         this.clock = clock;
     }
 
@@ -112,7 +117,9 @@ public class RegistrationService {
 
         try {
             Registration saved = registrationRepository.saveAndFlush(registration);
-            return TicketResponse.from(saved, qrTokenService);
+            TicketResponse response = TicketResponse.from(saved, qrTokenService);
+            dispatchAfterCommit(() -> ticketEmailService.sendRegistrationEmail(response));
+            return response;
         } catch (DataIntegrityViolationException ex) {
             throw ApiException.conflict("This email is already registered for this event.");
         }
@@ -240,7 +247,22 @@ public class RegistrationService {
                 "Promoted attendee '" + saved.getFullName() + "' (" + saved.getTicketCode() + ") from waitlist to confirmed",
                 Instant.now(clock)));
 
-        return TicketResponse.from(saved, qrTokenService);
+        TicketResponse response = TicketResponse.from(saved, qrTokenService);
+        dispatchAfterCommit(() -> ticketEmailService.sendPromotionEmail(response));
+        return response;
+    }
+
+    private void dispatchAfterCommit(Runnable action) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
+        }
     }
 
     /**
