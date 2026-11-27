@@ -107,52 +107,52 @@ export function StaffAuditLogsPage() {
   const hasFilter = search.trim().length > 0 || category !== 'all'
 
   return (
-    <div className="page-container animate-rise space-y-3 py-3 sm:space-y-4 sm:py-5">
-      {/* Header */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <StatusBadge tone="blue" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
+    <div className="page-container animate-rise space-y-2.5 py-3 sm:space-y-4 sm:py-5">
+      {/* Compact Aligned Header with Top-Right Sync */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <StatusBadge tone="blue" icon={<ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}>
               Security &amp; Oversight
             </StatusBadge>
             {!isLoading && (
-              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-brand-navy/75">
-                {logs.length} recent {logs.length === 1 ? 'entry' : 'entries'}
+              <span className="rounded-full border border-border bg-white/90 px-2 py-0.5 text-[10.5px] font-bold text-brand-navy/75 sm:text-[11px]">
+                {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
               </span>
             )}
           </div>
-          <h1 className="heading-hero font-heading mt-1.5 font-extrabold text-brand-navy">
-            Audit Logs
-          </h1>
-          <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
-            Traceable record of event changes, waitlist promotions, door check-ins, undos, and cancellations in Cebu time.
-          </p>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="shrink-0 bg-white/90"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 shrink-0 ${isRefetching ? 'animate-spin' : ''}`} />
+            <span>{isRefetching ? 'Syncing…' : 'Sync'}</span>
+          </Button>
         </div>
 
-        <Button
-          variant="outline"
-          size="md"
-          onClick={() => refetch()}
-          disabled={isRefetching}
-          className="w-full bg-white/90 sm:w-auto"
-        >
-          <RefreshCw className={`h-4 w-4 shrink-0 ${isRefetching ? 'animate-spin' : ''}`} />
-          <span>{isRefetching ? 'Syncing…' : 'Sync'}</span>
-        </Button>
+        <h1 className="heading-hero font-heading font-extrabold text-brand-navy">
+          Audit Logs
+        </h1>
+        <p className="section-subtitle">
+          Traceable record of event updates, waitlist promotions, check-ins, undos, and cancellations in Cebu time.
+        </p>
       </div>
 
       {/* Filter & Search Toolbar */}
-      <div className="staff-surface-card space-y-2.5 rounded-[var(--radius-card)] p-3 sm:p-3.5">
-        <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+      <div className="staff-surface-card space-y-2 rounded-[var(--radius-card)] p-2.5 sm:p-3.5">
+        <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 flex-1">
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch('')}
-              placeholder="Search actor, action, ticket code, or event…"
+              placeholder="Search actor, action, code, or event…"
               aria-label="Search audit logs"
-              leftIcon={<Search className="h-4 w-4" />}
-              className="min-h-[40px] text-base sm:text-sm"
+              leftIcon={<Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             />
           </div>
 
@@ -174,7 +174,7 @@ export function StaffAuditLogsPage() {
         </div>
 
         {hasFilter && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-2 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-1.5 text-[11px] sm:text-xs">
             <span className="text-brand-navy/75">
               Showing <strong className="text-brand-navy">{filtered.length}</strong> matching{' '}
               {filtered.length === 1 ? 'entry' : 'entries'}
@@ -185,7 +185,7 @@ export function StaffAuditLogsPage() {
                 setSearch('')
                 setCategory('all')
               }}
-              className="inline-flex h-9 items-center gap-1 font-bold text-brand-primary hover:underline"
+              className="inline-flex h-7 items-center gap-1 font-bold text-brand-primary hover:underline"
             >
               <X className="h-3.5 w-3.5" />
               <span>Clear filters</span>
@@ -207,7 +207,7 @@ export function StaffAuditLogsPage() {
             </Alert>
           </div>
         ) : visibleRows.length === 0 ? (
-          <div className="p-6 sm:p-8">
+          <div className="p-5 sm:p-8">
             <EmptyState
               icon={<ShieldCheck className="h-6 w-6" />}
               title={hasFilter ? 'No audit entries match your filter' : 'No audit logs recorded yet'}
@@ -239,11 +239,11 @@ export function StaffAuditLogsPage() {
               <table className="w-full text-left text-xs">
                 <thead className="border-b border-border bg-page/70 text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/65">
                   <tr>
-                    <th className="px-4 py-3">When (Manila)</th>
-                    <th className="px-4 py-3">Action</th>
-                    <th className="px-4 py-3">Who</th>
-                    <th className="px-4 py-3">Target</th>
-                    <th className="px-4 py-3">Details</th>
+                    <th className="px-3.5 py-2.5">When (Manila)</th>
+                    <th className="px-3.5 py-2.5">Action</th>
+                    <th className="px-3.5 py-2.5">Who</th>
+                    <th className="px-3.5 py-2.5">Target</th>
+                    <th className="px-3.5 py-2.5">Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/70">
@@ -251,23 +251,23 @@ export function StaffAuditLogsPage() {
                     const actionBadge = getActionBadge(entry.action)
                     const roleBadge = getRoleBadge(entry.performedByRole)
                     return (
-                      <tr key={entry.id} className="transition-colors hover:bg-page/45">
-                        <td className="font-code whitespace-nowrap px-4 py-3 text-brand-navy/80">
+                      <tr key={entry.id} className="transition-colors odd:bg-surface even:bg-page/45 hover:bg-sky-50/45">
+                        <td className="font-code whitespace-nowrap px-3.5 py-2.5 text-brand-navy/80">
                           {formatCebuDateTime(entry.createdAt)}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3">
+                        <td className="whitespace-nowrap px-3.5 py-2.5">
                           <StatusBadge tone={actionBadge.tone}>{actionBadge.label}</StatusBadge>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3.5 py-2.5">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className="font-bold text-brand-navy">{entry.performedByName}</span>
                             <StatusBadge tone={roleBadge.tone}>{roleBadge.label}</StatusBadge>
                           </div>
                         </td>
-                        <td className="font-code whitespace-nowrap px-4 py-3 text-brand-navy/70">
+                        <td className="font-code whitespace-nowrap px-3.5 py-2.5 text-brand-navy/70">
                           {entry.entityType} #{entry.entityId}
                         </td>
-                        <td className="px-4 py-3 text-brand-navy/85">{entry.details}</td>
+                        <td className="px-3.5 py-2.5 text-brand-navy/85">{entry.details}</td>
                       </tr>
                     )
                   })}
@@ -275,26 +275,28 @@ export function StaffAuditLogsPage() {
               </table>
             </div>
 
-            {/* Mobile Card List */}
+            {/* Compact Mobile Card List */}
             <ul className="divide-y divide-border/75 md:hidden">
               {visibleRows.map((entry) => {
                 const actionBadge = getActionBadge(entry.action)
                 const roleBadge = getRoleBadge(entry.performedByRole)
                 return (
-                  <li key={entry.id} className="space-y-1.5 p-3.5 text-xs">
+                  <li key={entry.id} className="space-y-1 p-2.5 text-[11px]">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <StatusBadge tone={actionBadge.tone}>{actionBadge.label}</StatusBadge>
-                      <span className="font-code text-[11px] text-brand-navy/65">
+                      <span className="font-code text-[10px] text-brand-navy/60">
                         {formatCebuDateTime(entry.createdAt)}
                       </span>
                     </div>
-                    <p className="font-medium text-brand-navy">{entry.details}</p>
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-[11px] text-brand-navy/70">
+                    <p className="text-[11.5px] font-semibold leading-snug text-brand-navy">
+                      {entry.details}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-[10.5px] text-brand-navy/70">
                       <span className="inline-flex items-center gap-1.5">
                         <strong className="text-brand-navy">{entry.performedByName}</strong>
                         <StatusBadge tone={roleBadge.tone}>{roleBadge.label}</StatusBadge>
                       </span>
-                      <span className="font-code">
+                      <span className="font-code text-[10px]">
                         {entry.entityType} #{entry.entityId}
                       </span>
                     </div>
@@ -305,12 +307,12 @@ export function StaffAuditLogsPage() {
 
             {/* Pagination Footer */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border/75 bg-page/45 px-4 py-2.5 text-xs">
-                <span className="text-brand-navy/70">
+              <div className="flex items-center justify-between border-t border-border/75 bg-page/45 px-3 py-2 text-[11px] sm:px-4 sm:text-xs">
+                <span className="font-semibold text-brand-navy/70">
                   Page <strong className="text-brand-navy">{safePage}</strong> of{' '}
                   <strong className="text-brand-navy">{totalPages}</strong>
                 </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1">
                   <Button
                     variant="outline"
                     size="sm"
@@ -318,7 +320,7 @@ export function StaffAuditLogsPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     aria-label="Previous audit log page"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                   <Button
                     variant="outline"
@@ -327,7 +329,7 @@ export function StaffAuditLogsPage() {
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     aria-label="Next audit log page"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>

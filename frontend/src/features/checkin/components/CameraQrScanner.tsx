@@ -1,4 +1,4 @@
-import { Camera, CameraOff, CheckCircle2, RefreshCw } from 'lucide-react'
+import { Camera, CameraOff, CheckCircle2, RefreshCw, SwitchCamera } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
@@ -44,6 +44,7 @@ export function CameraQrScanner({
   const [phase, setPhase] = useState<ScannerPhase>('starting')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [retrySeed, setRetrySeed] = useState(0)
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
 
   const scannerRef = useRef<{
     pause: (shouldPauseVideo?: boolean) => void
@@ -52,6 +53,7 @@ export function CameraQrScanner({
     stop: () => Promise<void>
     clear: () => void
   } | null>(null)
+  const stopChainRef = useRef<Promise<void>>(Promise.resolve())
   const cooldownTimerRef = useRef<number | null>(null)
   const cooldownLockRef = useRef(false)
   const onScanRef = useRef(onScanPayload)
@@ -113,6 +115,10 @@ export function CameraQrScanner({
 
     const boot = async () => {
       try {
+        // Wait for any previous camera stop/clear teardown (e.g. Front <-> Back flip)
+        await stopChainRef.current
+        if (cancelled) return
+
         const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
         if (cancelled) return
 
@@ -155,11 +161,11 @@ export function CameraQrScanner({
         }
 
         startPromise = instance.start(
-          { facingMode: 'environment' },
+          { facingMode },
           {
             fps: 10,
-            qrbox: { width: 210, height: 210 },
-            aspectRatio: 1.333,
+            qrbox: { width: 170, height: 170 },
+            aspectRatio: 1,
           },
           handleDecoded,
           () => {
@@ -210,34 +216,62 @@ export function CameraQrScanner({
           // Ignore DOM cleanup errors
         }
       }
-      void stopSafely()
+      stopChainRef.current = stopSafely()
     }
-  }, [active, disabled, regionId, retrySeed, clearCooldown])
+  }, [active, disabled, regionId, retrySeed, facingMode, clearCooldown])
 
   if (!active) return null
 
+  const toggleFacingMode = () => {
+    setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'))
+  }
+
   return (
-    <div className="overflow-hidden rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/55 p-3 sm:p-3.5">
-      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
-            <Camera className="h-4 w-4" />
+    <div className="overflow-hidden rounded-[var(--radius-control)] border border-brand-sky bg-sky-50/55 p-2.5 sm:p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-md bg-brand-primary/10 text-brand-primary">
+            <Camera className="h-3.5 w-3.5" />
           </span>
-          <div>
-            <p className="text-xs font-extrabold text-brand-navy">Live Camera QR Scanner</p>
-            <p className="text-[11px] text-brand-navy/70">
-              {phase === 'starting' && 'Requesting rear camera…'}
-              {phase === 'scanning' && 'Point camera at an attendee QR pass'}
-              {phase === 'cooldown' && 'Scanned — showing result for ~2 seconds…'}
-              {phase === 'error' && 'Camera paused — manual entry ready above'}
+          <div className="min-w-0">
+            <p className="truncate text-[11px] font-extrabold text-brand-navy sm:text-xs">
+              Live QR Scanner · {facingMode === 'environment' ? 'Back Cam' : 'Front Cam'}
+            </p>
+            <p className="truncate text-[10.5px] text-brand-navy/70 sm:text-[11px]">
+              {phase === 'starting' &&
+                (facingMode === 'environment'
+                  ? 'Starting back camera…'
+                  : 'Starting front camera…')}
+              {phase === 'scanning' && 'Align QR code inside frame'}
+              {phase === 'cooldown' && 'Captured — readying next scan…'}
+              {phase === 'error' && 'Camera paused — manual entry ready'}
             </p>
           </div>
         </div>
 
-        <Button type="button" variant="outline" size="sm" onClick={onClose} className="bg-white">
-          <CameraOff className="h-3.5 w-3.5 text-brand-navy/70" />
-          <span>Stop Camera</span>
-        </Button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={toggleFacingMode}
+            title={
+              facingMode === 'environment' ? 'Switch to front camera' : 'Switch to back camera'
+            }
+            aria-label={
+              facingMode === 'environment' ? 'Switch to front camera' : 'Switch to back camera'
+            }
+            className="bg-white px-2"
+          >
+            <SwitchCamera className="h-3.5 w-3.5 text-brand-primary" />
+            <span className="hidden min-[380px]:inline">Flip</span>
+          </Button>
+
+          <Button type="button" variant="outline" size="sm" onClick={onClose} className="bg-white px-2">
+            <CameraOff className="h-3.5 w-3.5 text-brand-navy/70" />
+            <span>Stop</span>
+          </Button>
+        </div>
       </div>
 
       {phase === 'error' && errorMessage ? (
@@ -261,16 +295,16 @@ export function CameraQrScanner({
           </div>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-[var(--radius-control)] border border-border bg-brand-navy/95">
+        <div className="relative mx-auto h-[200px] w-full max-w-[300px] overflow-hidden rounded-[var(--radius-control)] border border-border bg-brand-navy/95 sm:h-[236px] sm:max-w-[340px]">
           <div
             id={regionId}
-            className="mx-auto min-h-[220px] w-full max-w-[360px] [&_img]:hidden [&_video]:!w-full [&_video]:!rounded-[var(--radius-control)] [&_video]:object-cover"
+            className="h-full w-full [&>div]:!h-full [&>div]:!w-full [&_img]:hidden [&_video]:!h-full [&_video]:!w-full [&_video]:!rounded-[var(--radius-control)] [&_video]:!object-cover"
           />
 
           {phase === 'cooldown' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-brand-navy/80 p-4 text-center text-white backdrop-blur-xs">
-              <CheckCircle2 className="h-7 w-7 text-brand-cyan" />
-              <p className="text-xs font-extrabold tracking-wide">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-brand-navy/80 p-3 text-center text-white backdrop-blur-xs">
+              <CheckCircle2 className="h-6 w-6 text-brand-cyan" />
+              <p className="text-[11px] font-extrabold tracking-wide sm:text-xs">
                 Result captured — readying next scan…
               </p>
               <Button
@@ -278,7 +312,7 @@ export function CameraQrScanner({
                 variant="secondary"
                 size="sm"
                 onClick={resumeScanningNow}
-                className="mt-1 bg-white text-brand-navy hover:bg-sky-50"
+                className="mt-0.5 bg-white text-brand-navy hover:bg-sky-50"
               >
                 <span>Scan Next Now</span>
               </Button>

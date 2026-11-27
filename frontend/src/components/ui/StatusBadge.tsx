@@ -36,7 +36,7 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   return (
     <span
-      className={`animate-pop inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold tracking-wide ${toneClasses[tone]} ${className}`}
+      className={`animate-pop inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold tracking-wide sm:px-2 sm:text-[11px] ${toneClasses[tone]} ${className}`}
     >
       {pulse && (
         <span className="relative flex h-2 w-2" aria-hidden="true">

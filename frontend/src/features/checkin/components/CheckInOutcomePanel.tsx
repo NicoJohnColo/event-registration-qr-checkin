@@ -22,12 +22,16 @@ export function CheckInOutcomePanel({
 }: CheckInOutcomePanelProps) {
   if (!lastResult) {
     return (
-      <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-page/60 p-4 text-center">
-        <ScanLine className="mx-auto h-5 w-5 text-brand-primary/65" />
-        <p className="mt-1 text-sm font-bold text-brand-navy">Ready for door check-in</p>
-        <p className="mt-0.5 text-xs text-brand-navy/70">
-          Select an event and enter or scan a ticket code above to verify entry.
-        </p>
+      <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] border border-dashed border-border bg-page/60 p-2.5 sm:block sm:rounded-[var(--radius-card)] sm:p-4 sm:text-center">
+        <ScanLine className="h-4 w-4 shrink-0 text-brand-primary/65 sm:mx-auto sm:h-5 sm:w-5" />
+        <div className="min-w-0">
+          <p className="text-xs font-bold text-brand-navy sm:mt-1 sm:text-sm">
+            Ready for door check-in
+          </p>
+          <p className="mt-0.5 text-[11px] leading-snug text-brand-navy/70 sm:text-xs">
+            Enter or scan a ticket code above to verify entry.
+          </p>
+        </div>
       </div>
     )
   }

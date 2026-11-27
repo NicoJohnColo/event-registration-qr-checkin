@@ -64,7 +64,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     }`
 
   const mobileNavItemClass = ({ isActive }: { isActive: boolean }) =>
-    `flex w-full h-9.5 items-center justify-between rounded-[var(--radius-control)] px-3 text-xs font-bold transition-colors ${
+    `flex h-8.5 w-full items-center justify-between rounded-[var(--radius-control)] px-2.5 text-xs font-bold transition-colors ${
       isActive
         ? 'bg-sky-50 text-brand-primary ring-1 ring-brand-sky'
         : 'text-brand-navy/85 hover:bg-page hover:text-brand-navy'
@@ -107,7 +107,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
           <button
             type="button"
-            className="inline-flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-brand-navy transition-colors hover:bg-page focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 md:hidden"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border bg-surface text-brand-navy transition-colors hover:bg-page focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 md:hidden"
             onClick={() => setMobileOpen((prev) => !prev)}
             aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileOpen}
@@ -117,7 +117,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         </div>
 
         {mobileOpen && (
-          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-var(--header-h))] overflow-y-auto border-t border-border/80 bg-white py-2.5 shadow-xl md:hidden">
+          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-var(--header-h))] overflow-y-auto border-t border-border/80 bg-white py-2 shadow-xl md:hidden">
             <nav className="page-container flex flex-col gap-1" aria-label="Mobile navigation">
               <NavLink to="/" end className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
                 <span className="inline-flex items-center gap-2">
@@ -155,8 +155,8 @@ export function PublicLayout({ children }: PublicLayoutProps) {
                 <ChevronRight className="h-3.5 w-3.5 text-brand-navy/45" />
               </NavLink>
 
-              <div className="mt-1 flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-control)] bg-page px-3 py-2 text-[11px] text-brand-navy/75">
-                <span className="inline-flex items-center gap-1.5 font-semibold">
+              <div className="mt-0.5 flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-control)] bg-page px-2.5 py-1.5 text-[10.5px] text-brand-navy/75">
+                <span className="inline-flex items-center gap-1 font-semibold">
                   <Clock className="h-3 w-3 shrink-0 text-brand-primary" />
                   <span>Cebu Time (UTC+8)</span>
                 </span>
@@ -186,33 +186,33 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         {children ?? <Outlet />}
       </main>
 
-      <footer className="relative z-10 border-t border-border bg-white py-4 sm:py-6">
-        <div className="page-container flex flex-col items-start justify-between gap-3 text-xs text-brand-navy/75 sm:flex-row sm:items-center">
-          <div className="space-y-1">
+      <footer className="relative z-10 border-t border-border bg-white py-3 sm:py-6">
+        <div className="page-container flex flex-col items-start justify-between gap-2 text-xs text-brand-navy/75 sm:flex-row sm:items-center sm:gap-3">
+          <div className="space-y-0.5 sm:space-y-1">
             <BrandLogo />
-            <p className="text-[11px] leading-relaxed text-brand-navy/70">
+            <p className="text-[10.5px] leading-snug text-brand-navy/70 sm:text-[11px]">
               All event schedules shown in Cebu local time (Asia/Manila · UTC+8).
             </p>
           </div>
           <nav
             aria-label="Footer links"
-            className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold"
+            className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[11px] font-bold sm:gap-x-4 sm:text-xs"
           >
             <Link
               to="/events"
-              className="inline-flex h-8 items-center transition-colors hover:text-brand-primary"
+              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
             >
               Browse Events
             </Link>
             <Link
               to="/lookup"
-              className="inline-flex h-8 items-center transition-colors hover:text-brand-primary"
+              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
             >
               Find My Ticket
             </Link>
             <Link
               to={staffDestination}
-              className="inline-flex h-8 items-center transition-colors hover:text-brand-primary"
+              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
             >
               {staffLabel}
             </Link>

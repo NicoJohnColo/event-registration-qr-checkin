@@ -14,20 +14,20 @@ const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS
 export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsRowProps) {
   if (isLoading) {
     return (
-      <section className="grid grid-cols-1 gap-3 lg:grid-cols-12" aria-label="Loading analytics">
-        <div className="staff-surface-card h-[210px] rounded-[var(--radius-card)] p-3 sm:p-4 lg:col-span-7">
-          <div className="h-4 w-40 rounded skeleton-shimmer" />
-          <div className="mt-3 space-y-2.5">
+      <section className="grid grid-cols-1 gap-2 sm:gap-3 lg:grid-cols-12" aria-label="Loading analytics">
+        <div className="staff-surface-card h-[146px] rounded-[var(--radius-card)] p-2.5 sm:h-[210px] sm:p-4 lg:col-span-7">
+          <div className="h-3.5 w-36 rounded skeleton-shimmer sm:h-4 sm:w-40" />
+          <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:mt-3 sm:grid-cols-1 sm:gap-2.5">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-7 w-full rounded skeleton-shimmer" />
+              <div key={i} className="h-10 w-full rounded skeleton-shimmer sm:h-7" />
             ))}
           </div>
         </div>
-        <div className="staff-surface-card h-[180px] rounded-[var(--radius-card)] p-3 sm:h-[210px] sm:p-4 lg:col-span-5">
-          <div className="h-4 w-32 rounded skeleton-shimmer" />
-          <div className="mt-4 flex items-center gap-4">
-            <div className="h-24 w-24 shrink-0 rounded-full skeleton-shimmer" />
-            <div className="flex-1 space-y-2">
+        <div className="staff-surface-card h-[112px] rounded-[var(--radius-card)] p-2.5 sm:h-[210px] sm:p-4 lg:col-span-5">
+          <div className="h-3.5 w-28 rounded skeleton-shimmer sm:h-4 sm:w-32" />
+          <div className="mt-2.5 flex items-center gap-3 sm:mt-4 sm:gap-4">
+            <div className="h-14 w-14 shrink-0 rounded-full skeleton-shimmer sm:h-24 sm:w-24" />
+            <div className="grid flex-1 grid-cols-2 gap-1.5 sm:grid-cols-1 sm:gap-2">
               {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="h-3.5 w-full rounded skeleton-shimmer" />
               ))}
@@ -97,31 +97,32 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
 
   return (
     <section
-      className="grid grid-cols-1 gap-3 lg:grid-cols-12"
+      className="grid grid-cols-1 gap-2 sm:gap-3 lg:grid-cols-12"
       aria-label="Event capacity levels and attendance distribution"
     >
-      {/* Left: Event Seat & Check-In Levels */}
-      <div className="staff-surface-card flex flex-col rounded-[var(--radius-card)] p-3 sm:p-4 lg:col-span-7">
-        <div className="mb-2.5 flex items-center justify-between gap-2">
+      {/* Left: Event Seat & Check-In Levels (2-column compact grid on mobile, spacious rows on desktop) */}
+      <div className="staff-surface-card flex flex-col rounded-[var(--radius-card)] p-2.5 sm:p-4 lg:col-span-7">
+        <div className="mb-1.5 flex items-center justify-between gap-2 sm:mb-2.5">
           <div className="min-w-0">
             <h2 className="heading-card font-heading truncate font-extrabold text-brand-navy">
-              Event Seat &amp; Check-In Levels
+              <span className="sm:hidden">Seat &amp; Check-In Levels</span>
+              <span className="hidden sm:inline">Event Seat &amp; Check-In Levels</span>
             </h2>
-            <p className="text-[11px] text-brand-navy/65 sm:text-xs">
+            <p className="hidden text-xs text-brand-navy/65 sm:block">
               Capacity fill and real-time door arrivals
             </p>
           </div>
 
           <Link
             to="/staff/events"
-            className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-brand-primary hover:underline"
+            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-bold text-brand-primary hover:underline sm:text-xs"
           >
             <span>Manage</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </Link>
         </div>
 
-        <div className="divide-y divide-border/70">
+        <div className="grid grid-cols-2 gap-1.5 sm:block sm:divide-y sm:divide-border/70">
           {topEvents.map((ev) => {
             const confirmedTotal = ev.confirmedCount + ev.checkedInCount
             const fillPct =
@@ -134,35 +135,34 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
               <Link
                 key={ev.eventId}
                 to={`/staff/events/${ev.eventId}/attendees`}
-                className="group block py-2 transition-colors hover:bg-page/60 sm:grid sm:grid-cols-12 sm:items-center sm:gap-2 sm:rounded-[var(--radius-control)] sm:px-2"
+                className="group flex flex-col justify-between rounded-[var(--radius-control)] border border-border/70 bg-page/55 p-1.5 transition-colors hover:bg-page sm:grid sm:grid-cols-12 sm:items-center sm:gap-2 sm:border-0 sm:bg-transparent sm:px-2 sm:py-2"
               >
-                <div className="flex items-center justify-between gap-2 sm:col-span-5">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-code shrink-0 rounded bg-page px-1.5 py-0.5 text-[11px] font-bold text-brand-navy/85 ring-1 ring-border">
+                <div className="flex items-center justify-between gap-1 sm:col-span-5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-1 sm:justify-start sm:gap-1.5">
+                      <span className="font-code shrink-0 rounded bg-white px-1 py-0.5 text-[9.5px] font-bold text-brand-navy/85 ring-1 ring-border sm:bg-page sm:px-1.5 sm:text-[11px]">
                         {ev.codePrefix}
                       </span>
-                      <span className="truncate text-xs font-extrabold text-brand-navy group-hover:text-brand-primary">
+                      <span className="font-code shrink-0 text-[10px] font-extrabold tabular-nums text-brand-navy sm:hidden">
+                        {confirmedTotal}
+                        <span className="font-semibold text-brand-navy/55">/{ev.capacity}</span>
+                      </span>
+                      <span className="hidden truncate text-xs font-extrabold text-brand-navy group-hover:text-brand-primary sm:inline">
                         {ev.title}
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-[11px] text-brand-navy/60">
+                    <p className="mt-0.5 truncate text-[10.5px] font-bold text-brand-navy group-hover:text-brand-primary sm:hidden">
+                      {ev.title}
+                    </p>
+                    <p className="mt-0.5 hidden truncate text-[11px] text-brand-navy/60 sm:block">
                       {formatCebuDate(ev.startsAt)} · {ev.checkedInCount} in
                     </p>
                   </div>
-
-                  {/* Mobile Compact Ratio */}
-                  <span className="font-code shrink-0 text-xs font-extrabold tabular-nums text-brand-navy sm:hidden">
-                    {confirmedTotal}
-                    <span className="text-[11px] font-semibold text-brand-navy/55">
-                      /{ev.capacity}
-                    </span>
-                  </span>
                 </div>
 
-                {/* Progress Bar (Compact full-width bar below on mobile, column on tablet+) */}
-                <div className="mt-1.5 flex items-center gap-2 sm:col-span-5 sm:mt-0">
-                  <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-slate-100 sm:h-2.5">
+                {/* Progress Bar */}
+                <div className="mt-1 flex items-center gap-1.5 sm:col-span-5 sm:mt-0 sm:gap-2">
+                  <div className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200/80 sm:h-2.5 sm:bg-slate-100">
                     <div
                       className="h-full bg-brand-primary transition-all duration-500"
                       style={{ width: `${checkedPctOfCap}%` }}
@@ -174,7 +174,7 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
                       title={`Confirmed Pending: ${ev.confirmedCount}`}
                     />
                   </div>
-                  <span className="font-code w-8 shrink-0 text-right text-[11px] font-bold tabular-nums text-brand-navy/80">
+                  <span className="font-code shrink-0 text-right text-[9.5px] font-bold tabular-nums text-brand-navy/75 sm:w-8 sm:text-[11px]">
                     {fillPct}%
                   </span>
                 </div>
@@ -195,18 +195,23 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
       </div>
 
       {/* Right: Compact Registration Status Donut */}
-      <div className="staff-surface-card flex flex-col rounded-[var(--radius-card)] p-3 sm:p-4 lg:col-span-5">
-        <div>
-          <h2 className="heading-card font-heading font-extrabold text-brand-navy">
-            Registration Status
-          </h2>
-          <p className="text-[11px] text-brand-navy/65 sm:text-xs">
-            Live pass breakdown across events
-          </p>
+      <div className="staff-surface-card flex flex-col rounded-[var(--radius-card)] p-2.5 sm:p-4 lg:col-span-5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="heading-card font-heading truncate font-extrabold text-brand-navy">
+              Registration Status
+            </h2>
+            <p className="hidden text-xs text-brand-navy/65 sm:block">
+              Live pass breakdown across events
+            </p>
+          </div>
+          <span className="font-code shrink-0 rounded-full bg-page px-2 py-0.5 text-[10px] font-bold text-brand-navy/70 sm:hidden">
+            {totalPasses} passes
+          </span>
         </div>
 
-        <div className="mt-3 flex flex-1 items-center justify-between gap-3 sm:mt-4 sm:gap-4">
-          <div className="relative h-24 w-24 shrink-0 sm:h-30 sm:w-30">
+        <div className="mt-2 flex flex-1 items-center justify-between gap-2.5 sm:mt-4 sm:gap-4">
+          <div className="relative h-16 w-16 shrink-0 sm:h-28 sm:w-28">
             <svg viewBox="0 0 120 120" className="h-full w-full" role="img" aria-label="Registration status donut chart">
               <circle
                 cx="60"
@@ -237,23 +242,23 @@ export function DashboardAnalyticsRow({ events, isLoading }: DashboardAnalyticsR
                 )}
             </svg>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="font-code text-base font-extrabold tabular-nums leading-none text-brand-navy sm:text-lg">
+              <span className="font-code text-xs font-extrabold tabular-nums leading-none text-brand-navy sm:text-lg">
                 {totalPasses}
               </span>
-              <span className="mt-0.5 text-[11px] font-bold text-brand-navy/60">Passes</span>
+              <span className="mt-0.5 hidden text-[11px] font-bold text-brand-navy/60 sm:block">Passes</span>
             </div>
           </div>
 
-          <dl className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+          <dl className="grid min-w-0 flex-1 grid-cols-2 gap-x-2 gap-y-1 sm:block sm:space-y-2">
             {segments.map((seg) => (
-              <div key={seg.key} className="flex items-center justify-between gap-2 text-xs">
-                <dt className="flex min-w-0 items-center gap-1.5 font-semibold text-brand-navy/85">
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${seg.dotClass}`} />
-                  <span className="truncate text-[11px] sm:text-xs">{seg.label}</span>
+              <div key={seg.key} className="flex items-center justify-between gap-1 text-[10.5px] sm:gap-2 sm:text-xs">
+                <dt className="flex min-w-0 items-center gap-1 font-semibold text-brand-navy/85 sm:gap-1.5">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full sm:h-2 sm:w-2 ${seg.dotClass}`} />
+                  <span className="truncate">{seg.label}</span>
                 </dt>
-                <dd className="font-code shrink-0 text-[11px] font-bold tabular-nums text-brand-navy sm:text-xs">
-                  {seg.count}{' '}
-                  <span className="font-semibold text-brand-navy/55">({seg.pct}%)</span>
+                <dd className="font-code shrink-0 font-bold tabular-nums text-brand-navy">
+                  {seg.count}
+                  <span className="hidden font-semibold text-brand-navy/55 sm:inline"> ({seg.pct}%)</span>
                 </dd>
               </div>
             ))}

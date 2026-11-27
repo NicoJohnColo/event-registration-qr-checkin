@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarCheck2, CheckCircle2, Clock, MapPin } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Clock, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -35,7 +35,7 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
       Waitlist
     </StatusBadge>
   ) : happeningToday ? (
-    <StatusBadge tone="blue" pulse icon={<CalendarCheck2 className="h-3.5 w-3.5" />}>
+    <StatusBadge tone="blue" pulse>
       Happening Today
     </StatusBadge>
   ) : (
@@ -54,12 +54,13 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
     >
       <div className={`h-1 w-full ${topAccentClass}`} aria-hidden="true" />
 
-      <div className="flex flex-1 flex-col justify-between p-3 sm:p-4">
+      <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-4">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
+          {/* Clean aligned header row: slim date + prefix on left, crisp status badge on right */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
               <div
-                className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[8px] border text-center ${
+                className={`hidden h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[8px] border text-center sm:flex ${
                   event.ended
                     ? 'border-slate-200 bg-slate-50 text-slate-600'
                     : 'border-brand-sky bg-sky-50/80 text-brand-navy'
@@ -73,10 +74,10 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-brand-navy/85">
+                <p className="truncate text-[11px] font-bold text-brand-primary sm:text-xs sm:text-brand-navy/85">
                   {formatCebuDate(event.startsAt)}
                 </p>
-                <p className="font-code mt-0.5 hidden text-[11px] font-semibold text-brand-navy/65 min-[360px]:block">
+                <p className="font-code hidden text-[11px] font-semibold text-brand-navy/65 sm:mt-0.5 sm:block">
                   Prefix: {event.codePrefix}
                 </p>
               </div>
@@ -84,31 +85,31 @@ export function EventCard({ event, animationDelayClass = '' }: EventCardProps) {
             <div className="shrink-0">{badge}</div>
           </div>
 
-          <Link to={`/events/${event.id}`} className="mt-2.5 block">
-            <h3 className="heading-card font-heading line-clamp-2 font-extrabold text-brand-navy transition-colors group-hover:text-brand-primary">
+          <Link to={`/events/${event.id}`} className="mt-1.5 block sm:mt-2.5">
+            <h3 className="heading-card font-heading line-clamp-1 font-extrabold text-brand-navy transition-colors group-hover:text-brand-primary sm:line-clamp-2">
               {event.title}
             </h3>
           </Link>
 
-          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-navy/75">
+          <p className="mt-0.5 line-clamp-1 text-[11px] leading-snug text-brand-navy/70 sm:mt-1 sm:line-clamp-2 sm:text-xs sm:leading-relaxed">
             {event.description}
           </p>
 
-          <dl className="mt-2.5 space-y-1 rounded-[8px] bg-page/85 px-2.5 py-1.5 text-[11px] text-brand-navy/85">
-            <div className="flex items-start gap-1.5">
-              <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-primary" />
-              <span className="min-w-0 flex-1 break-words font-semibold">
+          <dl className="mt-2 space-y-1 text-[10.5px] leading-snug text-brand-navy/80 sm:mt-2.5 sm:rounded-[8px] sm:bg-page/85 sm:px-2.5 sm:py-1.5 sm:text-[11px]">
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3 shrink-0 text-brand-primary sm:h-3.5 sm:w-3.5" />
+              <span className="min-w-0 flex-1 truncate font-semibold">
                 {formatCebuTimeRange(event.startsAt, event.endsAt)} · Cebu time
               </span>
             </div>
-            <div className="flex items-start gap-1.5">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-primary" />
-              <span className="min-w-0 flex-1 break-words font-semibold">{event.venue}</span>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 shrink-0 text-brand-primary sm:h-3.5 sm:w-3.5" />
+              <span className="min-w-0 flex-1 truncate font-semibold">{event.venue}</span>
             </div>
           </dl>
         </div>
 
-        <div className="mt-3 space-y-2.5 border-t border-border/70 pt-2.5">
+        <div className="mt-2.5 space-y-2 border-t border-border/70 pt-2 sm:mt-3 sm:space-y-2.5 sm:pt-2.5">
           <SpotsLeft event={event} compact />
 
           {event.ended ? (

@@ -1,15 +1,8 @@
 import { CalendarX2, ChevronLeft, ChevronRight } from 'lucide-react'
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type MouseEvent,
-  type PointerEvent,
-} from 'react'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
 import { EmptyState } from '../../../components/ui/EmptyState'
+import { useHorizontalCarousel } from '../../../lib/useHorizontalCarousel'
 import type { EventMetrics } from '../api'
 import { DashboardEventCard } from './DashboardEventCard'
 import type { DashboardViewMode } from './DashboardToolbar'
@@ -33,7 +26,7 @@ function DashboardCardSkeleton({ carousel = false }: { carousel?: boolean }) {
     <div
       className={`overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-card ${
         carousel
-          ? 'w-[84%] max-w-[325px] shrink-0 snap-start sm:w-[350px] sm:max-w-none lg:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]'
+          ? 'w-[68vw] max-w-[238px] shrink-0 snap-start sm:w-[330px] sm:max-w-none lg:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]'
           : ''
       }`}
     >
@@ -74,103 +67,19 @@ export function DashboardEventList({
   hasActiveFilters,
   onResetFilters,
 }: DashboardEventListProps) {
-  const trackRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef({ active: false, startX: 0, startScrollLeft: 0, moved: false })
-  const [dragging, setDragging] = useState(false)
-  const [canPrev, setCanPrev] = useState(false)
-  const [canNext, setCanNext] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  const syncCarouselState = useCallback(() => {
-    const el = trackRef.current
-    if (!el) return
-    const { scrollLeft, scrollWidth, clientWidth } = el
-    setCanPrev(scrollLeft > 4)
-    setCanNext(scrollLeft + clientWidth < scrollWidth - 4)
-
-    const firstCard = el.firstElementChild as HTMLElement | null
-    if (firstCard) {
-      const gap = window.innerWidth >= 768 ? 16 : 12
-      const step = firstCard.getBoundingClientRect().width + gap
-      if (step > 0) {
-        setActiveIndex(
-          Math.min(Math.max(events.length - 1, 0), Math.max(0, Math.round(scrollLeft / step))),
-        )
-      }
-    }
-  }, [events.length])
-
-  useEffect(() => {
-    if (viewMode !== 'carousel') return
-    syncCarouselState()
-    window.addEventListener('resize', syncCarouselState)
-    return () => window.removeEventListener('resize', syncCarouselState)
-  }, [viewMode, syncCarouselState, events.length])
-
-  // Snap back cleanly to the first slide when filtered list changes
-  useEffect(() => {
-    if (viewMode === 'carousel' && trackRef.current) {
-      trackRef.current.scrollTo({ left: 0 })
-      setActiveIndex(0)
-      syncCarouselState()
-    }
-  }, [events.length, viewMode, syncCarouselState])
-
-  const scrollByCard = (direction: -1 | 1) => {
-    const el = trackRef.current
-    if (!el) return
-    const firstCard = el.firstElementChild as HTMLElement | null
-    const gap = window.innerWidth >= 768 ? 16 : 12
-    const step = firstCard ? firstCard.getBoundingClientRect().width + gap : 320
-    el.scrollBy({ left: direction * step, behavior: 'smooth' })
-  }
-
-  const scrollToIndex = (index: number) => {
-    const el = trackRef.current
-    if (!el) return
-    const firstCard = el.firstElementChild as HTMLElement | null
-    const gap = window.innerWidth >= 768 ? 16 : 12
-    const step = firstCard ? firstCard.getBoundingClientRect().width + gap : 320
-    el.scrollTo({ left: index * step, behavior: 'smooth' })
-  }
-
-  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0 || !trackRef.current) return
-    dragRef.current = {
-      active: true,
-      startX: e.clientX,
-      startScrollLeft: trackRef.current.scrollLeft,
-      moved: false,
-    }
-    setDragging(true)
-  }
-
-  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!dragRef.current.active || !trackRef.current) return
-    const dx = e.clientX - dragRef.current.startX
-    if (Math.abs(dx) > 6) {
-      dragRef.current.moved = true
-    }
-    if (dragRef.current.moved) {
-      trackRef.current.scrollLeft = dragRef.current.startScrollLeft - dx
-    }
-  }
-
-  const endMouseDrag = () => {
-    if (!dragRef.current.active) return
-    dragRef.current.active = false
-    setDragging(false)
-    window.setTimeout(() => {
-      dragRef.current.moved = false
-    }, 0)
-  }
-
-  const handleClickCapture = (e: MouseEvent<HTMLDivElement>) => {
-    if (dragRef.current.moved) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
+  const {
+    trackRef,
+    dragging,
+    canPrev,
+    canNext,
+    activeIndex,
+    scrollByCard,
+    scrollToIndex,
+    trackProps,
+  } = useHorizontalCarousel({
+    itemCount: events.length,
+    isActive: viewMode === 'carousel',
+  })
 
   if (isLoading) {
     if (viewMode === 'carousel') {
@@ -271,15 +180,8 @@ export function DashboardEventList({
       {/* Horizontal Snap-Scroll Carousel Track (Mobile-first with peek of next card) */}
       <div
         ref={trackRef}
-        onScroll={syncCarouselState}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endMouseDrag}
-        onPointerCancel={endMouseDrag}
-        onPointerLeave={endMouseDrag}
-        onDragStart={(e) => e.preventDefault()}
-        onClickCapture={handleClickCapture}
-        className={`no-scrollbar flex gap-3 overflow-x-auto overscroll-x-contain pb-2 [scroll-padding-inline:2px] [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] md:gap-4 ${
+        {...trackProps}
+        className={`no-scrollbar flex gap-2.5 overflow-x-auto overscroll-x-contain pb-1 [scroll-padding-inline:2px] [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] sm:gap-3 sm:pb-1.5 md:gap-4 ${
           dragging
             ? 'cursor-grabbing snap-none select-none'
             : 'cursor-grab snap-x snap-mandatory'
@@ -288,7 +190,7 @@ export function DashboardEventList({
         {events.map((event, idx) => (
           <div
             key={event.eventId}
-            className="flex w-[84%] max-w-[325px] shrink-0 snap-start sm:w-[350px] sm:max-w-none lg:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]"
+            className="flex w-[68vw] max-w-[238px] shrink-0 snap-start sm:w-[330px] sm:max-w-none lg:w-[calc((100%-1rem)/2)] xl:w-[calc((100%-2rem)/3)]"
           >
             <DashboardEventCard
               event={event}
@@ -302,19 +204,19 @@ export function DashboardEventList({
 
       {/* Bottom Carousel Navigation Controls */}
       {events.length > 1 && (
-        <div className="mt-2.5 flex items-center justify-between gap-2.5">
+        <div className="mt-1.5 flex items-center justify-center gap-2.5 sm:mt-2 sm:justify-between">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
             disabled={!canPrev}
             aria-label="Previous event"
-            className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+            className="hidden h-8 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:inline-flex"
           >
-            <ChevronLeft className="h-4 w-4 shrink-0" />
-            <span className="hidden sm:inline">Prev</span>
+            <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
+            <span>Prev</span>
           </button>
 
-          <div className="flex items-center gap-1" role="tablist" aria-label="Dashboard event slides">
+          <div className="flex items-center gap-1.5" role="tablist" aria-label="Dashboard event slides">
             {events.map((ev, idx) => (
               <button
                 key={ev.eventId}
@@ -323,13 +225,13 @@ export function DashboardEventList({
                 aria-selected={idx === activeIndex}
                 aria-label={`View ${ev.title}`}
                 onClick={() => scrollToIndex(idx)}
-                className="inline-flex min-h-[40px] min-w-[26px] items-center justify-center px-1"
+                className="inline-flex h-6 min-w-[18px] items-center justify-center px-0.5 sm:h-8 sm:min-w-[24px] sm:px-1"
               >
                 <span
-                  className={`h-2 rounded-full transition-all duration-200 ${
+                  className={`h-1.5 rounded-full transition-all duration-200 sm:h-2 ${
                     idx === activeIndex
-                      ? 'w-5 bg-brand-primary'
-                      : 'w-2 bg-brand-navy/25 hover:bg-brand-navy/45'
+                      ? 'w-4 bg-brand-primary sm:w-5'
+                      : 'w-1.5 bg-brand-navy/25 hover:bg-brand-navy/45 sm:w-2'
                   }`}
                 />
               </button>
@@ -341,10 +243,10 @@ export function DashboardEventList({
             onClick={() => scrollByCard(1)}
             disabled={!canNext}
             aria-label="Next event"
-            className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+            className="hidden h-8 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:inline-flex"
           >
-            <span className="hidden sm:inline">Next</span>
-            <ChevronRight className="h-4 w-4 shrink-0" />
+            <span>Next</span>
+            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
           </button>
         </div>
       )}

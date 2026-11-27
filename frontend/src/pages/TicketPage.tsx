@@ -28,12 +28,12 @@ export function TicketPage() {
   }, [code, stateTicket])
 
   return (
-    <div className="page-container py-6 sm:py-8">
+    <div className="page-container py-4 sm:py-8">
       <div className={`mx-auto ${ticket ? 'max-w-3xl' : 'max-w-lg'}`}>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-4">
           <Link
             to="/events"
-            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-brand-primary hover:underline"
+            className="inline-flex min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-primary hover:underline sm:min-h-[44px] sm:text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>All Events</span>
@@ -41,7 +41,7 @@ export function TicketPage() {
 
           <Link
             to="/lookup"
-            className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold text-brand-navy/75 transition-colors hover:text-brand-primary"
+            className="inline-flex min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-navy/75 transition-colors hover:text-brand-primary sm:min-h-[44px] sm:text-sm"
           >
             <Search className="h-3.5 w-3.5" />
             <span>Find Another Ticket</span>

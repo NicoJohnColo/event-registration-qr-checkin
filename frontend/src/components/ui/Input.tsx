@@ -14,16 +14,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative flex items-center">
         {leftIcon && (
-          <span className="pointer-events-none absolute left-3 text-brand-navy/65">
+          <span className="pointer-events-none absolute left-2.5 text-brand-navy/65 sm:left-3">
             {leftIcon}
           </span>
         )}
         <input
           ref={ref}
           value={value}
-          className={`h-[var(--control-h)] min-h-[40px] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] text-base text-brand-navy placeholder:text-slate-500 transition-all duration-150 focus:outline-none focus:ring-3 sm:text-sm ${
-            leftIcon ? 'pl-9' : 'pl-3'
-          } ${showClear ? 'pr-9.5' : 'pr-3.5'} ${
+          className={`h-[var(--control-h)] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] text-[13px] text-brand-navy placeholder:text-slate-500 transition-all duration-150 focus:outline-none focus:ring-3 sm:text-sm ${
+            leftIcon ? 'pl-8 sm:pl-9' : 'pl-2.5 sm:pl-3'
+          } ${showClear ? 'pr-8.5 sm:pr-9.5' : 'pr-3 sm:pr-3.5'} ${
             hasError
               ? 'border-status-red focus:border-status-red focus:ring-status-red/15'
               : 'border-transparent focus:border-brand-primary focus:bg-white focus:ring-brand-primary/15'

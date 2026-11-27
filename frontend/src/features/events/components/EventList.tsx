@@ -222,7 +222,7 @@ export function EventList({
 
   if (layout === 'grid') {
     return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
         {sorted.map((event, idx) => (
           <EventCard
             key={event.id}
@@ -268,7 +268,7 @@ export function EventList({
         onPointerLeave={endMouseDrag}
         onDragStart={(e) => e.preventDefault()}
         onClickCapture={handleClickCapture}
-        className={`no-scrollbar flex gap-4 overflow-x-auto overscroll-x-contain pb-3 [scroll-padding-inline:clamp(16px,5vw,24px)] [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] md:gap-6 ${
+        className={`no-scrollbar flex gap-3 overflow-x-auto overscroll-x-contain pb-2 [scroll-padding-inline:clamp(12px,3.8vw,24px)] [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] sm:gap-4 sm:pb-3 md:gap-6 ${
           dragging
             ? 'cursor-grabbing snap-none select-none'
             : 'cursor-grab snap-x snap-mandatory'
@@ -277,7 +277,7 @@ export function EventList({
         {sorted.map((event, idx) => (
           <div
             key={event.id}
-            className="flex w-[85vw] max-w-[360px] shrink-0 snap-start sm:w-[340px] sm:max-w-none lg:w-[calc((100%-3rem)/3)]"
+            className="flex w-[74vw] max-w-[264px] shrink-0 snap-start sm:w-[340px] sm:max-w-none lg:w-[calc((100%-3rem)/3)] [&>*]:w-full"
           >
             <EventCard
               event={event}
@@ -287,18 +287,18 @@ export function EventList({
         ))}
       </div>
 
-      {/* Bottom Carousel Controls: centered row with 40px buttons & 40px dot hit areas (Mobile & Desktop) */}
+      {/* Carousel Controls: sleek centered dots on phones, Prev/Next + dots on >=sm */}
       {sorted.length > 1 && (
-        <div className="mt-2.5 flex items-center justify-between gap-2.5">
+        <div className="mt-1 flex items-center justify-center gap-2 sm:mt-2.5 sm:justify-between">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
             disabled={!canPrev}
             aria-label="Previous event"
-            className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+            className="hidden h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:inline-flex"
           >
             <ChevronLeft className="h-4 w-4 shrink-0" />
-            <span className="hidden sm:inline">Prev</span>
+            <span>Prev</span>
           </button>
 
           <div className="flex items-center gap-0.5" role="tablist" aria-label="Event slides">
@@ -310,13 +310,13 @@ export function EventList({
                 aria-selected={idx === activeIndex}
                 aria-label={`Go to ${ev.title}`}
                 onClick={() => scrollToIndex(idx)}
-                className="inline-flex min-h-[40px] min-w-[26px] items-center justify-center px-1"
+                className="inline-flex min-h-[24px] min-w-[20px] items-center justify-center px-0.5 sm:min-h-[40px] sm:min-w-[26px] sm:px-1"
               >
                 <span
-                  className={`h-2 rounded-full transition-all duration-200 ${
+                  className={`h-1.5 rounded-full transition-all duration-200 sm:h-2 ${
                     idx === activeIndex
                       ? 'w-5 bg-brand-primary'
-                      : 'w-2 bg-brand-navy/25 hover:bg-brand-navy/45'
+                      : 'w-1.5 bg-brand-navy/25 hover:bg-brand-navy/45 sm:w-2'
                   }`}
                 />
               </button>
@@ -328,9 +328,9 @@ export function EventList({
             onClick={() => scrollByCard(1)}
             disabled={!canNext}
             aria-label="Next event"
-            className="inline-flex h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+            className="hidden h-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-surface px-3 text-xs font-bold text-brand-navy shadow-xs transition-colors hover:border-brand-primary hover:text-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:inline-flex"
           >
-            <span className="hidden sm:inline">Next</span>
+            <span>Next</span>
             <ChevronRight className="h-4 w-4 shrink-0" />
           </button>
         </div>

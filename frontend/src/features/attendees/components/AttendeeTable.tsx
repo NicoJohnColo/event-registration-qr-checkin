@@ -86,17 +86,17 @@ export function AttendeeTable({
 
   return (
     <div>
-      {/* Desktop Table (≥768px): Name, Ticket, Contact, Status, Actions */}
+      {/* Desktop Table (≥768px): unified light header & compact rows matching Audit Logs */}
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full border-collapse text-left text-xs">
-          <thead className="bg-brand-navy text-xs font-bold uppercase tracking-wider text-white">
+          <thead className="border-b border-border bg-page/70 text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/65">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Ticket</th>
-              <th className="px-4 py-3">Phone &amp; Email</th>
-              <th className="px-4 py-3">Registered</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-3.5 py-2.5">Name</th>
+              <th className="px-3.5 py-2.5">Ticket</th>
+              <th className="px-3.5 py-2.5">Phone &amp; Email</th>
+              <th className="px-3.5 py-2.5">Registered</th>
+              <th className="px-3.5 py-2.5">Status</th>
+              <th className="px-3.5 py-2.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/70">
@@ -105,24 +105,26 @@ export function AttendeeTable({
               return (
                 <tr
                   key={row.id}
-                  className="odd:bg-surface even:bg-page/55 transition-colors hover:bg-sky-50/50"
+                  className="transition-colors odd:bg-surface even:bg-page/45 hover:bg-sky-50/45"
                 >
-                  <td className="px-4 py-3 text-sm font-bold text-brand-navy">{row.fullName}</td>
-                  <td className="px-4 py-3">
-                    <span className="font-code inline-block rounded-lg border border-brand-sky bg-sky-50 px-2.5 py-1 text-xs font-bold tracking-wider text-brand-navy">
+                  <td className="px-3.5 py-2.5 text-[13px] font-bold text-brand-navy">
+                    {row.fullName}
+                  </td>
+                  <td className="px-3.5 py-2.5">
+                    <span className="font-code inline-block rounded-md border border-brand-sky bg-sky-50 px-2 py-0.5 text-[11px] font-bold tracking-wider text-brand-navy">
                       {row.ticketCode}
                     </span>
                   </td>
-                  <td className="max-w-[240px] px-4 py-3">
+                  <td className="max-w-[240px] px-3.5 py-2.5">
                     <div className="font-code text-xs font-semibold text-brand-navy/85">
                       {row.mobile}
                     </div>
                     <div className="mt-0.5 break-words text-xs text-brand-navy/75">{row.email}</div>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-brand-navy/75">
+                  <td className="whitespace-nowrap px-3.5 py-2.5 text-xs text-brand-navy/75">
                     {formatCebuDateTime(row.registeredAt)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3.5 py-2.5">
                     <div className="flex flex-col items-start gap-1">
                       <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
                       {row.status === 'CHECKED_IN' && row.checkedInAt && (
@@ -139,7 +141,7 @@ export function AttendeeTable({
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-3.5 py-2.5 text-right">
                     <div className="inline-flex justify-end">
                       <AttendeeRowActions
                         row={row}
@@ -159,7 +161,7 @@ export function AttendeeTable({
         </table>
       </div>
 
-      {/* Deterministic Mobile Card List (<768px) */}
+      {/* Compact Mobile Card List (<768px) */}
       <ul className="divide-y divide-border/80 md:hidden">
         {visibleRows.map((row) => {
           const badge = getRowStatusBadge(row)
@@ -168,9 +170,9 @@ export function AttendeeTable({
             (isOrganizer && (row.status === 'CONFIRMED' || row.status === 'WAITLISTED'))
 
           return (
-            <li key={row.id} className="grid grid-cols-1 gap-1 px-3 py-3">
+            <li key={row.id} className="space-y-1 px-2.5 py-2.5">
               <div className="flex min-w-0 items-center justify-between gap-2">
-                <p className="min-w-0 truncate font-heading text-sm font-extrabold text-brand-navy">
+                <p className="min-w-0 truncate font-heading text-xs font-extrabold text-brand-navy">
                   {row.fullName}
                 </p>
                 <div className="shrink-0">
@@ -178,8 +180,8 @@ export function AttendeeTable({
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                <span className="font-code inline-block max-w-full rounded border border-brand-sky bg-sky-50 px-1.5 py-0.5 font-bold tracking-wider text-brand-navy">
+              <div className="flex flex-wrap items-center gap-1.5 text-[10.5px]">
+                <span className="font-code inline-block rounded border border-brand-sky bg-sky-50 px-1.5 py-0.5 font-bold tracking-wider text-brand-navy">
                   {row.ticketCode}
                 </span>
                 <span className="font-code font-semibold text-brand-navy/80">{row.mobile}</span>
@@ -195,28 +197,28 @@ export function AttendeeTable({
                 )}
               </div>
 
-              <p className="min-w-0 truncate break-words text-[11px] text-brand-navy/75">
-                {row.email}
-              </p>
-
-              <p className="text-[11px] text-brand-navy/60">
-                Registered {formatCebuDateTime(row.registeredAt)}
-              </p>
-
-              {hasMobileAction && (
-                <div className="mt-1.5">
-                  <AttendeeRowActions
-                    row={row}
-                    isOrganizer={isOrganizer}
-                    mutatingId={mutatingId}
-                    confirmCancelId={confirmCancelId}
-                    compactMobile
-                    onRequestCancel={onRequestCancel}
-                    onConfirmCancel={onConfirmCancel}
-                    onUndoCheckIn={onUndoCheckIn}
-                  />
+              <div className="flex items-center justify-between gap-2 pt-0.5">
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] text-brand-navy/75">{row.email}</p>
+                  <p className="text-[10px] text-brand-navy/55">
+                    Reg {formatCebuDateTime(row.registeredAt)}
+                  </p>
                 </div>
-              )}
+                {hasMobileAction && (
+                  <div className="shrink-0">
+                    <AttendeeRowActions
+                      row={row}
+                      isOrganizer={isOrganizer}
+                      mutatingId={mutatingId}
+                      confirmCancelId={confirmCancelId}
+                      compactMobile
+                      onRequestCancel={onRequestCancel}
+                      onConfirmCancel={onConfirmCancel}
+                      onUndoCheckIn={onUndoCheckIn}
+                    />
+                  </div>
+                )}
+              </div>
             </li>
           )
         })}
@@ -224,7 +226,7 @@ export function AttendeeTable({
 
       {/* Pagination Footer */}
       {attendees.length > PAGE_SIZE && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/80 bg-page/55 px-3 py-2 text-xs">
+        <div className="flex items-center justify-between gap-2 border-t border-border/80 bg-page/55 px-3 py-2 text-[11px] sm:text-xs">
           <span className="font-semibold text-brand-navy/75">
             {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, attendees.length)} of{' '}
             {attendees.length}
@@ -234,19 +236,19 @@ export function AttendeeTable({
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={safePage <= 1}
-              className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-border bg-surface px-2 text-[11px] font-bold text-brand-navy transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-7 items-center gap-0.5 rounded-[6px] border border-border bg-surface px-2 text-[11px] font-bold text-brand-navy transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:rounded-[8px]"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               <span>Prev</span>
             </button>
             <span className="px-1.5 text-[11px] font-bold tabular-nums text-brand-navy/80">
-              {safePage} / {totalPages}
+              {safePage}/{totalPages}
             </span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage >= totalPages}
-              className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-border bg-surface px-2 text-[11px] font-bold text-brand-navy transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-7 items-center gap-0.5 rounded-[6px] border border-border bg-surface px-2 text-[11px] font-bold text-brand-navy transition-colors hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-40 sm:h-8 sm:rounded-[8px]"
             >
               <span>Next</span>
               <ChevronRight className="h-3.5 w-3.5" />

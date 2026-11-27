@@ -281,7 +281,7 @@ export function StaffLayout() {
                 onClick={() => setMobileSidebarOpen(true)}
                 aria-label="Open staff sidebar"
                 aria-expanded={mobileSidebarOpen}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-brand-sky bg-sky-50/75 text-brand-primary transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-brand-sky bg-sky-50/75 text-brand-primary transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
               >
                 <PanelLeft className="h-4 w-4" />
               </button>
