@@ -139,7 +139,7 @@ export function StaffLayout() {
   )
 
   return (
-    <div className="bg-staff-canvas flex min-h-dvh flex-col text-brand-navy">
+    <div className="bg-staff-canvas flex min-h-svh flex-col overflow-x-clip text-brand-navy">
       {/* Fixed Static Left Sidebar on Tablet / Desktop (>= 768px) */}
       <aside
         className="bg-sidebar-sky fixed inset-y-0 left-0 z-30 hidden w-[236px] flex-col border-r border-brand-sky/75 shadow-[4px_0_24px_-12px_rgba(25,81,252,0.12)] md:flex"
@@ -231,7 +231,7 @@ export function StaffLayout() {
       {/* Main Content Shell */}
       <div className="flex min-w-0 flex-1 flex-col md:pl-[236px]">
         {/* Fixed Desktop Header (>= 768px) */}
-        <header className="fixed top-0 right-0 z-20 hidden h-[60px] items-center justify-between gap-4 border-b border-brand-sky/75 bg-white/92 px-5 backdrop-blur-xl md:left-[236px] md:flex lg:px-7">
+        <header className="fixed top-0 right-0 z-20 hidden h-[60px] items-center justify-between gap-4 border-b border-brand-sky/75 bg-white/92 px-5 backdrop-blur-xl [transform:translate3d(0,0,0)] [backface-visibility:hidden] md:left-[236px] md:flex lg:px-7">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-sky bg-sky-50/90 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-brand-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" aria-hidden="true" />
@@ -273,7 +273,7 @@ export function StaffLayout() {
         </header>
 
         {/* Fixed Compact Mobile Header (< 768px) with Left Sidebar Toggle */}
-        <header className="fixed top-0 inset-x-0 z-30 border-b border-brand-sky/75 bg-white/95 text-brand-navy backdrop-blur-xl md:hidden">
+        <header className="fixed top-0 inset-x-0 z-30 border-b border-brand-sky/75 bg-white/95 text-brand-navy backdrop-blur-xl [transform:translate3d(0,0,0)] [backface-visibility:hidden] md:hidden">
           <div className="page-container flex h-[var(--header-h)] items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <button
@@ -312,7 +312,7 @@ export function StaffLayout() {
         {/* Main Workspace */}
         <main
           key={pathname}
-          className="animate-page-in relative min-w-0 flex-1 pt-[var(--header-h)] pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-8"
+          className="animate-page-in relative min-w-0 flex-1 pt-[var(--header-h)] pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pt-[60px] md:pb-8"
         >
           <Outlet />
         </main>

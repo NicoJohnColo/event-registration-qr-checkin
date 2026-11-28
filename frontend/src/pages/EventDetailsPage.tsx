@@ -55,11 +55,11 @@ export function EventDetailsPage() {
   const happeningToday = !event.ended && isTodayInManila(event.startsAt, event.endsAt)
 
   return (
-    <div className="page-container py-3.5 sm:py-8">
-      <div className="mb-2 sm:mb-3">
+    <div className="page-container py-2.5 sm:py-8">
+      <div className="mb-1.5 sm:mb-3">
         <Link
           to="/events"
-          className="inline-flex h-8 items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:text-sm"
+          className="inline-flex h-7 items-center gap-1 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:gap-1.5 sm:text-sm"
         >
           <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span>All Events</span>
@@ -69,7 +69,7 @@ export function EventDetailsPage() {
       {/* Unified Master Event Card */}
       <article className="animate-rise overflow-hidden rounded-[var(--radius-card)] border border-brand-sky/80 bg-surface shadow-dock">
         {/* Card Banner Header */}
-        <header className="relative overflow-hidden bg-hero-blue px-3 py-3 text-white sm:px-6 sm:py-6">
+        <header className="relative overflow-hidden bg-hero-blue px-3 py-2.5 text-white sm:px-6 sm:py-6">
           <div className="bg-hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
 
           <div className="relative flex items-start justify-between gap-6">
@@ -93,20 +93,20 @@ export function EventDetailsPage() {
                   </StatusBadge>
                 )}
 
-                <span className="font-code rounded-full border border-white/25 bg-white/12 px-2.5 py-0.5 text-[11px] font-semibold text-brand-sky backdrop-blur-sm">
+                <span className="font-code rounded-full border border-white/25 bg-white/12 px-2.5 py-0.5 text-xs font-semibold text-brand-sky backdrop-blur-sm">
                   Prefix: {event.codePrefix}
                 </span>
 
-                <span className="rounded-full border border-white/25 bg-white/12 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                <span className="rounded-full border border-white/25 bg-white/12 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
                   Free Admission
                 </span>
               </div>
 
-              <h1 className="heading-hero mt-2.5 font-heading font-extrabold text-white">
+              <h1 className="heading-hero mt-2 font-heading font-extrabold text-white sm:mt-2.5">
                 {event.title}
               </h1>
 
-              <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs font-medium text-brand-sky/95">
+              <div className="mt-2 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-xs font-medium text-brand-sky/95 sm:mt-2.5 sm:text-sm">
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-cyan" />
                   <span>{formatCebuDate(event.startsAt)}</span>
@@ -129,58 +129,58 @@ export function EventDetailsPage() {
         {/* Split Card Body */}
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Left Wing: Schedule Strip (shown on >=sm to avoid duplicating header strip on mobile) + About + Door Check-In */}
-          <div className="space-y-3 p-3 sm:space-y-4 sm:p-6 lg:col-span-7">
+          <div className="space-y-3 p-3.5 sm:space-y-4 sm:p-6 lg:col-span-7">
             <div className="hidden grid-cols-1 divide-y divide-border/80 rounded-[var(--radius-card)] border border-border/80 bg-page sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               <div className="p-3">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand-primary">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
                   <span>Date in Cebu</span>
                 </div>
-                <p className="mt-0.5 text-xs font-bold text-brand-navy">
+                <p className="mt-0.5 text-sm font-bold text-brand-navy">
                   {formatCebuDate(event.startsAt)}
                 </p>
               </div>
 
               <div className="p-3">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand-primary">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary">
                   <Clock className="h-3.5 w-3.5 shrink-0" />
                   <span>Time (12h PHT)</span>
                 </div>
-                <p className="mt-0.5 text-xs font-bold text-brand-navy">
+                <p className="mt-0.5 text-sm font-bold text-brand-navy">
                   {formatCebuTimeRange(event.startsAt, event.endsAt)}
                 </p>
               </div>
 
               <div className="p-3">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand-primary">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   <span>Venue</span>
                 </div>
-                <p className="mt-0.5 text-xs font-bold text-brand-navy">{event.venue}</p>
+                <p className="mt-0.5 text-sm font-bold text-brand-navy">{event.venue}</p>
               </div>
             </div>
 
             <div>
-              <h2 className="heading-card font-heading font-bold text-brand-navy">
+              <h2 className="heading-card font-heading font-extrabold text-brand-navy">
                 About this event
               </h2>
-              <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-brand-navy/80 sm:text-sm">
+              <p className="text-body mt-1.5 whitespace-pre-line text-brand-navy/80">
                 {event.description}
               </p>
             </div>
 
-            <div className="border-t border-border/80 pt-4">
-              <h2 className="font-heading text-sm font-bold text-brand-navy">
+            <div className="border-t border-border/80 pt-3 sm:pt-4">
+              <h2 className="heading-card font-heading font-extrabold text-brand-navy">
                 What to expect at the door
               </h2>
-              <ul className="mt-2.5 space-y-2.5 text-xs text-brand-navy/80">
+              <ul className="mt-2.5 space-y-2.5 text-xs text-brand-navy/80 sm:text-sm">
                 <li className="flex items-start gap-2.5">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-brand-primary">
                     <QrCode className="h-3.5 w-3.5" />
                   </div>
                   <div>
                     <p className="font-bold text-brand-navy">Mobile QR Ticket</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/70">
+                    <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
                       Show your QR code or ticket code ({event.codePrefix}-XXXXXX) on your phone
                       screen at check-in.
                     </p>
@@ -192,7 +192,7 @@ export function EventDetailsPage() {
                   </div>
                   <div>
                     <p className="font-bold text-brand-navy">Event-Day Verification</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/70">
+                    <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
                       Door check-in opens on {formatCebuDate(event.startsAt)} (Asia/Manila time).
                       Each ticket checks in once.
                     </p>
@@ -203,19 +203,19 @@ export function EventDetailsPage() {
           </div>
 
           {/* Right Wing: Integrated Registration Stub */}
-          <aside className="flex flex-col justify-between gap-3 border-t border-dashed border-border bg-page/75 p-3 sm:gap-4 sm:p-6 lg:col-span-5 lg:border-l lg:border-t-0">
+          <aside className="flex flex-col justify-between gap-3 border-t border-dashed border-border bg-page/75 p-3.5 sm:gap-4 sm:p-6 lg:col-span-5 lg:border-l lg:border-t-0">
             <div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-brand-primary sm:text-[11px]">
+                <span className="section-eyebrow">
                   Registration Pass
                 </span>
-                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10.5px] font-bold text-brand-navy sm:px-2.5 sm:text-[11px]">
+                <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-bold text-brand-navy">
                   Free
                 </span>
               </div>
 
-              <div className="mt-2.5 rounded-[var(--radius-card)] border border-border/80 bg-surface p-2.5 shadow-xs sm:mt-3 sm:p-3">
-                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-brand-navy/75 sm:mb-2 sm:text-xs">
+              <div className="mt-2.5 rounded-[var(--radius-card)] border border-border/80 bg-surface p-3 shadow-xs sm:mt-3">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-brand-navy/75 sm:mb-2 sm:text-sm">
                   <Users className="h-3.5 w-3.5 text-brand-primary" />
                   <span>
                     {event.registeredCount} registered · {event.capacity} max capacity
@@ -224,7 +224,7 @@ export function EventDetailsPage() {
                 <SpotsLeft event={event} compact />
               </div>
 
-              <div className="ticket-notch-light my-3 sm:my-4" />
+              <div className="ticket-notch-light my-2 sm:my-4" />
 
               <div className="space-y-2 sm:space-y-2.5">
                 {event.ended ? (
@@ -255,7 +255,7 @@ export function EventDetailsPage() {
               </div>
             </div>
 
-            <div className="border-t border-border/80 pt-3 text-center sm:pt-4">
+            <div className="border-t border-border/80 pt-2 text-center sm:pt-4">
               <Link
                 to="/lookup"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover hover:underline"

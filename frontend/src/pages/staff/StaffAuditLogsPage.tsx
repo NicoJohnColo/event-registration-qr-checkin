@@ -107,7 +107,7 @@ export function StaffAuditLogsPage() {
   const hasFilter = search.trim().length > 0 || category !== 'all'
 
   return (
-    <div className="page-container animate-rise space-y-2.5 py-3 sm:space-y-4 sm:py-5">
+    <div className="page-container animate-rise space-y-2 py-2 sm:space-y-4 sm:py-5">
       {/* Compact Aligned Header with Top-Right Sync */}
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2">
@@ -116,7 +116,7 @@ export function StaffAuditLogsPage() {
               Security &amp; Oversight
             </StatusBadge>
             {!isLoading && (
-              <span className="rounded-full border border-border bg-white/90 px-2 py-0.5 text-[10.5px] font-bold text-brand-navy/75 sm:text-[11px]">
+              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-xs font-bold text-brand-navy/75">
                 {logs.length} {logs.length === 1 ? 'entry' : 'entries'}
               </span>
             )}
@@ -137,13 +137,13 @@ export function StaffAuditLogsPage() {
         <h1 className="heading-hero font-heading font-extrabold text-brand-navy">
           Audit Logs
         </h1>
-        <p className="section-subtitle">
+        <p className="section-subtitle hidden sm:block">
           Traceable record of event updates, waitlist promotions, check-ins, undos, and cancellations in Cebu time.
         </p>
       </div>
 
       {/* Filter & Search Toolbar */}
-      <div className="staff-surface-card space-y-2 rounded-[var(--radius-card)] p-2.5 sm:p-3.5">
+      <div className="staff-surface-card space-y-1.5 rounded-[var(--radius-card)] p-2 sm:space-y-2 sm:p-3.5">
         <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 flex-1">
             <Input
@@ -281,7 +281,7 @@ export function StaffAuditLogsPage() {
                 const actionBadge = getActionBadge(entry.action)
                 const roleBadge = getRoleBadge(entry.performedByRole)
                 return (
-                  <li key={entry.id} className="space-y-1 p-2.5 text-[11px]">
+                  <li key={entry.id} className="space-y-0.5 p-2 text-[11px]">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <StatusBadge tone={actionBadge.tone}>{actionBadge.label}</StatusBadge>
                       <span className="font-code text-[10px] text-brand-navy/60">
@@ -307,7 +307,7 @@ export function StaffAuditLogsPage() {
 
             {/* Pagination Footer */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border/75 bg-page/45 px-3 py-2 text-[11px] sm:px-4 sm:text-xs">
+              <div className="flex items-center justify-between border-t border-border/75 bg-page/45 px-2.5 py-1.5 text-[11px] sm:px-4 sm:py-2 sm:text-xs">
                 <span className="font-semibold text-brand-navy/70">
                   Page <strong className="text-brand-navy">{safePage}</strong> of{' '}
                   <strong className="text-brand-navy">{totalPages}</strong>

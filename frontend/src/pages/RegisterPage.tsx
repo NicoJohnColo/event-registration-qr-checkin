@@ -42,17 +42,17 @@ export function RegisterPage() {
 
   return (
     <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 py-3.5 sm:py-6">
+      <section className="bg-sky-header border-b border-brand-sky/80 py-2.5 sm:py-6">
         <div className="page-container flex items-start justify-between gap-4">
           <div className="min-w-0">
             <Link
               to={`/events/${event.id}`}
-              className="inline-flex h-8 min-h-[32px] items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:text-sm"
+              className="inline-flex h-7 items-center gap-1 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:gap-1.5 sm:text-sm"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>Back to event details</span>
             </Link>
-            <p className="section-eyebrow mt-1">
+            <p className="section-eyebrow mt-0.5 sm:mt-1">
               {event.full && !event.ended ? 'Waitlist Registration' : 'Free Event Registration'}
             </p>
             <h1 className="heading-hero mt-0.5 font-heading font-extrabold text-brand-navy">
@@ -63,30 +63,30 @@ export function RegisterPage() {
         </div>
       </section>
 
-      <section className="page-container grid grid-cols-1 gap-3 py-3.5 sm:gap-6 sm:py-8 lg:grid-cols-12">
+      <section className="page-container grid grid-cols-1 gap-3 py-3 sm:gap-6 sm:py-8 lg:grid-cols-12">
         {/* Mobile Compact Event Context Strip (above the form so guests never scroll past submit to verify event details) */}
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-2.5 shadow-card lg:hidden">
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] font-semibold text-brand-navy/85">
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="h-3 w-3 shrink-0 text-brand-primary" />
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-3 shadow-card lg:hidden">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs font-semibold text-brand-navy/85">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
               <span>{formatCebuDate(event.startsAt)}</span>
             </span>
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3 shrink-0 text-brand-primary" />
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
               <span>{formatCebuTimeRange(event.startsAt, event.endsAt)}</span>
             </span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3 w-3 shrink-0 text-brand-primary" />
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
               <span>{event.venue}</span>
             </span>
           </div>
-          <div className="mt-2 border-t border-border/70 pt-1.5">
+          <div className="mt-2 border-t border-border/70 pt-2">
             <SpotsLeft event={event} compact />
           </div>
         </div>
 
         <div className="lg:col-span-7">
-          <div className="animate-rise rounded-[var(--radius-card)] border border-border bg-surface p-3 shadow-card sm:p-5">
+          <div className="animate-rise rounded-[var(--radius-card)] border border-border bg-surface p-[var(--card-pad)] shadow-card sm:p-5">
             <h2 className="heading-card font-heading font-extrabold text-brand-navy">
               Attendee Details
             </h2>
@@ -94,7 +94,7 @@ export function RegisterPage() {
               One registration per email for this event. Your ticket code is generated immediately.
             </p>
 
-            <div className="mt-4">
+            <div className="mt-2.5 sm:mt-4">
               {event.ended ? (
                 <div className="space-y-4">
                   <Alert tone="info" title="Event has ended">

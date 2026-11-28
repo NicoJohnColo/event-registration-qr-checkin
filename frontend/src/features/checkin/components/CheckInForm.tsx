@@ -95,7 +95,7 @@ export function CheckInForm({
           {localError}
         </p>
       ) : (
-        <p className="text-[10.5px] leading-snug text-brand-navy/65 sm:text-xs">
+        <p className="hidden text-xs leading-snug text-brand-navy/65 sm:block">
           Enter code manually or scan QR pass cleanly. Press Enter to verify.
         </p>
       )}

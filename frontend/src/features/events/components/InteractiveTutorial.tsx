@@ -92,15 +92,18 @@ export function InteractiveTutorial() {
   }
 
   return (
-    <section id="tutorial" className="scroll-mt-16 border-y border-border bg-white py-7 sm:py-11">
+    <section
+      id="tutorial"
+      className="screen-section scroll-mt-[var(--header-h)] border-y border-border bg-white py-3 sm:py-8"
+    >
       <div className="page-container">
         {/* Centered Header matching reference walkthrough style */}
         <div className="mx-auto max-w-lg text-center">
           <p className="section-eyebrow">How It Works</p>
-          <h2 className="heading-section mt-1 font-heading font-extrabold text-brand-navy">
+          <h2 className="heading-section mt-0.5 font-heading font-extrabold text-brand-navy sm:mt-1">
             See EventRegister in action
           </h2>
-          <p className="section-subtitle mt-1">
+          <p className="section-subtitle mt-0.5 sm:mt-1">
             Interactive walkthrough of the {steps.length} core stages.
           </p>
 
@@ -114,7 +117,7 @@ export function InteractiveTutorial() {
               role="tab"
               aria-selected={role === 'attendee'}
               onClick={() => handleRoleChange('attendee')}
-              className={`inline-flex h-7 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition-colors sm:h-7.5 sm:px-3.5 sm:text-xs ${
+              className={`inline-flex h-8.5 items-center justify-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-colors ${
                 role === 'attendee'
                   ? 'bg-white text-brand-primary shadow-2xs ring-1 ring-brand-sky'
                   : 'text-brand-navy/70 hover:text-brand-navy'
@@ -128,7 +131,7 @@ export function InteractiveTutorial() {
               role="tab"
               aria-selected={role === 'staff'}
               onClick={() => handleRoleChange('staff')}
-              className={`inline-flex h-7 items-center justify-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition-colors sm:h-7.5 sm:px-3.5 sm:text-xs ${
+              className={`inline-flex h-8.5 items-center justify-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-colors ${
                 role === 'staff'
                   ? 'bg-white text-brand-primary shadow-2xs ring-1 ring-brand-sky'
                   : 'text-brand-navy/70 hover:text-brand-navy'
@@ -141,9 +144,9 @@ export function InteractiveTutorial() {
         </div>
 
         {/* Single Centered Clean Walkthrough Card */}
-        <article className="mx-auto mt-5 max-w-[540px] overflow-hidden rounded-[16px] border border-border/90 bg-white shadow-card sm:mt-6">
+        <article className="mx-auto mt-4 max-w-[540px] overflow-hidden rounded-[var(--radius-card)] border border-border/90 bg-white shadow-card sm:mt-6 sm:rounded-[16px]">
           {/* Top Tinted Preview Canvas (uniform fixed height across all steps so nothing shifts) */}
-          <div className="flex h-[176px] items-center justify-center border-b border-border/75 bg-gradient-to-br from-[#F6F9FF] via-[#EEF4FF] to-[#E6F0FF] p-3.5 sm:h-[208px] sm:p-5">
+          <div className="flex h-[172px] items-center justify-center border-b border-border/75 bg-gradient-to-br from-[#F6F9FF] via-[#EEF4FF] to-[#E6F0FF] p-3.5 sm:h-[214px] sm:p-5">
             <div key={`${role}-${step}`} className="animate-soft-fade w-full">
               {role === 'attendee' ? <AttendeeScene step={step} /> : <StaffScene step={step} />}
             </div>
@@ -157,11 +160,11 @@ export function InteractiveTutorial() {
             <h3 className="font-heading mt-1 text-base font-extrabold text-brand-navy sm:text-lg">
               {current.title}
             </h3>
-            <p className="mt-1 min-h-[54px] text-xs leading-relaxed text-brand-navy/75 sm:min-h-[42px] sm:text-[13px]">
+            <p className="mt-1 min-h-[44px] text-[13px] leading-relaxed text-brand-navy/75 sm:text-sm">
               {current.description}
             </p>
 
-            <div className="mt-4 flex items-center justify-between gap-2 pt-1">
+            <div className="mt-3.5 flex items-center justify-between gap-2 pt-0.5 sm:mt-4 sm:pt-1">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1" role="tablist" aria-label="Walkthrough steps">
                   {steps.map((item, idx) => {
@@ -202,7 +205,7 @@ export function InteractiveTutorial() {
                   type="button"
                   onClick={() => setPlaying((prev) => !prev)}
                   aria-label={playing ? 'Pause walkthrough animation' : 'Play walkthrough animation'}
-                  className="inline-flex h-6 items-center gap-1 rounded-full border border-border/80 bg-page px-2 text-[10px] font-bold text-brand-navy/75 transition-colors hover:border-brand-primary/40 hover:text-brand-primary"
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-border/80 bg-page px-2.5 text-[11px] font-bold text-brand-navy/75 transition-colors hover:border-brand-primary/40 hover:text-brand-primary"
                 >
                   {playing ? (
                     <>
@@ -248,33 +251,33 @@ function AttendeeScene({ step }: { step: number }) {
   if (step === 0) {
     return (
       <div className="grid grid-cols-12 items-center gap-2 sm:gap-3">
-        <div className="animate-chip-in col-span-6 rounded-xl border border-border/80 bg-white p-2.5 shadow-2xs sm:p-3">
-          <p className="text-[9.5px] font-bold uppercase tracking-wider text-brand-navy/50 sm:text-[10px]">
+        <div className="animate-chip-in col-span-6 rounded-xl border border-border/80 bg-white p-3 shadow-2xs sm:p-3.5">
+          <p className="text-[10.5px] font-bold uppercase tracking-wider text-brand-navy/55 sm:text-[11px]">
             Published Event
           </p>
-          <p className="mt-1 truncate text-xs font-extrabold text-brand-navy sm:text-[13px]">
+          <p className="mt-1 truncate text-[13px] font-extrabold text-brand-navy sm:text-sm">
             Cebu Dev Meetup
           </p>
-          <p className="mt-1 text-[10.5px] text-brand-navy/70 sm:text-xs">8:00 AM · Ayala Cebu</p>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <p className="mt-1 text-[11.5px] text-brand-navy/75 sm:text-xs">8:00 AM · Ayala Cebu</p>
+          <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
             <div className="h-full w-1/4 rounded-full bg-gradient-to-r from-brand-primary to-brand-cyan transition-all duration-500" />
           </div>
         </div>
 
         <div className="col-span-1 flex justify-center text-brand-primary">
-          <ArrowRight className="animate-nudge h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <ArrowRight className="animate-nudge h-4 w-4" />
         </div>
 
-        <div className="col-span-5 space-y-1.5">
-          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+        <div className="col-span-5 space-y-2">
+          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-primary" />
             <span className="truncate">27 spots left</span>
           </div>
-          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-status-green" />
             <span className="truncate">Free · Instant</span>
           </div>
-          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-navy" />
             <span className="font-code truncate">Prefix: CDM</span>
           </div>
@@ -286,33 +289,33 @@ function AttendeeScene({ step }: { step: number }) {
   if (step === 1) {
     return (
       <div className="grid grid-cols-12 items-center gap-2 sm:gap-3">
-        <div className="animate-chip-in col-span-6 space-y-1.5 rounded-xl border border-border/80 bg-white p-2.5 shadow-2xs sm:p-3">
-          <p className="text-[9.5px] font-bold uppercase tracking-wider text-brand-navy/50 sm:text-[10px]">
+        <div className="animate-chip-in col-span-6 space-y-2 rounded-xl border border-border/80 bg-white p-3 shadow-2xs sm:p-3.5">
+          <p className="text-[10.5px] font-bold uppercase tracking-wider text-brand-navy/55 sm:text-[11px]">
             Attendee Form
           </p>
-          <p className="truncate text-[11px] font-bold text-brand-navy sm:text-xs">Juan Dela Cruz</p>
-          <span className="animate-highlight inline-block max-w-full truncate rounded px-1.5 py-0.5 text-[10px] font-semibold text-brand-primary sm:text-[11px]">
+          <p className="truncate text-xs font-bold text-brand-navy sm:text-[13px]">Juan Dela Cruz</p>
+          <span className="animate-highlight inline-block max-w-full truncate rounded px-1.5 py-0.5 text-[11px] font-semibold text-brand-primary sm:text-xs">
             juan@example.com
           </span>
-          <p className="font-code text-[10.5px] font-bold text-brand-navy/80 sm:text-xs">
+          <p className="font-code text-[11.5px] font-bold text-brand-navy/80 sm:text-xs">
             09171234567
           </p>
         </div>
 
         <div className="col-span-1 flex justify-center text-brand-primary">
-          <ArrowRight className="animate-nudge h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <ArrowRight className="animate-nudge h-4 w-4" />
         </div>
 
-        <div className="col-span-5 space-y-1.5">
-          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+        <div className="col-span-5 space-y-2">
+          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-status-green" />
             <span className="truncate">Unique Email</span>
           </div>
-          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-primary" />
             <span className="truncate">09XX Validated</span>
           </div>
-          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-navy" />
             <span className="truncate">Seat Reserved</span>
           </div>
@@ -384,29 +387,29 @@ function StaffScene({ step }: { step: number }) {
   if (step === 0) {
     return (
       <div className="grid grid-cols-12 items-center gap-2 sm:gap-3">
-        <div className="animate-chip-in col-span-6 space-y-1.5 rounded-xl border border-border/80 bg-white p-2.5 shadow-2xs sm:p-3">
-          <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-wider text-brand-navy/50 sm:text-[10px]">
-            <Lock className="h-3 w-3 text-brand-primary" />
+        <div className="animate-chip-in col-span-6 space-y-2 rounded-xl border border-border/80 bg-white p-3 shadow-2xs sm:p-3.5">
+          <div className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-brand-navy/55 sm:text-[11px]">
+            <Lock className="h-3.5 w-3.5 text-brand-primary" />
             <span>Staff Sign-In</span>
           </div>
-          <p className="font-code text-xs font-bold text-brand-navy">organizer</p>
-          <p className="font-code text-[10.5px] tracking-widest text-brand-navy/60">••••••••••</p>
+          <p className="font-code text-[13px] font-bold text-brand-navy">organizer</p>
+          <p className="font-code text-xs tracking-widest text-brand-navy/60">••••••••••</p>
         </div>
 
         <div className="col-span-1 flex justify-center text-brand-primary">
-          <ArrowRight className="animate-nudge h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <ArrowRight className="animate-nudge h-4 w-4" />
         </div>
 
-        <div className="col-span-5 space-y-1.5">
-          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+        <div className="col-span-5 space-y-2">
+          <div className="animate-chip-in delay-75 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-status-green" />
             <span className="truncate">BCrypt Checked</span>
           </div>
-          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-150 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-primary" />
             <span className="truncate">JWT Session</span>
           </div>
-          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-1.5 text-[10.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
+          <div className="animate-chip-in delay-225 flex items-center gap-1.5 rounded-lg border border-border/80 bg-white px-2.5 py-2 text-[11.5px] font-bold text-brand-navy shadow-2xs sm:text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full bg-brand-navy" />
             <span className="truncate">Role Guarded</span>
           </div>

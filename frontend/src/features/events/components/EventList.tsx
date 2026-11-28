@@ -277,7 +277,7 @@ export function EventList({
         {sorted.map((event, idx) => (
           <div
             key={event.id}
-            className="flex w-[74vw] max-w-[264px] shrink-0 snap-start sm:w-[340px] sm:max-w-none lg:w-[calc((100%-3rem)/3)] [&>*]:w-full"
+            className="flex w-[84vw] max-w-[330px] shrink-0 snap-start sm:w-[340px] sm:max-w-none lg:w-[calc((100%-3rem)/3)] [&>*]:w-full"
           >
             <EventCard
               event={event}

@@ -8,9 +8,9 @@ export function HowItWorksPage() {
     <div>
       <InteractiveTutorial />
 
-      <section className="bg-page py-5 sm:py-8">
+      <section className="bg-page py-3 sm:py-8">
         <div className="page-container">
-          <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-white p-3 shadow-card sm:gap-4 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2.5 rounded-[var(--radius-card)] border border-border bg-white p-2.5 shadow-card sm:gap-4 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 max-w-xl">
               <p className="section-eyebrow">Ready to try it?</p>
               <h2 className="heading-section mt-0.5 font-heading font-extrabold text-brand-navy">

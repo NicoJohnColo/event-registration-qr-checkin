@@ -15,10 +15,11 @@
   --space-5: 1.5rem;  /* 24px */
   --space-6: 2rem;    /* 32px */
 
-  /* Layout & Bar heights (sleek mobile-app proportions) */
+  /* Layout & Bar heights */
   --container-max: 1140px;
   --page-gutter: clamp(12px, 3.8vw, 24px);
-  --header-h: 50px;
+  --header-h: 58px;
+  --footer-h: 54px;
 
   /* Card & Control tokens */
   --card-pad: clamp(12px, 2.8vw, 16px);
@@ -28,15 +29,15 @@
   --control-h: 40px;
   --control-h-sm: 36px;
 
-  /* Consistent mobile-first typography scale (never below 11px) */
-  --text-body: clamp(0.8125rem, 1.2vw + 0.45rem, 0.875rem); /* 13px mobile -> 14px desktop */
-  --text-sm: 0.75rem;     /* 12px */
-  --text-xs: 0.6875rem;   /* 11px floor */
-  --text-input: 1rem;     /* 16px mobile prevents iOS zoom */
-  --text-h1: clamp(1.375rem, 3.2vw, 1.875rem);          /* 22px mobile -> 30px desktop */
-  --text-h2: clamp(1.0625rem, 2.2vw, 1.375rem);         /* 17px mobile -> 22px desktop */
-  --text-card-title: clamp(0.9375rem, 1.5vw, 1.0625rem); /* 15px mobile -> 17px desktop */
-  --text-kpi: clamp(1.125rem, 2vw, 1.375rem);           /* 18px mobile -> 22px desktop */
+  /* Consistent responsive typography scale (strictly monotonic mobile -> desktop) */
+  --text-body: clamp(0.875rem, 0.35vw + 0.75rem, 0.9375rem);      /* 14px mobile -> 15px desktop */
+  --text-sm: 0.8125rem;                                            /* 13px */
+  --text-xs: 0.75rem;                                              /* 12px floor */
+  --text-input: 1rem;                                              /* 16px mobile prevents iOS zoom */
+  --text-h1: clamp(1.625rem, 2vw + 0.85rem, 2.25rem);              /* 26px mobile -> 36px desktop */
+  --text-h2: clamp(1.25rem, 1.4vw + 0.7rem, 1.625rem);             /* 20px mobile -> 26px desktop */
+  --text-card-title: clamp(1rem, 0.7vw + 0.7rem, 1.125rem);        /* 16px mobile -> 18px desktop */
+  --text-kpi: clamp(1.125rem, 1vw + 0.75rem, 1.375rem);            /* 18px mobile -> 22px desktop */
 
   /* Soft elevation shadow */
   --shadow-soft:
@@ -47,19 +48,15 @@
 /* Compact proportional scale on phones (< 640px) so cards, buttons & text never look oversized */
 @media (max-width: 639px) {
   :root {
-    --header-h: 44px;
-    --page-gutter: 12px;
-    --card-pad: 10px;
-    --card-gap: 8px;
-    --radius-card: 10px;
-    --radius-control: 8px;
-    --control-h: 34px;
-    --control-h-sm: 30px;
-    --text-body: 0.75rem;
-    --text-h1: 1.25rem;
-    --text-h2: 0.9375rem;
-    --text-card-title: 0.8125rem;
-    --text-kpi: 1rem;
+    --header-h: 52px;
+    --footer-h: 48px;
+    --page-gutter: 16px;
+    --card-pad: 14px;
+    --card-gap: 10px;
+    --radius-card: 12px;
+    --radius-control: 10px;
+    --control-h: 42px;
+    --control-h-sm: 36px;
   }
 }
 
@@ -103,9 +100,12 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 72px;
+    scroll-padding-top: var(--header-h);
     font-family: var(--font);
-    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: scroll;
+    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
     max-width: 100%;
     -webkit-text-size-adjust: 100%;
   }
@@ -117,8 +117,19 @@
     font-size: var(--text-body);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-y: none;
+    touch-action: pan-x pan-y;
     max-width: 100%;
+  }
+
+  /* Keep >= 16px on small screens so mobile browsers never auto-zoom on focus */
+  @media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 
   h1, h2, h3, h4, .font-heading {
@@ -139,6 +150,14 @@
   max-width: var(--container-max);
   margin-inline: auto;
   padding-inline: var(--page-gutter);
+}
+
+/* Full-screen section height fitting cleanly between the fixed header and fixed footer */
+.screen-section {
+  min-height: calc(100svh - var(--header-h) - var(--footer-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Fluid typography helpers */
@@ -173,30 +192,18 @@
 
 /* Unified section header typography used across every page & section */
 .section-eyebrow {
-  font-size: 0.65625rem; /* 10.5px */
+  font-size: 0.75rem; /* 12px */
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.12em;
+  line-height: 1.25;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--color-brand-primary);
 }
 
-@media (min-width: 640px) {
-  .section-eyebrow {
-    font-size: 0.6875rem; /* 11px */
-  }
-}
-
 .section-subtitle {
-  font-size: 0.75rem; /* 12px */
-  line-height: 1.5;
+  font-size: var(--text-body);
+  line-height: 1.55;
   color: rgba(3, 25, 91, 0.75);
-}
-
-@media (min-width: 640px) {
-  .section-subtitle {
-    font-size: 0.875rem; /* 14px */
-  }
 }
 
 /* Right-edge scroll affordance fade for horizontally scrollable chip bars */
@@ -749,11 +756,9 @@
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 }
 

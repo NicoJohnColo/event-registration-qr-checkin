@@ -1,9 +1,9 @@
 /**
  * Single source of truth for the top navigation bar so the public site, the
- * staff portal and the staff sign-in screen all share one 56px header look.
+ * staff portal and the staff sign-in screen all share one fixed header look.
  */
 export const siteHeaderClass =
-  'sticky top-0 z-40 border-b border-border bg-white/95 text-brand-navy backdrop-blur-xl'
+  'fixed top-0 inset-x-0 z-40 border-b border-border bg-white/95 text-brand-navy backdrop-blur-xl [transform:translate3d(0,0,0)] [backface-visibility:hidden]'
 
 export const siteHeaderInnerClass =
   'page-container flex h-[var(--header-h)] items-center justify-between gap-2'

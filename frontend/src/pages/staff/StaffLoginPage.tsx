@@ -87,7 +87,7 @@ export function StaffLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-x-hidden">
+    <div className="relative flex min-h-svh flex-col overflow-x-clip">
       <AmbientBackdrop />
       {/* Same header bar as the public site and staff portal */}
       <header className={siteHeaderClass}>
@@ -97,7 +97,7 @@ export function StaffLoginPage() {
           </Link>
           <Link
             to="/"
-            className={`${headerPillClass} !h-7.5 !px-2.5 !text-[11px] sm:!h-8.5 sm:!text-xs`}
+            className={headerPillClass}
             aria-label="Back to Home"
           >
             <ArrowLeft className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
@@ -109,7 +109,7 @@ export function StaffLoginPage() {
       </header>
 
       {/* Main Split Stage */}
-      <main className="page-container relative z-10 flex flex-1 flex-col justify-center py-6 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10">
+      <main className="page-container relative z-10 flex flex-1 flex-col justify-center pt-[calc(var(--header-h)+0.75rem)] pb-4 sm:py-6 sm:pt-[calc(var(--header-h)+1.5rem)] lg:grid lg:grid-cols-12 lg:items-center lg:gap-10">
         {/* Desktop Brand + Animated Floating Dialog Showcase */}
         <div className="hidden lg:col-span-7 lg:flex lg:flex-col lg:items-start lg:gap-8">
           <div className="animate-rise space-y-2.5">
@@ -138,29 +138,29 @@ export function StaffLoginPage() {
 
         {/* Floating White Staff Login Card */}
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <div className="animate-card-float-in w-full max-w-[380px] rounded-[var(--radius-card)] border border-border/90 bg-white p-4 shadow-card sm:max-w-[400px] sm:p-6">
-            <div className="border-b border-border/75 pb-3.5 text-center">
-              <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-[10px] border border-brand-sky bg-sky-50 text-brand-primary sm:h-10 sm:w-10">
-                <ShieldCheck className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+          <div className="animate-card-float-in w-full max-w-[380px] rounded-[var(--radius-card)] border border-border/90 bg-white p-3.5 shadow-card sm:max-w-[400px] sm:p-6">
+            <div className="border-b border-border/75 pb-2.5 text-center sm:pb-3.5">
+              <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[10px] border border-brand-sky bg-sky-50 text-brand-primary sm:h-10 sm:w-10">
+                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <p className="section-eyebrow mt-2.5">Staff Portal · UTC+8</p>
+              <p className="section-eyebrow mt-2 sm:mt-2.5">Staff Portal · UTC+8</p>
               <h1 className="heading-section mt-0.5 font-heading font-extrabold text-brand-navy">
                 Sign in to EventRegister
               </h1>
-              <p className="section-subtitle mt-1">
+              <p className="section-subtitle mt-0.5 sm:mt-1">
                 Organizer &amp; door staff access for check-in and event tools.
               </p>
             </div>
 
             {submitError && (
-              <div className="mt-3">
+              <div className="mt-2.5 sm:mt-3">
                 <Alert tone="error" title="Sign-in failed">
                   {submitError}
                 </Alert>
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-3" noValidate>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3" noValidate>
               <FormField
                 label="Username"
                 htmlFor="staff-username"
@@ -211,7 +211,7 @@ export function StaffLoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-electric mt-1 inline-flex h-[var(--control-h)] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-xs font-bold text-white sm:text-sm"
+                className="btn-electric mt-1 inline-flex h-[var(--control-h)] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-sm font-bold text-white"
               >
                 {isSubmitting ? (
                   <>
@@ -224,7 +224,7 @@ export function StaffLoginPage() {
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 border-t border-border/70 pt-3 text-center text-[11px] text-brand-navy/70 sm:text-xs">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 border-t border-border/70 pt-3 text-center text-xs text-brand-navy/75 sm:text-sm">
               <span>Need an attendee QR pass?</span>
               <Link
                 to="/lookup"
