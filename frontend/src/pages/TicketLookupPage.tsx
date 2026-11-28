@@ -10,14 +10,14 @@ export function TicketLookupPage() {
 
   if (ticket) {
     return (
-      <div className="page-container py-4 sm:py-8">
+      <div className="page-container py-2.5 sm:py-8">
         <div className="mx-auto max-w-3xl">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 sm:mb-4">
             <Link
               to="/events"
-              className="inline-flex min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-primary hover:underline sm:min-h-[44px] sm:text-sm"
+              className="inline-flex h-8 items-center gap-1 text-xs font-bold text-brand-primary hover:underline sm:min-h-[44px] sm:gap-1.5 sm:text-sm"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span>All Events</span>
             </Link>
 
@@ -35,10 +35,10 @@ export function TicketLookupPage() {
 
   return (
     <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 py-3 sm:py-6">
+      <section className="bg-sky-header border-b border-brand-sky/80 py-2.5 sm:py-6">
         <div className="page-container text-center">
           <div className="mx-auto max-w-lg">
-            <StatusBadge tone="blue" icon={<Ticket className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}>
+            <StatusBadge tone="blue" icon={<Ticket className="h-3.5 w-3.5" />}>
               Public Ticket Retrieval
             </StatusBadge>
             <h1 className="heading-hero mt-1.5 text-balance font-heading font-extrabold text-brand-navy sm:mt-2">
@@ -51,7 +51,7 @@ export function TicketLookupPage() {
         </div>
       </section>
 
-      <section className="page-container py-3.5 sm:py-7">
+      <section className="page-container py-3 sm:py-7">
         <div className="mx-auto max-w-md">
           <LookupForm onFound={setTicket} />
         </div>

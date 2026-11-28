@@ -1,13 +1,27 @@
-export function BrandLogo({ inverted = false }: { inverted?: boolean }) {
+export function BrandLogo({
+  inverted = false,
+  size = 'default',
+}: {
+  inverted?: boolean
+  size?: 'default' | 'compact'
+}) {
+  const isCompact = size === 'compact'
+
   return (
-    <span className="group inline-flex items-center gap-1.5 select-none">
+    <span
+      className={`inline-flex items-center select-none ${
+        isCompact ? 'gap-1.5' : 'gap-2 sm:gap-2.5'
+      }`}
+    >
       {/* 4-diamond geometric mark inspired by the brand reference */}
       <svg
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
-        className="h-[19px] w-[19px] shrink-0 transition-transform duration-200 group-hover:scale-105 sm:h-[23px] sm:w-[23px]"
+        className={`shrink-0 ${
+          isCompact ? 'h-[18px] w-[18px] sm:h-[21px] sm:w-[21px]' : 'h-7 w-7 sm:h-8 sm:w-8'
+        }`}
       >
         <rect
           x="16"
@@ -52,16 +66,18 @@ export function BrandLogo({ inverted = false }: { inverted?: boolean }) {
       </svg>
       <span className="flex flex-col leading-none">
         <span
-          className={`font-heading text-[13px] font-extrabold tracking-tight sm:text-[15px] ${
-            inverted ? 'text-white' : 'text-brand-navy'
-          }`}
+          className={`font-heading font-extrabold tracking-tight ${
+            isCompact
+              ? 'text-[12.5px] sm:text-[14px]'
+              : 'text-[16px] sm:text-[18px]'
+          } ${inverted ? 'text-white' : 'text-brand-navy'}`}
         >
           EventRegister
         </span>
         <span
-          className={`mt-0.5 text-[8px] font-bold uppercase tracking-[0.12em] sm:text-[9px] ${
-            inverted ? 'text-brand-sky/90' : 'text-brand-primary'
-          }`}
+          className={`mt-0.5 font-bold uppercase tracking-[0.12em] ${
+            isCompact ? 'text-[8px] sm:text-[8.5px]' : 'text-[9.5px] sm:text-[10px]'
+          } ${inverted ? 'text-brand-sky/90' : 'text-brand-primary'}`}
         >
           Cebu · QR Pass
         </span>

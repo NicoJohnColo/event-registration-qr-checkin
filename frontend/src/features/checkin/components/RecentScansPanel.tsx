@@ -26,7 +26,7 @@ export function RecentScansPanel({
 
   return (
     <aside className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-card lg:col-span-5">
-      <div className="flex items-center justify-between gap-2 border-b border-border/80 bg-page/65 px-3 py-2 sm:px-4 sm:py-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-border/80 bg-page/65 px-2.5 py-1.5 sm:px-4 sm:py-2.5">
         <div className="flex items-center gap-2">
           <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-brand-navy/80 sm:text-xs">
             Recent Scans ({recentScans.length})
@@ -119,7 +119,7 @@ export function RecentScansPanel({
       </div>
 
       {selectedEventId && (
-        <div className="border-t border-border/80 bg-page/55 p-2.5 sm:px-4 sm:py-3">
+        <div className="border-t border-border/80 bg-page/55 p-2 sm:px-4 sm:py-3">
           <Link
             to={`/staff/events/${selectedEventId}/attendees`}
             className="flex h-[var(--control-h)] w-full items-center justify-between rounded-[var(--radius-control)] border border-border bg-surface px-3 text-[11px] font-bold text-brand-navy transition-colors hover:border-brand-primary hover:text-brand-primary sm:px-3.5 sm:text-xs"

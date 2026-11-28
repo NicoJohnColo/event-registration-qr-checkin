@@ -187,14 +187,14 @@ export function AttendeeListPage() {
   const firstWaitlist = waitlistedRows[0] ?? null
 
   return (
-    <div className="page-container animate-rise space-y-2.5 py-3 sm:space-y-4 sm:py-6">
+    <div className="page-container animate-rise space-y-2 py-2 sm:space-y-4 sm:py-6">
       {/* Header + Event Selector */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-2.5">
         <div className="min-w-0">
           <h1 className="heading-hero font-heading font-extrabold text-brand-navy">
             Attendee Roster
           </h1>
-          <p className="section-subtitle mt-0.5">
+          <p className="section-subtitle mt-0.5 hidden sm:block">
             Registered attendees, waitlist queue, cancellations, and Cebu check-in status.
           </p>
         </div>
@@ -252,7 +252,7 @@ export function AttendeeListPage() {
 
       {/* One Unified Search + Filter + Table Container */}
       <div className="scroll-mt-16 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-card">
-        <div className="space-y-2 border-b border-border/80 bg-page/55 p-2.5 sm:space-y-2.5 sm:p-3.5">
+        <div className="space-y-1.5 border-b border-border/80 bg-page/55 p-2 sm:space-y-2.5 sm:p-3.5">
           <SearchBox
             value={searchInput}
             onChange={setSearchInput}

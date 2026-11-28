@@ -35,16 +35,16 @@ export function SpotsLeft({ event, compact = false }: SpotsLeftProps) {
       : `${event.spotsLeft} of ${event.capacity} spots left`
 
   return (
-    <div className={compact ? 'space-y-1 sm:space-y-1.5' : 'space-y-1.5 sm:space-y-2'}>
-      <div className="flex items-center justify-between gap-2 text-[10.5px] font-bold sm:text-xs">
+    <div className={compact ? 'space-y-1.5' : 'space-y-1.5 sm:space-y-2'}>
+      <div className="flex items-center justify-between gap-2 text-xs font-bold">
         <span className={labelClass}>{label}</span>
         {!event.ended && (
-          <span className="shrink-0 text-[10px] font-semibold text-brand-navy/60 sm:rounded-full sm:bg-page sm:px-2.5 sm:py-0.5 sm:text-xs sm:font-bold sm:text-brand-navy/75">
+          <span className="shrink-0 text-[11px] font-semibold text-brand-navy/65 sm:rounded-full sm:bg-page sm:px-2.5 sm:py-0.5 sm:text-xs sm:font-bold sm:text-brand-navy/75">
             {percentFilled}% filled
           </span>
         )}
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100 sm:h-2">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 sm:h-2">
         <div
           className={`h-full rounded-full transition-all duration-500 ease-out ${barClass}`}
           style={{ width: `${percentFilled}%` }}

@@ -46,12 +46,12 @@ export function EventsPage() {
   }
 
   const viewModeToggle = (
-    <div className="inline-flex rounded-xl border border-border/80 bg-page p-1">
+    <div className="inline-flex h-[var(--control-h)] items-center rounded-[var(--radius-control)] border border-border/80 bg-page p-1">
       <button
         type="button"
         onClick={() => setViewMode('carousel')}
         aria-label="Swipe carousel view"
-        className={`inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-lg px-2 text-xs font-bold transition-colors sm:px-2.5 ${
+        className={`inline-flex h-full items-center gap-1.5 rounded-[7px] px-2.5 text-xs font-bold transition-colors sm:px-3 ${
           viewMode === 'carousel'
             ? 'bg-brand-primary text-white shadow-xs'
             : 'text-brand-navy/70 hover:text-brand-navy'
@@ -64,7 +64,7 @@ export function EventsPage() {
         type="button"
         onClick={() => setViewMode('grid')}
         aria-label="List grid view"
-        className={`inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-lg px-2 text-xs font-bold transition-colors sm:px-2.5 ${
+        className={`inline-flex h-full items-center gap-1.5 rounded-[7px] px-2.5 text-xs font-bold transition-colors sm:px-3 ${
           viewMode === 'grid'
             ? 'bg-brand-primary text-white shadow-xs'
             : 'text-brand-navy/70 hover:text-brand-navy'
@@ -77,26 +77,26 @@ export function EventsPage() {
   )
 
   return (
-    <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 pt-3.5 pb-7 sm:pt-7 sm:pb-12">
+    <div className="flex min-h-[calc(100svh-var(--header-h)-var(--footer-h))] flex-col">
+      <section className="bg-sky-header border-b border-brand-sky/80 pt-4 pb-8 sm:pt-7 sm:pb-12">
         <div className="page-container">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:items-start md:text-left">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
                 <StatusBadge tone="blue" icon={<CalendarDays className="h-3.5 w-3.5" />}>
                   Directory · Asia/Manila (UTC+8)
                 </StatusBadge>
                 {!isLoading && (
-                  <span className="rounded-full bg-surface/90 px-2.5 py-0.5 text-[11px] font-semibold text-brand-navy/80">
+                  <span className="rounded-full bg-surface/90 px-2.5 py-0.5 text-xs font-semibold text-brand-navy/80">
                     {upcomingCount} upcoming · {openCount} with open seats
                   </span>
                 )}
               </div>
 
-              <h1 className="heading-hero mt-2 font-heading font-extrabold text-brand-navy sm:mt-2.5">
+              <h1 className="heading-hero mt-2.5 font-heading font-extrabold text-brand-navy">
                 All Cebu Events
               </h1>
-              <p className="section-subtitle mt-0.5 max-w-2xl break-words whitespace-normal sm:mt-1">
+              <p className="section-subtitle mx-auto mt-1 max-w-2xl break-words whitespace-normal md:mx-0">
                 Every published event with 12-hour Cebu start and end times and live seat availability.
               </p>
             </div>
@@ -105,7 +105,7 @@ export function EventsPage() {
         </div>
       </section>
 
-      <section className="page-container relative z-10 -mt-5 pb-8 sm:pb-12">
+      <section className="page-container relative z-10 -mt-5 flex-1 pb-6 sm:-mt-6 sm:pb-12">
         <EventSearchToolbar
           search={search}
           onSearchChange={setSearch}
@@ -121,7 +121,7 @@ export function EventsPage() {
           onReset={resetFilters}
           placeholder="Search events…"
           rightAccessory={viewModeToggle}
-          className="mb-4 shadow-dock"
+          className="mb-2.5 shadow-dock sm:mb-4"
         />
 
         <EventList

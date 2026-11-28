@@ -134,7 +134,13 @@ export function TicketCard({ ticket, onTicketUpdated }: TicketCardProps) {
             isCancelled ? 'opacity-65 grayscale' : ''
           }`}
         >
-          <TicketQR ticketCode={ticket.ticketCode} qrPayload={ticket.qrPayload} caption={qrCaption} />
+          <TicketQR
+            ticketCode={ticket.ticketCode}
+            qrPayload={ticket.qrPayload}
+            caption={qrCaption}
+            eventTitle={ticket.eventTitle}
+            attendeeName={ticket.attendeeName}
+          />
         </div>
       </div>
     </article>

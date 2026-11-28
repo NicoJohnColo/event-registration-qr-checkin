@@ -170,7 +170,7 @@ export function StaffEventsPage() {
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all'
 
   return (
-    <div className="page-container animate-rise space-y-2.5 py-2.5 sm:space-y-4 sm:py-5">
+    <div className="page-container animate-rise space-y-2 py-2 sm:space-y-4 sm:py-5">
       {/* Page Header */}
       <div className="flex items-start justify-between gap-2 sm:items-end">
         <div className="min-w-0">
@@ -179,15 +179,15 @@ export function StaffEventsPage() {
               Organizer Tools
             </StatusBadge>
             {!isLoading && (
-              <span className="rounded-full border border-border bg-white/90 px-2 py-0.5 text-[10px] font-bold text-brand-navy/75 sm:px-2.5 sm:text-[11px]">
+              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-xs font-bold text-brand-navy/75">
                 {events.length} {events.length === 1 ? 'event' : 'events'}
               </span>
             )}
           </div>
-          <h1 className="heading-hero font-heading mt-1 font-extrabold text-brand-navy sm:mt-1.5">
+          <h1 className="heading-hero font-heading mt-1.5 font-extrabold text-brand-navy">
             Manage Events
           </h1>
-          <p className="mt-0.5 hidden text-xs leading-relaxed text-brand-navy/75 sm:block sm:text-sm">
+          <p className="section-subtitle mt-0.5 hidden sm:block">
             Create draft events, publish schedules to attendees, adjust capacity, close, or delete events.
           </p>
         </div>

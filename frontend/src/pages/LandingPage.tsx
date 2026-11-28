@@ -87,16 +87,16 @@ export function LandingPage() {
   return (
     <div>
       {/* 1. Hero Banner with 3D Isometric Cube Stage */}
-      <section className="relative overflow-hidden border-b border-border py-9 sm:py-11 lg:py-14">
+      <section className="screen-section relative overflow-hidden border-b border-border py-4 sm:py-10">
         <AmbientBackdrop />
-        <div className="page-container relative z-10 grid grid-cols-1 items-center gap-6 md:grid-cols-12 lg:gap-8">
+        <div className="page-container relative z-10 grid grid-cols-1 items-center gap-4 md:grid-cols-12 lg:gap-8">
           <div className="animate-rise flex min-w-0 flex-col items-center text-center md:col-span-7 md:block md:text-left lg:col-span-6">
-            <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/90 px-3 py-1 text-[11px] font-bold text-brand-navy shadow-xs backdrop-blur-md sm:text-xs">
+            <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/90 px-3 py-1 text-xs font-bold text-brand-navy shadow-xs backdrop-blur-md sm:px-3.5 sm:py-1">
               <Sparkles className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
               <span className="truncate">Cebu Tech Events · Asia/Manila (UTC+8)</span>
             </div>
 
-            <h1 className="font-heading mt-3.5 text-[1.625rem] font-extrabold leading-[1.14] tracking-[-0.02em] text-brand-navy sm:text-[2rem] lg:text-[2.25rem]">
+            <h1 className="font-heading mt-3 text-[1.75rem] font-extrabold leading-[1.12] tracking-[-0.02em] text-brand-navy sm:mt-4 sm:text-[2.15rem] lg:text-[2.5rem]">
               Register in seconds.
               <br />
               <span className="bg-gradient-to-r from-brand-primary to-[#5B8EFF] bg-clip-text text-transparent">
@@ -104,18 +104,18 @@ export function LandingPage() {
               </span>
             </h1>
 
-            <p className="section-subtitle mx-auto mt-3 max-w-[336px] sm:max-w-xl md:mx-0">
+            <p className="section-subtitle mx-auto mt-2.5 max-w-[360px] sm:mt-3.5 sm:max-w-xl md:mx-0">
               Reserve your free seat at Cebu developer meetups, workshops, and startup nights with
               an instant QR boarding pass ready for entrance check-in.
             </p>
 
-            {/* Symmetrical CTAs: centered stacked grid on mobile, inline row on tablet/desktop */}
-            <div className="mt-5 flex w-full max-w-[340px] flex-col gap-2.5 sm:mt-6 md:max-w-none md:flex-row md:flex-wrap md:items-center md:gap-2">
+            {/* Symmetrical CTAs */}
+            <div className="mt-4 flex w-full max-w-[360px] flex-col gap-2 sm:mt-6 sm:gap-2.5 md:max-w-none md:flex-row md:flex-wrap md:items-center md:gap-2.5">
               <a href="#events" className="block md:w-auto">
                 <Button
-                  size="lg"
+                  size="md"
                   fullWidth
-                  className="min-h-[42px] text-[13px] font-bold md:min-h-0 md:h-[var(--control-h)] md:w-auto md:px-4 md:text-sm"
+                  className="font-bold md:w-auto md:px-4"
                 >
                   <span>Explore Events</span>
                   <ArrowRight className="h-4 w-4 shrink-0" />
@@ -125,9 +125,9 @@ export function LandingPage() {
                 <Link to="/lookup" className="block">
                   <Button
                     variant="outline"
-                    size="md"
+                    size="sm"
                     fullWidth
-                    className="min-h-[38px] bg-white/95 text-xs md:min-h-0 md:h-[var(--control-h)] md:w-auto md:px-4"
+                    className="bg-white/95 md:h-[var(--control-h)] md:w-auto md:px-4 md:text-sm"
                   >
                     <Search className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
                     <span>Find My Ticket</span>
@@ -136,9 +136,9 @@ export function LandingPage() {
                 <Link to="/how-it-works" className="block">
                   <Button
                     variant="outline"
-                    size="md"
+                    size="sm"
                     fullWidth
-                    className="min-h-[38px] bg-white/85 text-xs md:min-h-0 md:h-[var(--control-h)] md:w-auto md:px-3.5"
+                    className="bg-white/85 md:h-[var(--control-h)] md:w-auto md:px-3.5 md:text-sm"
                   >
                     <PlayCircle className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
                     <span className="md:hidden">How It Works</span>
@@ -148,46 +148,46 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Live Quick-Metrics: clean balanced strip on phones, 3 cards on >=sm */}
-            <dl className="mx-auto mt-6 grid w-full max-w-[340px] grid-cols-3 divide-x divide-border/75 rounded-[var(--radius-card)] border border-white/90 bg-white/90 shadow-card backdrop-blur-md sm:mt-6 sm:max-w-md sm:gap-2.5 sm:divide-x-0 sm:border-0 sm:bg-transparent sm:shadow-none sm:backdrop-blur-none md:mx-0">
-              <div className="px-2 py-3 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-white/90 sm:bg-white/90 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
+            {/* Live Quick-Metrics */}
+            <dl className="mx-auto mt-5 grid w-full max-w-[360px] grid-cols-3 divide-x divide-border/75 rounded-[var(--radius-card)] border border-white/90 bg-white/90 shadow-card backdrop-blur-md sm:mt-6 sm:max-w-md sm:gap-2.5 sm:divide-x-0 sm:border-0 sm:bg-transparent sm:shadow-none sm:backdrop-blur-none md:mx-0">
+              <div className="px-2.5 py-2.5 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-white/90 sm:bg-white/90 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
                 <div className="flex items-center justify-center gap-1 sm:justify-between">
-                  <dd className="font-heading text-base font-extrabold leading-none tabular-nums text-brand-navy">
+                  <dd className="font-heading text-base font-extrabold leading-none tabular-nums text-brand-navy sm:text-lg">
                     {isLoading ? '—' : upcomingCount}
                   </dd>
                   <span className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-md bg-sky-50 text-brand-primary sm:flex">
                     <CalendarDays className="h-3.5 w-3.5" />
                   </span>
                 </div>
-                <dt className="mt-1 text-[11px] font-bold text-brand-navy/75 sm:mt-1.5">
+                <dt className="mt-1 text-xs font-bold text-brand-navy/75 sm:mt-1.5">
                   Upcoming
                 </dt>
               </div>
 
-              <div className="bg-sky-50/75 px-2 py-3 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-brand-sky sm:bg-sky-50/95 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
+              <div className="bg-sky-50/75 px-2.5 py-2.5 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-brand-sky sm:bg-sky-50/95 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
                 <div className="flex items-center justify-center gap-1 sm:justify-between">
-                  <dd className="font-heading text-base font-extrabold leading-none tabular-nums text-brand-primary">
+                  <dd className="font-heading text-base font-extrabold leading-none tabular-nums text-brand-primary sm:text-lg">
                     {isLoading ? '—' : totalOpenSeats}
                   </dd>
                   <span className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-brand-primary shadow-2xs sm:flex">
                     <Users className="h-3.5 w-3.5" />
                   </span>
                 </div>
-                <dt className="mt-1 text-[11px] font-bold text-brand-primary sm:mt-1.5">
+                <dt className="mt-1 text-xs font-bold text-brand-primary sm:mt-1.5">
                   Open Seats
                 </dt>
               </div>
 
-              <div className="px-2 py-3 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-white/90 sm:bg-white/90 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
+              <div className="px-2.5 py-2.5 text-center sm:rounded-[var(--radius-card)] sm:border sm:border-white/90 sm:bg-white/90 sm:p-3 sm:text-left sm:shadow-card sm:backdrop-blur-md">
                 <div className="flex items-center justify-center gap-1 sm:justify-between">
-                  <dd className="font-heading text-base font-extrabold leading-none text-brand-navy">
+                  <dd className="font-heading text-base font-extrabold leading-none text-brand-navy sm:text-lg">
                     Free
                   </dd>
                   <span className="hidden h-6 w-6 shrink-0 items-center justify-center rounded-md bg-sky-50 text-brand-primary sm:flex">
                     <Gift className="h-3.5 w-3.5" />
                   </span>
                 </div>
-                <dt className="mt-1 text-[11px] font-bold text-brand-navy/75 sm:mt-1.5">
+                <dt className="mt-1 text-xs font-bold text-brand-navy/75 sm:mt-1.5">
                   Admission
                 </dt>
               </div>
@@ -202,9 +202,9 @@ export function LandingPage() {
       </section>
 
       {/* 2. Unified Events Directory & Search */}
-      <section id="events" className="scroll-mt-14 bg-page py-5 sm:py-8">
+      <section id="events" className="screen-section scroll-mt-[var(--header-h)] bg-page py-3 sm:py-8">
         <div className="page-container">
-          <div className="mb-3 text-center md:text-left">
+          <div className="mb-2 text-center sm:mb-3 md:text-left">
             <p className="section-eyebrow">Live Directory</p>
             <div className="mt-0.5 md:flex md:items-baseline md:justify-between md:gap-2">
               <h2 className="heading-section font-heading font-extrabold text-brand-navy">
@@ -237,7 +237,7 @@ export function LandingPage() {
             totalMatching={filteredEvents.length}
             onReset={resetFilters}
             flatMobile
-            className="mb-3"
+            className="mb-2 sm:mb-3"
           />
 
           <EventList
@@ -249,10 +249,10 @@ export function LandingPage() {
             onResetFilters={search || tab !== 'all' ? resetFilters : undefined}
           />
 
-          <div className="mt-2.5 flex justify-center md:hidden">
+          <div className="mt-3 flex justify-center md:hidden">
             <Link
               to="/events"
-              className="inline-flex h-8 items-center gap-1 rounded-full border border-border bg-white px-3.5 text-xs font-bold text-brand-primary shadow-2xs transition-colors hover:border-brand-primary/40"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-full border border-border bg-white px-4 text-xs font-bold text-brand-primary shadow-2xs transition-colors hover:border-brand-primary/40"
             >
               <span>View all events</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -265,42 +265,50 @@ export function LandingPage() {
       <InteractiveTutorial />
 
       {/* 6. Dual Action Banner (matching light-sky cards across mobile & desktop) */}
-      <section className="bg-page py-4 sm:py-8">
-        <div className="page-container grid grid-cols-2 gap-2 sm:gap-4">
-          <div className="flex flex-col justify-between gap-2 rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/80 p-2.5 shadow-card sm:p-4 md:flex-row md:items-center">
+      <section className="bg-page py-5 sm:py-8">
+        <div className="page-container grid grid-cols-2 items-stretch gap-2.5 sm:gap-4">
+          <div className="flex h-full flex-col justify-between gap-2.5 rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/80 p-3 text-center shadow-card sm:p-5 md:flex-row md:items-center md:text-left">
             <div className="min-w-0">
               <p className="section-eyebrow">For Attendees</p>
               <h3 className="heading-card mt-0.5 font-heading font-extrabold text-brand-navy">
                 Already registered?
               </h3>
-              <p className="mt-0.5 text-[11px] leading-snug text-brand-navy/75 sm:text-xs sm:leading-relaxed md:text-sm">
+              <p className="mt-1 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
                 Open your pass with code &amp; email.
               </p>
             </div>
             <Link to="/lookup" className="w-full shrink-0 md:w-auto">
-              <Button variant="outline" size="sm" fullWidth className="bg-white md:w-auto">
-                <Search className="h-3 w-3 text-brand-primary sm:h-3.5 sm:w-3.5" />
-                <span className="md:hidden">Find Ticket</span>
-                <span className="hidden md:inline">Find My Ticket</span>
+              <Button
+                variant="outline"
+                size="sm"
+                fullWidth
+                className="justify-center whitespace-nowrap bg-white !px-2 sm:!px-3.5 md:w-auto"
+              >
+                <Search className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
+                <span>Find My Ticket</span>
               </Button>
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between gap-2 rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/80 p-2.5 shadow-card sm:p-4 md:flex-row md:items-center">
+          <div className="flex h-full flex-col justify-between gap-2.5 rounded-[var(--radius-card)] border border-brand-sky bg-sky-50/80 p-3 text-center shadow-card sm:p-5 md:flex-row md:items-center md:text-left">
             <div className="min-w-0">
               <p className="section-eyebrow">For Door Staff</p>
               <h3 className="heading-card mt-0.5 font-heading font-extrabold text-brand-navy">
                 Managing check-in?
               </h3>
-              <p className="mt-0.5 text-[11px] leading-snug text-brand-navy/75 sm:text-xs sm:leading-relaxed md:text-sm">
+              <p className="mt-1 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
                 Sign in to scan passes at the door.
               </p>
             </div>
             <Link to="/staff/login" className="w-full shrink-0 md:w-auto">
-              <Button variant="outline" size="sm" fullWidth className="bg-white md:w-auto">
-                <ShieldCheck className="h-3 w-3 text-brand-primary sm:h-3.5 sm:w-3.5" />
-                <span className="md:hidden">Sign In</span>
-                <span className="hidden md:inline">Staff Sign In</span>
+              <Button
+                variant="outline"
+                size="sm"
+                fullWidth
+                className="justify-center whitespace-nowrap bg-white !px-2 sm:!px-3.5 md:w-auto"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
+                <span>Staff Sign In</span>
               </Button>
             </Link>
           </div>

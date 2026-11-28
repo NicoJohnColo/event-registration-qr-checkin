@@ -170,7 +170,7 @@ export function AttendeeTable({
             (isOrganizer && (row.status === 'CONFIRMED' || row.status === 'WAITLISTED'))
 
           return (
-            <li key={row.id} className="space-y-1 px-2.5 py-2.5">
+            <li key={row.id} className="space-y-0.5 px-2.5 py-2">
               <div className="flex min-w-0 items-center justify-between gap-2">
                 <p className="min-w-0 truncate font-heading text-xs font-extrabold text-brand-navy">
                   {row.fullName}
@@ -226,7 +226,7 @@ export function AttendeeTable({
 
       {/* Pagination Footer */}
       {attendees.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between gap-2 border-t border-border/80 bg-page/55 px-3 py-2 text-[11px] sm:text-xs">
+        <div className="flex items-center justify-between gap-2 border-t border-border/80 bg-page/55 px-2.5 py-1.5 text-[11px] sm:px-3 sm:py-2 sm:text-xs">
           <span className="font-semibold text-brand-navy/75">
             {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, attendees.length)} of{' '}
             {attendees.length}

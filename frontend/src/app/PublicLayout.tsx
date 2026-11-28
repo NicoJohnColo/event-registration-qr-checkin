@@ -57,21 +57,21 @@ export function PublicLayout({ children }: PublicLayoutProps) {
   }, [mobileOpen])
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `inline-flex h-8.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold leading-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 ${
+    `inline-flex h-8.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 ${
       isActive
         ? 'bg-sky-50 text-brand-primary shadow-xs ring-1 ring-brand-sky'
         : 'text-brand-navy/80 hover:bg-page hover:text-brand-navy'
     }`
 
   const mobileNavItemClass = ({ isActive }: { isActive: boolean }) =>
-    `flex h-8.5 w-full items-center justify-between rounded-[var(--radius-control)] px-2.5 text-xs font-bold transition-colors ${
+    `flex h-10 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-sm font-bold transition-colors ${
       isActive
         ? 'bg-sky-50 text-brand-primary ring-1 ring-brand-sky'
         : 'text-brand-navy/85 hover:bg-page hover:text-brand-navy'
     }`
 
   return (
-    <div className="flex min-h-dvh flex-col bg-page text-brand-navy">
+    <div className="flex min-h-svh flex-col bg-page text-brand-navy">
       <header className={siteHeaderClass}>
         <div className={siteHeaderInnerClass}>
           <Link to="/" className="shrink-0" onClick={() => setMobileOpen(false)}>
@@ -117,7 +117,7 @@ export function PublicLayout({ children }: PublicLayoutProps) {
         </div>
 
         {mobileOpen && (
-          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-var(--header-h))] overflow-y-auto border-t border-border/80 bg-white py-2 shadow-xl md:hidden">
+          <div className="animate-slide-down absolute inset-x-0 top-full z-50 max-h-[calc(100svh-var(--header-h))] overflow-y-auto border-t border-border/80 bg-white py-2 shadow-xl md:hidden">
             <nav className="page-container flex flex-col gap-1" aria-label="Mobile navigation">
               <NavLink to="/" end className={mobileNavItemClass} onClick={() => setMobileOpen(false)}>
                 <span className="inline-flex items-center gap-2">
@@ -176,45 +176,53 @@ export function PublicLayout({ children }: PublicLayoutProps) {
 
       {mobileOpen && (
         <div
-          className="fixed inset-x-0 top-[var(--header-h)] bottom-0 z-30 bg-brand-navy/35 backdrop-blur-[2px] md:hidden"
+          className="fixed inset-x-0 top-[var(--header-h)] bottom-0 z-[35] bg-brand-navy/35 backdrop-blur-[2px] md:hidden"
           aria-hidden="true"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      <main key={pathname} className="animate-page-in relative z-10 flex-1">
+      <main
+        key={pathname}
+        className="animate-page-in relative z-10 flex-1 pt-[var(--header-h)] pb-[calc(3.25rem+env(safe-area-inset-bottom))] sm:pb-16"
+      >
         {children ?? <Outlet />}
       </main>
 
-      <footer className="relative z-10 border-t border-border bg-white py-3 sm:py-6">
-        <div className="page-container flex flex-col items-start justify-between gap-2 text-xs text-brand-navy/75 sm:flex-row sm:items-center sm:gap-3">
-          <div className="space-y-0.5 sm:space-y-1">
-            <BrandLogo />
-            <p className="text-[10.5px] leading-snug text-brand-navy/70 sm:text-[11px]">
-              All event schedules shown in Cebu local time (Asia/Manila · UTC+8).
+      <footer className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-white/95 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur-xl [transform:translate3d(0,0,0)] [backface-visibility:hidden] sm:py-2.5">
+        <div className="page-container flex items-center justify-between gap-2 text-xs text-brand-navy/75">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="shrink-0">
+              <BrandLogo size="compact" />
+            </div>
+            <p className="hidden truncate border-l border-border/80 pl-2.5 text-[11px] text-brand-navy/70 md:block">
+              Cebu local time (Asia/Manila · UTC+8)
             </p>
           </div>
           <nav
             aria-label="Footer links"
-            className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[11px] font-bold sm:gap-x-4 sm:text-xs"
+            className="flex shrink-0 items-center gap-x-3 text-xs font-bold sm:gap-x-4"
           >
             <Link
               to="/events"
-              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
+              className="inline-flex h-7 items-center whitespace-nowrap transition-colors hover:text-brand-primary"
             >
-              Browse Events
+              <span className="sm:hidden">Events</span>
+              <span className="hidden sm:inline">Browse Events</span>
             </Link>
             <Link
               to="/lookup"
-              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
+              className="inline-flex h-7 items-center whitespace-nowrap transition-colors hover:text-brand-primary"
             >
-              Find My Ticket
+              <span className="sm:hidden">Ticket</span>
+              <span className="hidden sm:inline">Find My Ticket</span>
             </Link>
             <Link
               to={staffDestination}
-              className="inline-flex h-7 items-center transition-colors hover:text-brand-primary sm:h-8"
+              className="inline-flex h-7 items-center whitespace-nowrap transition-colors hover:text-brand-primary"
             >
-              {staffLabel}
+              <span className="sm:hidden">{isAuthenticated ? 'Staff' : 'Sign In'}</span>
+              <span className="hidden sm:inline">{staffLabel}</span>
             </Link>
           </nav>
         </div>

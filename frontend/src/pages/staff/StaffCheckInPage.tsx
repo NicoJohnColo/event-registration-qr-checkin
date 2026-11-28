@@ -125,14 +125,14 @@ export function StaffCheckInPage() {
     selectedEvent !== null && isTodayInManila(selectedEvent.startsAt, selectedEvent.endsAt)
 
   return (
-    <div className="page-container animate-rise py-3 sm:py-6">
-      <div className="grid grid-cols-1 items-start gap-3 sm:gap-4 lg:grid-cols-12">
+    <div className="page-container animate-rise py-2 sm:py-6">
+      <div className="grid grid-cols-1 items-start gap-2.5 sm:gap-4 lg:grid-cols-12">
         {/* Main Unified Check-In Workspace */}
         <section className="overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-card lg:col-span-7">
-          <div className="flex flex-col gap-2 border-b border-border/80 bg-page/65 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+          <div className="flex flex-col gap-1.5 border-b border-border/80 bg-page/65 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:p-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-start">
-                <h1 className="heading-section font-heading font-extrabold text-brand-navy sm:text-[1.375rem]">
+                <h1 className="heading-section font-heading font-extrabold text-brand-navy">
                   Door Check-In
                 </h1>
                 {selectedEvent && (
@@ -144,13 +144,13 @@ export function StaffCheckInPage() {
                 )}
               </div>
               {selectedEvent && (
-                <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] text-brand-navy/75 sm:text-xs">
+                <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-brand-navy/75 sm:text-sm">
                   <span className="inline-flex items-center gap-1">
-                    <Calendar className="h-3 w-3 shrink-0 text-brand-primary sm:h-3.5 sm:w-3.5" />
+                    <Calendar className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
                     <span>{formatCebuDate(selectedEvent.startsAt)}</span>
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3 w-3 shrink-0 text-brand-primary sm:h-3.5 sm:w-3.5" />
+                    <Clock className="h-3.5 w-3.5 shrink-0 text-brand-primary" />
                     <span>{formatCebuTimeRange(selectedEvent.startsAt, selectedEvent.endsAt)}</span>
                   </span>
                 </p>
@@ -158,13 +158,13 @@ export function StaffCheckInPage() {
             </div>
 
             {stats && (
-              <div className="flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] border border-brand-sky bg-sky-50 px-2.5 py-1.5 sm:w-auto sm:block sm:px-3 sm:text-right">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-brand-primary sm:text-[11px]">
+              <div className="flex w-full items-center justify-between gap-2 rounded-[var(--radius-control)] border border-brand-sky bg-sky-50 px-3 py-2 sm:w-auto sm:block sm:text-right">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-brand-primary sm:text-xs">
                   Checked In
                 </p>
-                <p className="font-code text-xs font-extrabold tabular-nums text-brand-navy sm:text-base">
+                <p className="font-code text-sm font-extrabold tabular-nums text-brand-navy sm:text-base">
                   {stats.checkedInCount} / {stats.registeredCount}
-                  <span className="ml-1 text-[10.5px] font-semibold text-brand-navy/70 sm:text-xs">
+                  <span className="ml-1 text-xs font-semibold text-brand-navy/70">
                     ({stats.capacity} cap)
                   </span>
                 </p>
@@ -191,7 +191,7 @@ export function StaffCheckInPage() {
                   size="sm"
                   disabled={!selectedEventId}
                   onClick={() => setCameraOpen((prev) => !prev)}
-                  className={`!h-7 px-2 text-[11px] sm:!h-7.5 sm:px-2.5 ${cameraOpen ? '' : 'bg-white'}`}
+                  className={cameraOpen ? '' : 'bg-white'}
                 >
                   {cameraOpen ? (
                     <>

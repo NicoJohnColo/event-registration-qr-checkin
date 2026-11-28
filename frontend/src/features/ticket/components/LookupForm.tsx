@@ -76,10 +76,10 @@ export function LookupForm({
     !(apiError instanceof ApiClientError && Object.keys(apiError.fieldErrors).length > 0)
 
   return (
-    <div className="w-full rounded-[var(--radius-card)] border border-border bg-surface p-3 shadow-dock sm:p-5">
+    <div className="w-full rounded-[var(--radius-card)] border border-border bg-surface p-3.5 shadow-dock sm:p-5">
       <div className="mb-3 sm:mb-3.5">
         <h2 className="heading-card font-heading font-extrabold text-brand-navy">{title}</h2>
-        <p className="mt-0.5 text-[11px] leading-snug text-brand-navy/75 sm:text-sm sm:leading-relaxed">
+        <p className="section-subtitle mt-0.5">
           {subtitle}
         </p>
       </div>

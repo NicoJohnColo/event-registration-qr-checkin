@@ -183,11 +183,11 @@ export function SegmentedTabs<T extends string>({
                   })
                 }
               }}
-              className={`inline-flex h-[var(--control-h-sm)] items-center justify-center gap-1 whitespace-nowrap rounded-[6px] px-2 text-[10.5px] font-bold leading-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary sm:rounded-[8px] sm:px-2.5 sm:text-xs ${
+              className={`inline-flex h-[var(--control-h-sm)] items-center justify-center gap-1 whitespace-nowrap rounded-[7px] px-2 text-[11.5px] font-bold leading-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary sm:rounded-[8px] sm:px-2.5 sm:text-xs ${
                 equalWidth
                   ? 'min-w-0 flex-1 px-1.5 text-center'
                   : fitMobile
-                    ? 'flex-1 px-1 sm:flex-initial sm:px-2.5'
+                    ? 'flex-auto px-1.5 sm:flex-initial sm:px-2.5'
                     : 'shrink-0 snap-start'
               } ${
                 active

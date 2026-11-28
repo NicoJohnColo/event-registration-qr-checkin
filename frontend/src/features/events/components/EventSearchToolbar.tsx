@@ -44,10 +44,10 @@ export function EventSearchToolbar({
       className={`${
         flatMobile
           ? 'sm:rounded-[var(--radius-card)] sm:border sm:border-border/80 sm:bg-surface sm:p-3 sm:shadow-card'
-          : 'rounded-[var(--radius-card)] border border-border/80 bg-surface p-2 shadow-card sm:p-3'
+          : 'rounded-[var(--radius-card)] border border-border/80 bg-surface p-2.5 shadow-card sm:p-3'
       } ${className}`}
     >
-      <div className="flex flex-col gap-1.5 sm:gap-2 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div className="min-w-0 flex-1">
             <Input

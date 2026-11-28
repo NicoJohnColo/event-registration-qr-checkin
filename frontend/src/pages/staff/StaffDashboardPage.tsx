@@ -78,24 +78,24 @@ export function StaffDashboardPage() {
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all'
 
   return (
-    <div className="page-container animate-rise space-y-2 py-2.5 sm:space-y-4 sm:py-5">
+    <div className="page-container animate-rise space-y-1.5 py-2 sm:space-y-4 sm:py-5">
       {/* Formal Page Title & Quick Action Row */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-2.5">
+      <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between sm:gap-2.5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <StatusBadge tone="blue" icon={<BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}>
               Operations Dashboard
             </StatusBadge>
             {!isLoading && (
-              <span className="rounded-full border border-border bg-white/90 px-2 py-0.5 text-[10px] font-bold text-brand-navy/75 sm:px-2.5 sm:text-[11px]">
+              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-xs font-bold text-brand-navy/75">
                 {metrics.length} {metrics.length === 1 ? 'event' : 'events'}
               </span>
             )}
           </div>
-          <h1 className="heading-hero font-heading mt-1 font-extrabold text-brand-navy sm:mt-1.5">
+          <h1 className="heading-hero font-heading mt-1.5 font-extrabold text-brand-navy">
             Operations Dashboard
           </h1>
-          <p className="mt-0.5 hidden text-xs leading-relaxed text-brand-navy/75 sm:block sm:text-sm">
+          <p className="section-subtitle mt-0.5 hidden sm:block">
             Live seat capacity, attendance breakdown, waitlists, and Excel CSV reporting.
           </p>
         </div>
