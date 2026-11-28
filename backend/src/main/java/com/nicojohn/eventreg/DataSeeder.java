@@ -20,6 +20,9 @@ import com.nicojohn.eventreg.registration.Registration;
 import com.nicojohn.eventreg.registration.RegistrationRepository;
 import com.nicojohn.eventreg.registration.RegistrationStatus;
 import com.nicojohn.eventreg.registration.TicketCodeGenerator;
+import com.nicojohn.eventreg.staff.Role;
+import com.nicojohn.eventreg.staff.StaffRepository;
+import com.nicojohn.eventreg.staff.StaffUser;
 
 /**
  * Seeds Level 1 demo events (S1-S4 from the Test Data plan) with dates relative to
@@ -32,16 +35,19 @@ public class DataSeeder implements ApplicationRunner {
 
     private final EventRepository eventRepository;
     private final RegistrationRepository registrationRepository;
+    private final StaffRepository staffRepository;
     private final TicketCodeGenerator ticketCodeGenerator;
     private final Clock clock;
 
     public DataSeeder(
             EventRepository eventRepository,
             RegistrationRepository registrationRepository,
+            StaffRepository staffRepository,
             TicketCodeGenerator ticketCodeGenerator,
             Clock clock) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
+        this.staffRepository = staffRepository;
         this.ticketCodeGenerator = ticketCodeGenerator;
         this.clock = clock;
     }
@@ -49,6 +55,8 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        ensureDemoStaffAccounts();
+
         LocalDate today = LocalDate.now(clock.withZone(ManilaTime.ZONE));
         Instant now = Instant.now(clock);
 
@@ -149,6 +157,23 @@ public class DataSeeder implements ApplicationRunner {
             }
         }
         log.info("Refreshed seeded event schedules (S1-S4) relative to Cebu date {}", today);
+    }
+
+    private void ensureDemoStaffAccounts() {
+        if (staffRepository.findByUsernameIgnoreCase("organizer").isEmpty()) {
+            staffRepository.save(new StaffUser(
+                    "Demo Organizer",
+                    "organizer",
+                    "$2a$10$egNwOY1w/P.xOI1N4I/PXOyAQS9TEg6auvAmf1dE1PWI5D0p0v6.2",
+                    Role.ORGANIZER));
+        }
+        if (staffRepository.findByUsernameIgnoreCase("doorstaff").isEmpty()) {
+            staffRepository.save(new StaffUser(
+                    "Demo Door Staff",
+                    "doorstaff",
+                    "$2a$10$btND1kXv/2RzSlakhhzGkeomBg2KjE0kcI.8TXYNTd.DJRX3FmTTq",
+                    Role.DOOR_STAFF));
+        }
     }
 
     private void seedConfirmed(Event event, Instant registeredAt, List<SeedAttendee> attendees) {

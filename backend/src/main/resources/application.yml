@@ -15,18 +15,11 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate     # Flyway owns the schema; Hibernate validates it
+      ddl-auto: validate     # Validate Hibernate entities against the PostgreSQL schema
     properties:
       hibernate:
         jdbc:
           time_zone: UTC     # store instants in UTC; display in Asia/Manila
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    # Supabase pre-installs helper functions in public (e.g. rls_auto_enable), so
-    # Flyway sees public as non-empty. Baseline at 0 so V1, V2... all run.
-    baseline-on-migrate: true
-    baseline-version: "0"
 
 server:
   port: ${PORT:8080}
