@@ -2,11 +2,13 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY pom.xml ./
-RUN MAVEN_OPTS="-Xmx384m" mvn -B dependency:go-offline
-
+COPY maven-settings.xml pom.xml ./
 COPY src ./src
-RUN MAVEN_OPTS="-Xmx384m" mvn -B -DskipTests package
+RUN MAVEN_OPTS="-Xmx384m" mvn -B -s /app/maven-settings.xml \
+    -Daether.connector.http.retryHandler.count=6 \
+    -Daether.connector.http.retryHandler.interval=10000 \
+    -Daether.connector.http.retryHandler.serviceUnavailable=429,503 \
+    -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
