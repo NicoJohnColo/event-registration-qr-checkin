@@ -1,3 +1,4 @@
+export { CameraQrScanner } from './components/CameraQrScanner'
 export { CheckInForm } from './components/CheckInForm'
 export { CheckInOutcomePanel } from './components/CheckInOutcomePanel'
 export { EventSelector } from './components/EventSelector'

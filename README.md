@@ -1,13 +1,14 @@
 # EventRegister — Cebu Event Registration & QR Check-in
 
-A mobile-first, full-stack event registration, waitlist management, and door QR check-in application built for Cebu tech and community events (**Asia/Manila · UTC+8**). Attendees browse published events, reserve a free seat or join the waitlist when capacity is full, receive an instant QR pass, retrieve or self-cancel passes without leaking personal details, and verify entry at the door. Organizers manage draft/published/closed/deleted event lifecycles, promote waitlisted attendees, undo mistaken check-ins with full audit trails, monitor live operations metrics, and export UTF-8 roster CSVs.
+A mobile-first, full-stack event registration, waitlist management, and door QR check-in application built for Cebu tech and community events (**Asia/Manila · UTC+8**). Attendees browse published events, reserve a free seat or join the waitlist when capacity is full, receive an HMAC-signed QR pass on screen and via confirmation email, retrieve or self-cancel passes without leaking personal details, and verify entry at the door via live camera or manual scan. Organizers manage draft/published/closed/deleted event lifecycles, promote waitlisted attendees, undo mistaken check-ins, monitor live metrics, export Excel-ready CSVs, and inspect the staff audit log.
 
 ---
 
 ## 1. Level Reached
 
-- **Current Baseline:** **Level 2 — Intermediate (`10 / 10` Level 2 Checks Passing: `L2-01`–`L2-10`, plus `12 / 12` Level 1 Core Checks `L1-01`–`L1-12`)**
-- **Target Level:** **Level 2 Complete** (camera QR scanner & outbound email remain scoped for Level 3)
+- **Verified Complete:** **Level 1 · Core (`12 / 12` Checks)** & **Level 2 · Intermediate (`10 / 10` Checks)** (tagged `level-1`, `level-2`; merged on `main`).
+- **Current Level 3 Progress (`level-3` branch):** **`5 of 6` Level 3 Advanced items implemented and verified locally** (`12` Camera QR Scanner UI, `13` Last-Spot Race Condition Locks, `14` Signed HMAC QR + Rate Limiting, `15` Sandbox Confirmation/Promotion Emails, `16` `ORGANIZER` vs `DOOR_STAFF` RBAC + Audit Logs Console).
+- **Remaining for Full Level 3 Sign-Off:** **Item `17` (Production HTTPS Deployment)**, **live phone-to-phone camera verification over HTTPS**, and your **3–5 minute demo video**.
 
 ---
 
@@ -15,9 +16,9 @@ A mobile-first, full-stack event registration, waitlist management, and door QR 
 
 | Layer | Technology |
 |---|---|
-| **Backend** | Java 21+ · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256` + BCrypt, Role-based `ORGANIZER` / `DOOR_STAFF`) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway |
+| **Backend** | Java 21+ · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256`, BCrypt, `@EnableMethodSecurity` + filter-layer `ORGANIZER` / `DOOR_STAFF` RBAC, HTTP `429` Rate Limiting) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway · `@Async` Spring Mail (`spring-boot-starter-mail`) · ZXing (`3.5.3`) QR PNG |
 | **Database** | PostgreSQL 17 (Supabase Session Pooler) |
-| **Frontend** | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS v4 · React Router 7 · TanStack Query v5 · React Hook Form + Zod · `qrcode.react` · `lucide-react` |
+| **Frontend** | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS v4 · React Router 7 · TanStack Query v5 · React Hook Form + Zod · `qrcode.react` · `html5-qrcode` (lazy-loaded camera scanner) · `lucide-react` |
 | **Time Zone** | Enforced server-side and client-side in `Asia/Manila` (`UTC+8`), rendered in 12-hour `AM/PM` format |
 
 ---
@@ -30,37 +31,45 @@ A mobile-first, full-stack event registration, waitlist management, and door QR 
 - **PostgreSQL 15+** (or a Supabase PostgreSQL project)
 
 ### Step 1 — Configure Environment Variables
-Copy `.env.example` to `.env` in the repository root and fill in your PostgreSQL / Supabase connection credentials and JWT secret:
+Copy `.env.example` to `.env` in the repository root and fill in your PostgreSQL / Supabase connection credentials, JWT secret, and optional Mailtrap Sandbox SMTP credentials:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Required variables in `.env`:
+Environment variables in `.env`:
 
 | Variable | Description | Example |
 |---|---|---|
 | `SPRING_DATASOURCE_URL` | JDBC PostgreSQL connection URL | `jdbc:postgresql://<pooler-host>:5432/postgres` |
 | `SPRING_DATASOURCE_USERNAME` | Database username | `postgres.<project-ref>` |
 | `SPRING_DATASOURCE_PASSWORD` | Database password | `your-db-password` |
-| `JWT_SECRET` | HMAC-SHA256 signing secret (≥32 chars) | `change-me-long-random-secret-key-at-least-32-chars` |
+| `JWT_SECRET` | HMAC-SHA256 JWT signing secret (≥32 chars) | `change-me-long-random-secret-key-at-least-32-chars` |
+| `QR_HMAC_SECRET` | Optional HMAC secret for QR tokens (defaults to `JWT_SECRET`) | `change-me-optional-qr-signing-secret-at-least-32-chars` |
 | `CORS_ALLOWED_ORIGIN` | Allowed frontend origin | `http://localhost:5173` |
 | `VITE_API_URL` | Backend base URL for Vite frontend | `http://localhost:8080` |
 | `APP_TIMEZONE` | Default server timezone | `Asia/Manila` |
+| `APP_PUBLIC_BASE_URL` | Base frontend URL used in email pass links | `http://localhost:5173` |
+| `MAIL_ENABLED` | Enable real SMTP sending (`false` logs `[EMAIL-SANDBOX-DRYRUN]`) | `false` |
+| `MAIL_HOST` | SMTP host (e.g. Mailtrap Sandbox) | `sandbox.smtp.mailtrap.io` |
+| `MAIL_PORT` | SMTP port | `2525` |
+| `MAIL_USERNAME` | Sandbox SMTP username | `your-mailtrap-username` |
+| `MAIL_PASSWORD` | Sandbox SMTP password | `your-mailtrap-password` |
+| `MAIL_FROM` | Sender address for confirmation emails | `no-reply@eventregister.cebu` |
 
 ### Step 2 — Start the Backend (`http://localhost:8080`)
-Flyway migrations (`V1__init.sql`, `V2__seed_staff.sql`, `V3__level2_extensions.sql`) and the idempotent relative-date `DataSeeder` run automatically on startup.
+Flyway migrations (`V1__init.sql`, `V2__seed_staff.sql`, `V3__level2_extensions.sql`, `V4__seed_door_staff.sql`) and the idempotent relative-date `DataSeeder` run automatically on startup.
 
 ```powershell
 cd backend
 .\mvnw.cmd -DskipTests package
-java -Xms128m -Xmx384m -jar target\eventreg-0.0.1-SNAPSHOT.jar
+java -Xms128m -Xmx256m -jar target\eventreg-0.0.1-SNAPSHOT.jar
 ```
 
 Verify backend health:
 ```powershell
 curl http://localhost:8080/api/health
-# {"status":"UP","timezone":"Asia/Manila","timestamp":"..."}
+# {"status":"UP","database":"UP","zone":"Asia/Manila","serverTime":"..."}
 ```
 
 ### Step 3 — Start the Frontend (`http://localhost:5173`)
@@ -70,11 +79,11 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser (or run `npm run dev -- --host` to test on a phone over local Wi-Fi).
+Open `http://localhost:5173` in your browser. *(Note: camera QR scanning works on `localhost`; on external devices/phones, HTTPS is required by browser camera permissions.)*
 
 ### Step 4 — Verification Commands
 ```powershell
-# Backend unit & domain tests
+# Backend unit, RBAC, HMAC QR, rate-limit, email & concurrency tests (67 tests)
 cd backend ; .\mvnw.cmd test
 
 # Frontend TypeScript & Vite production build
@@ -83,11 +92,11 @@ cd frontend ; npm run build
 
 ---
 
-## 4. Seed Data & Demo Staff Login
+## 4. Seed Data & Demo Staff Logins
 
 ### How Seed Data Loads
-1. **`V1__init.sql` & `V3__level2_extensions.sql` (Flyway):** Creates `staff_users`, `events`, `registrations` (including `WAITLISTED` / `CANCELLED` states and waitlist position constraints), and `audit_logs`.
-2. **`V2__seed_staff.sql` (Flyway):** Seeds the BCrypt-hashed organizer account.
+1. **`V1__init.sql` & `V3__level2_extensions.sql` (Flyway):** Creates `staff_users`, `events`, `registrations` (`CONFIRMED`, `WAITLISTED`, `CHECKED_IN`, `CANCELLED` + partial unique waitlist/email indexes), and `audit_logs`.
+2. **`V2__seed_staff.sql` & `V4__seed_door_staff.sql` (Flyway):** Seeds BCrypt-hashed demo accounts for both `ORGANIZER` and `DOOR_STAFF` roles.
 3. **`DataSeeder.java` (Spring `ApplicationRunner`):** Seeds 4 published events (`S1`–`S4`) with dates kept relative to **today in `Asia/Manila`**:
    - **`S1` — Cebu Dev Meetup 2026 (`CDM`)**: Scheduled **Today** (`8:00 AM – 11:59 PM` PHT), capacity `30`, `3` seeded confirmed attendees (`27` spots left).
    - **`S2` — Cebu Web Design Workshop (`CWD`)**: Scheduled **Today + 7 days** (`1:00 PM – 5:00 PM` PHT), capacity `50`, `0` registrations.
@@ -96,17 +105,16 @@ cd frontend ; npm run build
 
 ### Seeded Staff Credentials (`/staff/login`)
 
-| Role | Username | Password | Access |
+| Role | Username | Password | Permissions |
 |---|---|---|---|
-| **Organizer** (Demo Login) | `organizer` | `Demo@Cebu2026` | Operations Dashboard & CSV Export, Manage Events (Create/Edit/Publish/Close/Delete), Door Check-In + Undo, Attendee Roster + Promote/Cancel |
-
-*(The schema and JWT security filter also support `DOOR_STAFF` accounts for door check-in, undo check-in, and read-only roster access without event CRUD or organizer cancel/promote permissions.)*
+| **Organizer** | `organizer` | `Demo@Cebu2026` | Full operations: Dashboard & CSV Export, Manage Events (Create/Edit/Publish/Close/Delete), Door Check-In + Undo, Attendee Roster + Promote/Cancel, Audit Logs (`/staff/audit-logs`) |
+| **Door Staff** | `doorstaff` | `Door@Cebu2026` | Door Check-In + Undo (`/staff/check-in`) and read-only Attendee Roster (`/staff/attendees`). Blocked (`HTTP 403`) on Event CRUD, Dashboard, Waitlist Promotion, Staff Cancel, and Audit Logs |
 
 ---
 
-## 5. Data Model & Integrity Rules
+## 5. Data Model, Concurrency & Security Approach
 
-### Database Schema (`V1__init.sql` + `V3__level2_extensions.sql`)
+### Database Schema (`V1`–`V4`)
 
 | Table | Key Columns & Constraints |
 |---|---|
@@ -116,29 +124,40 @@ cd frontend ; npm run build
 | `audit_logs` | `id`, `action`, `entity_type`, `entity_id`, `performed_by_id` (`FK -> staff_users`), `details`, `created_at` |
 
 ### Concurrency & Security Guarantees
-- **Last-Spot Lock & Waitlist Queuing (`R1`, `L2-04`):** `RegistrationService.register()` acquires a `PESSIMISTIC_WRITE` row lock (`SELECT ... FOR UPDATE`) on the `Event` row inside `@Transactional` before counting `CONFIRMED + CHECKED_IN` registrations; once full, new registrants automatically receive `WAITLISTED` status with a unique consecutive `waitlist_position`.
+- **Last-Spot Lock & Waitlist Queuing (Item `13`, `L2-04`):** `RegistrationService.register()` and `promoteFirstWaitlist()` run inside `@Transactional` and acquire a PostgreSQL **`PESSIMISTIC_WRITE` row lock (`SELECT ... FOR UPDATE`)** on the target `Event` row via `EventRepository.findByIdForUpdate()`. Concurrent transactions serialize behind the row lock before counting `CONFIRMED + CHECKED_IN` seats — ensuring only the winner receives `CONFIRMED` and any overflow registrant receives `WAITLISTED` with a unique consecutive `waitlist_position` (`uq_reg_event_waitlist_pos`). Verified under simultaneous threads in `ConcurrencyRaceTest`.
+- **Atomic Door Check-In (Item `13`, `L1-09`, `L1-10`):** `CheckInService.checkIn()` checks ticket state and transitions `CONFIRMED` → `CHECKED_IN` using an **atomic conditional database update** (`UPDATE registrations SET status = 'CHECKED_IN', checked_in_at = :now, checked_in_by = :staff WHERE id = :id AND status = 'CONFIRMED'`). If two door scanners hit the same pass concurrently, only one thread receives `updated == 1` (`CHECKED_IN`) while the second receives `updated == 0` and falls back to `ALREADY_CHECKED_IN` with the winner's original timestamp.
 - **Duplicate Email Prevention (`R2`):** Enforced in application logic and via partial unique index `uq_reg_active_email` on `(event_id, lower(email))` while active (`CONFIRMED`, `CHECKED_IN`, `WAITLISTED`), allowing re-registration only if previously `CANCELLED`.
-- **Atomic Door Check-In & Undo Audit (`R3`, `L2-05`, `L2-06`, `L2-09`):** Rejects `WAITLISTED` (`"On waitlist — not confirmed"`), `CANCELLED` (`"Cancelled"`), wrong-day, and cross-event tickets. Valid check-ins use a conditional `UPDATE ... WHERE status = 'CONFIRMED'`; `POST /api/checkin/events/{eventId}/undo` reverts to `CONFIRMED` and logs an `UNDO_CHECK_IN` `AuditLog` with staff identity and timestamp.
+- **Signed HMAC-SHA256 QR Payloads & Rate Limiting (Item `14`):** `QrTokenService` embeds a constant-time verified HMAC-SHA256 signature (`ER1.<TICKET_CODE>.<HMAC24>`, bound to both `eventId` and `ticketCode`) inside generated QR passes while keeping short 6-character non-sequential codes (`SecureRandom`, excluding `0/O/1/I`) for manual fallback. Tampered/forged or cross-event tokens are rejected immediately as `INVALID`. `RateLimitFilter` enforces per-IP fixed-window quotas (`HTTP 429 Too Many Requests` + `Retry-After`) on `/api/tickets/lookup`, `/api/tickets/cancel`, `/api/events/*/register`, and `/api/checkin`.
 - **Privacy-Preserving Lookup & Self-Cancel (`R11`, `L2-06`):** Both `POST /api/tickets/lookup` and `POST /api/tickets/cancel` require matching `ticketCode` + registered `email`, returning uniform `404` `"Ticket not found"` on mismatch and blocking cancellation once `CHECKED_IN` (`400`, `L2-08`).
+- **RBAC & Audit Logging (Item `16`):** `SecurityConfig` combines `@EnableMethodSecurity` with filter-chain role enforcement (`ORGANIZER` vs `DOOR_STAFF`). All lifecycle actions (`CREATE_EVENT`, `UPDATE_EVENT`, `CLOSE_EVENT`, `DELETE_EVENT`, `CHECK_IN`, `UNDO_CHECK_IN`, `PROMOTE_WAITLIST`, `STAFF_CANCEL`, `ATTENDEE_CANCEL`) persist to `audit_logs` and are inspectable by Organizers at `/staff/audit-logs`.
 
 ---
 
-## 6. Completed Features & Scope
+## 6. Completed Features & Known Limitations
 
 ### Completed — Level 1 Core
 - Public events directory (`/`, `/events`) and details (`/events/:id`) with server-computed capacity, `Asia/Manila` 12-hour schedules, search, and filter chips.
-- Registration form (`/events/:id/register`) with Zod + Bean Validation, PH mobile format validation (`09XXXXXXXXX`), QR boarding pass (`/ticket/:code`), and email-guarded retrieval (`/lookup`).
+- Registration form (`/events/:id/register`) with Zod + Bean Validation, PH mobile validation (`09XXXXXXXXX`), QR boarding pass (`/ticket/:code`), and email-guarded retrieval (`/lookup`).
 - Stateless JWT staff login (`/staff/login`) and Door Check-In (`/staff/check-in`) with color + icon + text outcome banners and shift scan history.
 
 ### Completed — Level 2 Intermediate
-- **Event Management (`/staff/events`):** Create, edit, publish drafts (`DRAFT` -> `PUBLISHED` -> `CLOSED`), validate schedule order (`endsAt > startsAt`) and active capacity floors, and permanently **Delete** events (`DELETE /api/staff/events/{id}`) with registration cleanup.
-- **Waitlist Queue & FIFO Promotion (`L2-04`, `L2-05`, `L2-07`):** Full active events offer **Join Waitlist**, issue numbered `#X on the waitlist` passes, block premature door entry, and let Organizers promote `#1` cleanly once seats open (auto-compacting remaining positions).
-- **Self & Staff Cancellation (`L2-06`, `L2-08`):** Confirmed/waitlisted attendees can cancel directly from their ticket pass (`POST /api/tickets/cancel`), and Organizers can cancel registrations from the roster (`POST /api/staff/registrations/{id}/cancel`), releasing spots and rejecting cancellation on already checked-in passes.
-- **Undo Check-In (`L2-09`):** Door staff and Organizers can undo check-ins from both the Door Check-In banner/scan list and Attendee Roster (`POST /api/checkin/events/{eventId}/undo`), with `UNDO_CHECK_IN` audit records.
-- **Operations Dashboard & CSV Export (`/staff/dashboard`, `L2-10`):** Real-time KPI summary strip, dual seat/check-in bars, SVG status donut, Manila-time no-show tracking, mobile snap-scroll carousel, desktop fixed sky sidebar shell, and UTF-8 CSV download (`GET /api/staff/dashboard/events/{id}/export-csv`).
+- **Event Management (`/staff/events`):** Create, edit, publish drafts (`DRAFT` → `PUBLISHED` → `CLOSED`), validate schedule order (`endsAt > startsAt`) and active capacity floors, and delete events (`DELETE /api/staff/events/{id}`).
+- **Waitlist Queue & FIFO Promotion (`L2-04`, `L2-05`, `L2-07`):** Full active events offer **Join Waitlist**, issue numbered `#X on the waitlist` passes, reject waitlisted door scans in red (`"On waitlist — not confirmed"`), and let Organizers promote `#1` cleanly.
+- **Self & Staff Cancellation (`L2-06`, `L2-08`):** Confirmed/waitlisted attendees can self-cancel from their pass, Organizers can cancel from the roster, and checked-in passes are protected from cancellation.
+- **Undo Check-In (`L2-09`):** Door staff and Organizers can undo mistaken check-ins with full audit attribution.
+- **Operations Dashboard & Excel CSV Export (`/staff/dashboard`, `L2-10`):** Real PostgreSQL KPI summary strip, dual bars, donut chart, Manila-time no-show counts (`—` before start time), mobile carousel/grid toggle, and Excel-ready UTF-8 CSV download (with `\uFEFF` BOM and leading-zero-preserving `="09..."` mobile formatting).
 
-### Scoped for Level 3
-- Camera-based live QR scanning (`html5-qrcode`) and automated confirmation / promotion email notifications.
+### Completed Locally — Level 3 Advanced (`5 of 6` Items)
+- **Camera QR Scanner (`Item 12`):** Dynamically loaded `html5-qrcode` viewfinder in `/staff/check-in` with rear camera preference, ~2-second result pause + auto-resume, and seamless manual input fallback.
+- **Last-Spot & Double-Scan Concurrency Locks (`Item 13`):** PostgreSQL row locking + atomic conditional check-in updates backed by multi-threaded unit tests (`ConcurrencyRaceTest`).
+- **Signed HMAC QR & Per-IP Rate Limiting (`Item 14`):** `ER1.<CODE>.<HMAC24>` QR tokens (`QrTokenService`) + `HTTP 429` throttling (`RateLimitFilter`).
+- **Async Sandbox Emails (`Item 15`):** `@Async` post-commit HTML emails (`TicketEmailService`) with embedded ZXing QR PNGs (`cid:ticketQr`) for Confirmed and Promoted passes (and queue notices for Waitlisted passes); verified live with Mailtrap Sandbox.
+- **Roles & Audit Logs (`Item 16`):** Enforced `ORGANIZER` vs `DOOR_STAFF` separation (`V4__seed_door_staff.sql`), role-scoped navigation/routes, and `/staff/audit-logs` console.
+
+### Remaining / Known Limitations
+- **Item `17` (Production HTTPS Deployment):** Not yet deployed online (pending `Dockerfile`, `vercel.json`, and Render/Railway + Vercel setup).
+- **Phone-to-Phone Camera Check (`Item 12` / `L3-01`):** Camera component builds cleanly in Vite (`dist/`), but live rear-camera scanning from a second smartphone screen over HTTPS still awaits online deployment (Step 17).
+- **Submission Deliverables:** 3–5 minute demo video and final hosted URL remain pending deployment.
 
 ---
 
@@ -146,17 +165,17 @@ cd frontend ; npm run build
 
 | ID | Level | Acceptance Check | Local | Final | Notes |
 |---|---|---|---|---|---|
-| **L1-01** | Level 1 | Register for Cebu Dev Meetup 2026 on a phone-sized screen and see a ticket with a QR code | **Pass** | **Pass** | Verified at `375×667` & `390×844`; generates unique `CDM-XXXXXX` code + SVG QR pass |
-| **L1-02** | Level 1 | Scan the QR with any phone QR app: it shows the same ticket code | **Pass** | **Pass** | `<QRCodeSVG value={ticketCode} />` encodes the exact ticket code string |
-| **L1-03** | Level 1 | Refresh the browser, then find the ticket again with ticket code + email | **Pass** | **Pass** | `POST /api/tickets/lookup` restores full ticket & QR pass (case/whitespace insensitive) |
+| **L1-01** | Level 1 | Register for Cebu Dev Meetup 2026 on a phone-sized screen and see a ticket with a QR code | **Pass** | **Pass** | Verified on mobile viewports & live registration; generates unique `CDM-XXXXXX` code + SVG QR pass |
+| **L1-02** | Level 1 | Scan the QR with any phone QR app: it shows the same ticket code | **Pass** | **Pass** | QR encodes `ER1.<TICKET_CODE>.<HMAC24>` (embedding the exact ticket code with tamper protection in Level 3) |
+| **L1-03** | Level 1 | Refresh the browser, then find the ticket again with ticket code + email | **Pass** | **Pass** | `POST /api/tickets/lookup` restores full ticket & signed QR pass |
 | **L1-04** | Level 1 | A wrong ticket code or wrong email shows "Ticket not found" and no details | **Pass** | **Pass** | Both return identical HTTP `404` `{"message":"Ticket not found"}` (`R11`) |
-| **L1-05** | Level 1 | Register the same email twice for one event: the second attempt is blocked | **Pass** | **Pass** | Blocked with HTTP `409` friendly message across any letter casing |
-| **L1-06** | Level 1 | Submit the form with a bad email and a 10-digit mobile number: both show errors | **Pass** | **Pass** | Both inline field errors render simultaneously on client and server (`400` `fieldErrors`) |
-| **L1-07** | Level 1 | Open the seeded full event: it shows "Full" and blocks confirmed overbooking | **Pass** | **Pass** | `S3` (`Cebu Startup Pitch Night`, `5/5`) displays `Full · 0 of 5 spots left` (and routes to Waitlist in Level 2, `L2-04`) |
+| **L1-05** | Level 1 | Register the same email twice for one event: the second attempt is blocked | **Pass** | **Pass** | Blocked with HTTP `409` across any letter casing + DB partial index `uq_reg_active_email` |
+| **L1-06** | Level 1 | Submit the form with a bad email and a 10-digit mobile number: both show errors | **Pass** | **Pass** | Client Zod + server Bean Validation (`400` `fieldErrors`) |
+| **L1-07** | Level 1 | Open the seeded full event: it shows "Full" and blocks confirmed overbooking | **Pass** | **Pass** | `S3` (`CSP`, `5/5`) displays `Full · 0 of 5 spots left` and transitions to Level 2 Waitlist (`L2-04`) |
 | **L1-08** | Level 1 | Open a staff page while signed out: you are sent to the sign-in page | **Pass** | **Pass** | `ProtectedRoute` redirects to `/staff/login`; unauthenticated API calls return HTTP `401` |
-| **L1-09** | Level 1 | Check in a valid ticket: green "Checked in" with the name | **Pass** | **Pass** | Displays green `Checked In` banner with attendee full name, timestamp, and verifier name |
-| **L1-10** | Level 1 | Check in the same ticket again: yellow "Already checked in" with the first time | **Pass** | **Pass** | Displays yellow `Already Checked In` banner with the original Asia/Manila check-in time |
-| **L1-11** | Level 1 | Enter a made-up code, and a real code from a different event: both show "Invalid ticket" | **Pass** | **Pass** | Unknown code (`CDM-ZZZZZZ`) and cross-event code (`CSP-...` on `S1`) both show red `Invalid Ticket` |
+| **L1-09** | Level 1 | Check in a valid ticket: green "Checked in" with the name | **Pass** | **Pass** | Displays green `Checked In` banner with attendee full name, Cebu timestamp, and verifier name |
+| **L1-10** | Level 1 | Check in the same ticket again: yellow "Already checked in" with the first time | **Pass** | **Pass** | Displays yellow `Already Checked In` banner with original Manila check-in timestamp |
+| **L1-11** | Level 1 | Enter a made-up code, and a real code from a different event: both show "Invalid ticket" | **Pass** | **Pass** | Unknown, sequential, forged, and cross-event codes show red `Invalid Ticket` |
 | **L1-12** | Level 1 | The attendee list shows correct registered and checked-in totals | **Pass** | **Pass** | Totals bar (`Registered / Capacity`, `Checked in / Registered`) matches roster rows and filters by name/code |
 
 ---
@@ -165,13 +184,27 @@ cd frontend ; npm run build
 
 | ID | Acceptance Check | Status | Verification |
 |---|---|---|---|
-| **L2-01** | Draft event hidden from attendees; visible once published | **Pass** | Verified in `EventServiceTest` & live browser |
-| **L2-02** | Event with end time before start time is blocked | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & API |
-| **L2-03** | Lowering capacity below active registered count is blocked with descriptive message | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & API |
-| **L2-04** | Registering for a full event places attendee on waitlist with exact position | **Pass** | Verified in `RegistrationServiceTest` (`WAITLISTED #1`, `#2`) & API |
-| **L2-05** | Scanning waitlisted ticket shows *"On waitlist — not confirmed"* | **Pass** | Verified in `CheckInServiceTest` (`CheckInOutcome.WAITLISTED`) & API |
-| **L2-06** | Cancelling confirmed ticket frees spot; scanning cancelled ticket shows *"Cancelled"* | **Pass** | Verified in `RegistrationServiceTest`, `CheckInServiceTest`, & `/api/tickets/cancel` |
-| **L2-07** | Promoting #1 waitlist attendee allows successful check-in and compacts queue | **Pass** | Verified in `RegistrationServiceTest` & `/api/staff/events/{id}/promote-waitlist` |
-| **L2-08** | Attempting to cancel a checked-in registration is rejected | **Pass** | Rejected (`400`) in `RegistrationServiceTest` & both cancel endpoints |
-| **L2-09** | Undoing check-in permits re-checking-in and logs staff identity & timestamp | **Pass** | Verified in `CheckInServiceTest` (`UNDO_CHECK_IN` AuditLog) & `/api/checkin/events/{id}/undo` |
-| **L2-10** | Dashboard metrics match database counts; CSV export downloads cleanly | **Pass** | `DashboardService` metrics & UTF-8 CSV verified live (`HTTP 200`) |
+| **L2-01** | Draft event hidden from attendees; visible once published | **Pass** | Verified in `EventServiceTest` & live API check |
+| **L2-02** | Event with end time before start time is blocked | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & live API |
+| **L2-03** | Lowering capacity below active registered count is blocked with descriptive message | **Pass** | Rejected (`400`) in `EventServiceTest`, `EventFormModal`, & live API |
+| **L2-04** | Registering for a full event places attendee on waitlist with exact position | **Pass** | Verified in `RegistrationServiceTest` (`WAITLISTED #1`, `#2`) & live API |
+| **L2-05** | Scanning waitlisted ticket shows *"On waitlist — not confirmed"* (red) | **Pass** | Verified in `CheckInServiceTest`, red `outcomes.ts` styling, & live API |
+| **L2-06** | Cancelling confirmed ticket frees spot; scanning cancelled ticket shows *"Cancelled"* | **Pass** | Verified in `RegistrationServiceTest`, `CheckInServiceTest`, & live API |
+| **L2-07** | Promoting #1 waitlist attendee allows successful check-in and compacts queue | **Pass** | Verified in `RegistrationServiceTest` & live API |
+| **L2-08** | Attempting to cancel a checked-in registration is rejected | **Pass** | Rejected (`400`) in `RegistrationServiceTest` & live API |
+| **L2-09** | Undoing check-in permits re-checking-in and logs staff identity & timestamp | **Pass** | Verified in `CheckInServiceTest` (`UNDO_CHECK_IN` AuditLog) & live API |
+| **L2-10** | Dashboard counts match database counts; CSV export opens properly in Excel | **Pass** | Live metrics match PostgreSQL; CSV starts with UTF-8 BOM (`EF BB BF`) and `="09..."` mobile format |
+
+---
+
+## 9. Official Level 3 Acceptance Checklist (`L3-01`–`L3-07`)
+
+| ID | Feature | Acceptance Check | Local Status | Verification |
+|---|---|---|---|---|
+| **L3-01** | 12 · Camera Scan | Scan a ticket from another phone's screen with the camera: correct result, then ready after ~2s | **Built (Needs HTTPS Phone Test)** | `CameraQrScanner.tsx` (`html5-qrcode`) compiled into Vite production bundle; requires physical camera / HTTPS deployment test |
+| **L3-02** | 13 · Last-Spot Race | Two simultaneous last-spot registrations yield only one `CONFIRMED` | **Pass** | PostgreSQL `SELECT ... FOR UPDATE` row lock verified in `ConcurrencyRaceTest` |
+| **L3-03** | 13 · Double-Scan Race | Two simultaneous check-ins on the same ticket yield only one `CHECKED_IN` | **Pass** | Atomic conditional `UPDATE ... WHERE status = 'CONFIRMED'` verified in `ConcurrencyRaceTest` |
+| **L3-04** | 14 · Secure QR + Rate Limit | Guess/forged/sequential code never valid; endpoints rate-limited (`429`) | **Pass** | `QrTokenServiceTest`, `RateLimitFilterTest`, and live API checks (tampered `ER1`, `VRF-000001`, 21st request → `429`) |
+| **L3-05** | 15 · Sandbox Email | Registration & waitlist-promotion emails arrive in sandbox inbox with QR/link | **Pass** | `TicketEmailServiceTest` (3 tests) + live Mailtrap Sandbox receipt verified (`Confirmed QR Pass` with QR PNG & link) |
+| **L3-06** | 16 · Roles & Audit Log | Door staff cannot create/edit events (`403`); Organizer can; Audit Log records actions | **Pass** | `RoleSecurityTest` + live RBAC checks (`doorstaff` `403`, `organizer` `200`, `/staff/audit-logs`) |
+| **L3-07** | 17 · Deployment | Deployed link works on a phone over HTTPS, including the camera | **Pending** | Production deployment (`Dockerfile` + `vercel.json` / Render + Vercel) planned next in Phase 3.5 |

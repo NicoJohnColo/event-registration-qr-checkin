@@ -16,6 +16,7 @@ import com.nicojohn.eventreg.checkin.dto.CheckInRequest;
 import com.nicojohn.eventreg.checkin.dto.CheckInResponse;
 import com.nicojohn.eventreg.checkin.dto.CheckInStatsResponse;
 import com.nicojohn.eventreg.common.exception.ApiException;
+import com.nicojohn.eventreg.common.security.QrTokenService;
 import com.nicojohn.eventreg.common.security.StaffPrincipal;
 import com.nicojohn.eventreg.common.util.ManilaTime;
 import com.nicojohn.eventreg.event.Event;
@@ -36,6 +37,7 @@ public class CheckInService {
     private final RegistrationRepository registrationRepository;
     private final StaffRepository staffRepository;
     private final AuditLogRepository auditLogRepository;
+    private final QrTokenService qrTokenService;
     private final Clock clock;
 
     public CheckInService(
@@ -43,11 +45,13 @@ public class CheckInService {
             RegistrationRepository registrationRepository,
             StaffRepository staffRepository,
             AuditLogRepository auditLogRepository,
+            QrTokenService qrTokenService,
             Clock clock) {
         this.eventRepository = eventRepository;
         this.registrationRepository = registrationRepository;
         this.staffRepository = staffRepository;
         this.auditLogRepository = auditLogRepository;
+        this.qrTokenService = qrTokenService;
         this.clock = clock;
     }
 
@@ -68,10 +72,23 @@ public class CheckInService {
         Event event = eventRepository.findById(request.eventId())
                 .orElseThrow(() -> ApiException.notFound("Event not found."));
 
-        String normalizedCode = request.ticketCode().trim().toUpperCase(Locale.ROOT);
+        String rawInput = request.ticketCode().trim().toUpperCase(Locale.ROOT);
         long registeredCount = registrationRepository.countByEventIdAndStatusIn(event.getId(), ACTIVE_STATUSES);
         long checkedInCount = registrationRepository.countByEventIdAndStatus(
                 event.getId(), RegistrationStatus.CHECKED_IN);
+
+        String normalizedCode = qrTokenService.resolveCheckInInput(rawInput, event.getId()).orElse(null);
+        if (normalizedCode == null) {
+            return new CheckInResponse(
+                    CheckInOutcome.INVALID,
+                    "Invalid ticket",
+                    rawInput,
+                    null,
+                    null,
+                    null,
+                    checkedInCount,
+                    registeredCount);
+        }
 
         Registration reg = registrationRepository
                 .findByEventIdAndTicketCode(event.getId(), normalizedCode)
@@ -203,7 +220,8 @@ public class CheckInService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> ApiException.notFound("Event not found."));
 
-        String normalizedCode = ticketCode.trim().toUpperCase(Locale.ROOT);
+        String normalizedCode = qrTokenService.resolveCheckInInput(ticketCode, event.getId())
+                .orElseThrow(() -> ApiException.badRequest("Invalid or tampered ticket code."));
         Registration reg = registrationRepository
                 .findByEventIdAndTicketCode(event.getId(), normalizedCode)
                 .orElseThrow(() -> ApiException.notFound("Registration not found for event."));

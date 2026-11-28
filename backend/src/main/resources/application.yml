@@ -37,3 +37,17 @@ app:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
   jwt:
     secret: ${JWT_SECRET}
+  qr:
+    hmac-secret: ${QR_HMAC_SECRET:${JWT_SECRET}}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+  public-base-url: ${APP_PUBLIC_BASE_URL:${CORS_ALLOWED_ORIGIN:http://localhost:5173}}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:no-reply@eventregister.local}
+    smtp-auth: ${MAIL_SMTP_AUTH:true}
+    starttls: ${MAIL_SMTP_STARTTLS:true}

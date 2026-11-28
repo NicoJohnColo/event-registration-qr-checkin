@@ -1,5 +1,5 @@
 import { BarChart3, RefreshCw, ScanLine } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
@@ -16,33 +16,14 @@ import {
   type EventMetrics,
 } from '../../features/dashboard'
 
-const MOBILE_BREAKPOINT = 768
-
 export function StaffDashboardPage() {
   const { data: metrics = [], isLoading, isError, refetch, isRefetching } = useDashboardMetrics()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<DashboardStatusFilter>('all')
-  const [viewMode, setViewMode] = useState<DashboardViewMode>(() =>
-    typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT ? 'carousel' : 'grid',
-  )
-  const userToggledViewRef = useRef(false)
+  const [viewMode, setViewMode] = useState<DashboardViewMode>('carousel')
 
   const [exportingId, setExportingId] = useState<number | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (userToggledViewRef.current) return
-      setViewMode(window.innerWidth < MOBILE_BREAKPOINT ? 'carousel' : 'grid')
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const handleViewModeChange = (mode: DashboardViewMode) => {
-    userToggledViewRef.current = true
-    setViewMode(mode)
-  }
 
   const counts = useMemo(
     () => ({
@@ -97,45 +78,51 @@ export function StaffDashboardPage() {
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== 'all'
 
   return (
-    <div className="page-container animate-rise space-y-3 py-3 sm:space-y-4 sm:py-5">
+    <div className="page-container animate-rise space-y-2 py-2.5 sm:space-y-4 sm:py-5">
       {/* Formal Page Title & Quick Action Row */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-2.5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
-            <StatusBadge tone="blue" icon={<BarChart3 className="h-3.5 w-3.5" />}>
+            <StatusBadge tone="blue" icon={<BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />}>
               Operations Dashboard
             </StatusBadge>
             {!isLoading && (
-              <span className="rounded-full border border-border bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-brand-navy/75">
-                {metrics.length} {metrics.length === 1 ? 'event' : 'events'} synced
+              <span className="rounded-full border border-border bg-white/90 px-2 py-0.5 text-[10px] font-bold text-brand-navy/75 sm:px-2.5 sm:text-[11px]">
+                {metrics.length} {metrics.length === 1 ? 'event' : 'events'}
               </span>
             )}
           </div>
-          <h1 className="heading-hero font-heading mt-1.5 font-extrabold text-brand-navy">
+          <h1 className="heading-hero font-heading mt-1 font-extrabold text-brand-navy sm:mt-1.5">
             Operations Dashboard
           </h1>
-          <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
+          <p className="mt-0.5 hidden text-xs leading-relaxed text-brand-navy/75 sm:block sm:text-sm">
             Live seat capacity, attendance breakdown, waitlists, and Excel CSV reporting.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
+        <div className="grid grid-cols-2 gap-1.5 sm:flex sm:shrink-0 sm:items-center sm:gap-2">
           <Button
             variant="outline"
-            size="md"
+            size="sm"
             fullWidth
             onClick={() => refetch()}
             disabled={isRefetching}
-            className="bg-white/90 sm:w-auto"
+            className="bg-white/90 sm:h-[var(--control-h)] sm:w-auto sm:px-3.5 sm:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 shrink-0 ${isRefetching ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 ${isRefetching ? 'animate-spin' : ''}`} />
             <span>{isRefetching ? 'Syncing…' : 'Sync'}</span>
           </Button>
 
           <Link to="/staff/check-in" className="block sm:flex-none">
-            <Button variant="primary" size="md" fullWidth className="sm:w-auto">
-              <ScanLine className="h-4 w-4 shrink-0" />
-              <span>Door Check-In</span>
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth
+              className="sm:h-[var(--control-h)] sm:w-auto sm:px-3.5 sm:text-sm"
+            >
+              <ScanLine className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              <span className="sm:hidden">Check-In</span>
+              <span className="hidden sm:inline">Door Check-In</span>
             </Button>
           </Link>
         </div>
@@ -154,14 +141,14 @@ export function StaffDashboardPage() {
       {!isError && <DashboardAnalyticsRow events={metrics} isLoading={isLoading} />}
 
       {/* Block 3: Event Directory Search + Filter + Mobile Carousel / Desktop Grid */}
-      <section className="space-y-3" aria-label="Event reports">
+      <section className="space-y-2 sm:space-y-3" aria-label="Event reports">
         <DashboardToolbar
           search={search}
           onSearchChange={setSearch}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
+          onViewModeChange={setViewMode}
           counts={counts}
           totalMatching={filteredEvents.length}
           onReset={resetFilters}

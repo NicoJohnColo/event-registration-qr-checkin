@@ -1,14 +1,20 @@
 import { Loader2, ScanLine } from 'lucide-react'
-import { useRef, useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button'
 
 interface CheckInFormProps {
   onSubmitCode: (ticketCode: string) => void
   isPending: boolean
   disabled?: boolean
+  headerAction?: ReactNode
 }
 
-export function CheckInForm({ onSubmitCode, isPending, disabled = false }: CheckInFormProps) {
+export function CheckInForm({
+  onSubmitCode,
+  isPending,
+  disabled = false,
+  headerAction,
+}: CheckInFormProps) {
   const [code, setCode] = useState('')
   const [localError, setLocalError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -29,13 +35,19 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
 
   return (
     <form onSubmit={handleSubmit} className="space-y-1.5" noValidate>
-      <label htmlFor="checkin-ticket-code" className="block text-xs font-bold text-brand-navy">
-        Ticket Code
-      </label>
+      <div className="flex items-center justify-between gap-2">
+        <label
+          htmlFor="checkin-ticket-code"
+          className="block text-[11px] font-bold text-brand-navy sm:text-xs"
+        >
+          Ticket Code
+        </label>
+        {headerAction}
+      </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <div className="relative flex-1">
-          <ScanLine className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-primary" />
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="relative min-w-0 flex-1">
+          <ScanLine className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-primary sm:left-3" />
           <input
             ref={inputRef}
             id="checkin-ticket-code"
@@ -52,7 +64,7 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
             spellCheck={false}
             autoFocus
             disabled={disabled}
-            className={`font-code h-[var(--control-h)] min-h-[40px] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] pl-8.5 pr-10 text-base font-bold uppercase tracking-wider text-brand-navy placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:outline-none focus:ring-3 sm:text-sm ${
+            className={`font-code h-[var(--control-h)] w-full rounded-[var(--radius-control)] border bg-[#F3F5F9] pl-8 pr-2.5 text-xs font-bold uppercase tracking-wider text-brand-navy placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-500 focus:outline-none focus:ring-3 sm:pl-8.5 sm:pr-4 sm:text-sm ${
               localError
                 ? 'border-status-red focus:border-status-red focus:ring-status-red/15'
                 : 'border-transparent focus:border-brand-primary focus:bg-white focus:ring-brand-primary/15'
@@ -65,11 +77,11 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
           variant="primary"
           size="md"
           disabled={disabled || isPending}
-          className="shrink-0 px-4"
+          className="shrink-0 px-3 sm:px-4"
         >
           {isPending ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
               <span>Checking...</span>
             </>
           ) : (
@@ -79,12 +91,12 @@ export function CheckInForm({ onSubmitCode, isPending, disabled = false }: Check
       </div>
 
       {localError ? (
-        <p className="text-xs font-semibold text-status-red" role="alert">
+        <p className="text-[11px] font-semibold text-status-red sm:text-xs" role="alert">
           {localError}
         </p>
       ) : (
-        <p className="text-xs leading-relaxed text-brand-navy/75">
-          Case-insensitive &amp; whitespace trimmed automatically. Press Enter after typing or scanning.
+        <p className="text-[10.5px] leading-snug text-brand-navy/65 sm:text-xs">
+          Enter code manually or scan QR pass cleanly. Press Enter to verify.
         </p>
       )}
     </form>

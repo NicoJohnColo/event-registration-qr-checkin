@@ -26,3 +26,20 @@ export function ProtectedRoute() {
 
   return <Outlet />
 }
+
+/** Restricts organizer-only console pages and redirects door staff to check-in. */
+export function OrganizerRoute() {
+  const { staff } = useAuth()
+
+  if (staff && staff.role !== 'ORGANIZER') {
+    return <Navigate to="/staff/check-in" replace />
+  }
+
+  return <Outlet />
+}
+
+/** Routes `/staff` to each role's primary console screen. */
+export function StaffIndexRedirect() {
+  const { staff } = useAuth()
+  return <Navigate to={staff?.role === 'DOOR_STAFF' ? '/staff/check-in' : '/staff/dashboard'} replace />
+}

@@ -8,9 +8,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 class StaffSeedHashTest {
 
     @Test
-    void demoOrganizerPasswordMatchesSeedHash() {
+    void demoStaffPasswordsMatchFlywaySeedHashes() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String seedHash = "$2a$10$egNwOY1w/P.xOI1N4I/PXOyAQS9TEg6auvAmf1dE1PWI5D0p0v6.2";
-        assertTrue(encoder.matches("Demo@Cebu2026", seedHash));
+        String organizerHash = "$2a$10$egNwOY1w/P.xOI1N4I/PXOyAQS9TEg6auvAmf1dE1PWI5D0p0v6.2";
+        String doorStaffHash = "$2a$10$btND1kXv/2RzSlakhhzGkeomBg2KjE0kcI.8TXYNTd.DJRX3FmTTq";
+
+        assertTrue(encoder.matches("Demo@Cebu2026", organizerHash));
+        assertTrue(encoder.matches("Door@Cebu2026", doorStaffHash));
     }
 }

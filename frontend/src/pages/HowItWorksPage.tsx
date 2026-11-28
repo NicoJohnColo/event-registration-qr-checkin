@@ -8,23 +8,20 @@ export function HowItWorksPage() {
     <div>
       <InteractiveTutorial />
 
-      <section className="bg-page py-6 sm:py-8">
+      <section className="bg-page py-5 sm:py-8">
         <div className="page-container">
-          <div className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border bg-white p-4 shadow-card lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-white p-3 shadow-card sm:gap-4 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 max-w-xl">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-brand-primary">
-                Ready to try it?
-              </p>
-              <h2 className="heading-card mt-0.5 font-heading font-extrabold text-brand-navy">
+              <p className="section-eyebrow">Ready to try it?</p>
+              <h2 className="heading-section mt-0.5 font-heading font-extrabold text-brand-navy">
                 Explore live Cebu events or open your pass
               </h2>
-              <p className="mt-1 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
-                Reserve a free seat in seconds, retrieve an existing QR pass, or sign in as door
-                staff.
+              <p className="section-subtitle mt-0.5 sm:mt-1">
+                Reserve a free seat, retrieve an existing QR pass, or sign in as door staff.
               </p>
             </div>
 
-            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:w-auto lg:shrink-0">
+            <div className="grid w-full grid-cols-1 gap-1.5 min-[380px]:grid-cols-3 lg:w-auto lg:shrink-0 lg:gap-2">
               <Link to="/events" className="block">
                 <Button variant="primary" size="sm" fullWidth>
                   <span>Browse Events</span>

@@ -48,9 +48,9 @@ export function TicketCard({ ticket, onTicketUpdated }: TicketCardProps) {
 
   return (
     <article className="animate-modal-in overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface shadow-dock">
-      <div className="bg-brand-navy px-4 py-3 text-white sm:px-5">
+      <div className="bg-brand-navy px-3 py-2.5 text-white sm:px-5 sm:py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-cyan">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-cyan sm:text-[11px]">
             EventRegister · Digital Pass
           </span>
           <StatusBadge tone={badge.tone} icon={<BadgeIcon className="h-3.5 w-3.5" />}>
@@ -63,7 +63,7 @@ export function TicketCard({ ticket, onTicketUpdated }: TicketCardProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12">
-        <div className="flex min-w-0 flex-col justify-between gap-3.5 p-4 sm:p-5 md:col-span-7">
+        <div className="flex min-w-0 flex-col justify-between gap-2.5 p-3 sm:gap-3.5 sm:p-5 md:col-span-7">
           <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-wider text-brand-navy/70">
               Attendee
@@ -130,11 +130,11 @@ export function TicketCard({ ticket, onTicketUpdated }: TicketCardProps) {
         </div>
 
         <div
-          className={`flex items-center justify-center border-t border-dashed border-border bg-page/55 p-4 sm:p-5 md:col-span-5 md:border-t-0 md:border-l ${
+          className={`order-first flex items-center justify-center border-b border-dashed border-border bg-page/55 p-3 sm:p-5 md:order-last md:col-span-5 md:border-b-0 md:border-l ${
             isCancelled ? 'opacity-65 grayscale' : ''
           }`}
         >
-          <TicketQR ticketCode={ticket.ticketCode} caption={qrCaption} />
+          <TicketQR ticketCode={ticket.ticketCode} qrPayload={ticket.qrPayload} caption={qrCaption} />
         </div>
       </div>
     </article>

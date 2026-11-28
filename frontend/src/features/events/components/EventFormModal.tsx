@@ -205,7 +205,7 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-brand-navy/45 p-0 backdrop-blur-[3px] sm:items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-brand-navy/45 p-3 backdrop-blur-[3px] sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="event-form-modal-title"
@@ -213,16 +213,16 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="animate-modal-in flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-[18px] border border-brand-sky/75 bg-white shadow-2xl sm:max-w-[560px] sm:rounded-[var(--radius-card)]">
+      <div className="animate-modal-in flex max-h-[82dvh] w-full max-w-[360px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-brand-sky/75 bg-white shadow-2xl sm:max-h-[88dvh] sm:max-w-[520px]">
         {/* Modal Header */}
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/80 bg-page/75 px-4 py-3 sm:px-5">
+        <div className="flex shrink-0 items-center justify-between gap-2.5 border-b border-border/80 bg-page/75 px-3.5 py-2 sm:px-5 sm:py-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-brand-primary">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-brand-primary sm:text-[11px]">
               {isEdit ? 'Edit Event Details' : 'Create New Event'}
             </p>
             <h2
               id="event-form-modal-title"
-              className="heading-card font-heading truncate font-extrabold text-brand-navy"
+              className="font-heading truncate text-sm font-extrabold text-brand-navy sm:text-base"
             >
               {isEdit ? event?.title : 'New Cebu Event'}
             </h2>
@@ -232,9 +232,9 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border bg-white text-brand-navy/70 transition-colors hover:bg-page hover:text-brand-navy focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-control)] border border-border bg-white text-brand-navy/70 transition-colors hover:bg-page hover:text-brand-navy focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-brand-primary/20 sm:h-9 sm:w-9"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
         </div>
 
@@ -242,7 +242,7 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
         <form
           id="staff-event-form"
           onSubmit={handleSubmit}
-          className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-5"
+          className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3.5 py-2.5 [-webkit-overflow-scrolling:touch] sm:space-y-3 sm:p-5"
           noValidate
         >
           {serverError && (
@@ -269,7 +269,7 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
                     key={opt.value}
                     type="button"
                     onClick={() => setStatus(opt.value)}
-                    className={`flex min-h-[36px] items-center justify-center rounded-[8px] px-2 text-xs font-extrabold transition-all ${
+                    className={`flex h-[var(--control-h-sm)] items-center justify-center rounded-[6px] px-2 text-[11px] font-extrabold transition-all sm:h-9 sm:rounded-[8px] sm:text-xs ${
                       active
                         ? 'bg-brand-primary text-white shadow-xs'
                         : 'text-brand-navy/75 hover:bg-white/80 hover:text-brand-navy'
@@ -282,96 +282,87 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
             </div>
           </div>
 
-          {/* Row: Event Title + Ticket Prefix */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
-            <div className="sm:col-span-8">
-              <FormField label="Event Title" htmlFor="ev-title" required error={errors.title}>
-                <Input
-                  id="ev-title"
-                  value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value)
-                    if (errors.title) setErrors((p) => ({ ...p, title: undefined }))
-                  }}
-                  placeholder="e.g. Cebu Tech Summit 2026"
-                  hasError={Boolean(errors.title)}
-                  maxLength={150}
-                />
-              </FormField>
-            </div>
+          {/* Event Title */}
+          <FormField label="Event Title" htmlFor="ev-title" required error={errors.title}>
+            <Input
+              id="ev-title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                if (errors.title) setErrors((p) => ({ ...p, title: undefined }))
+              }}
+              placeholder="e.g. Cebu Tech Summit 2026"
+              hasError={Boolean(errors.title)}
+              maxLength={150}
+            />
+          </FormField>
 
-            <div className="sm:col-span-4">
-              <FormField
-                label="Code Prefix"
-                htmlFor="ev-prefix"
-                error={errors.codePrefix}
-                hint={isEdit ? 'Locked' : 'Optional (e.g. CTS)'}
-              >
-                <Input
-                  id="ev-prefix"
-                  type="text"
-                  value={codePrefix}
-                  disabled={isEdit}
-                  onChange={(e) => {
-                    setCodePrefix(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5))
-                    if (errors.codePrefix) setErrors((p) => ({ ...p, codePrefix: undefined }))
-                  }}
-                  placeholder="Auto"
-                  leftIcon={<Hash className="h-4 w-4" />}
-                  className="font-code uppercase tracking-wider placeholder:font-sans placeholder:normal-case placeholder:tracking-normal disabled:opacity-65"
-                  hasError={Boolean(errors.codePrefix)}
-                  maxLength={5}
-                />
-              </FormField>
-            </div>
+          {/* Row: Code Prefix + Capacity (side-by-side compact pair on all viewports) */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <FormField
+              label="Code Prefix"
+              htmlFor="ev-prefix"
+              error={errors.codePrefix}
+              hint={isEdit ? 'Locked' : 'e.g. CTS'}
+            >
+              <Input
+                id="ev-prefix"
+                type="text"
+                value={codePrefix}
+                disabled={isEdit}
+                onChange={(e) => {
+                  setCodePrefix(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5))
+                  if (errors.codePrefix) setErrors((p) => ({ ...p, codePrefix: undefined }))
+                }}
+                placeholder="Auto"
+                leftIcon={<Hash className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                className="font-code uppercase tracking-wider placeholder:font-sans placeholder:normal-case placeholder:tracking-normal disabled:opacity-65"
+                hasError={Boolean(errors.codePrefix)}
+                maxLength={5}
+              />
+            </FormField>
+
+            <FormField
+              label="Capacity"
+              htmlFor="ev-capacity"
+              required
+              error={errors.capacity}
+              hint={isEdit && activeRegistered > 0 ? `Min ${activeRegistered}` : undefined}
+            >
+              <Input
+                id="ev-capacity"
+                type="number"
+                min={1}
+                inputMode="numeric"
+                value={capacity}
+                onChange={(e) => {
+                  setCapacity(e.target.value)
+                  if (errors.capacity) setErrors((p) => ({ ...p, capacity: undefined }))
+                }}
+                leftIcon={<Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                hasError={Boolean(errors.capacity)}
+              />
+            </FormField>
           </div>
 
-          {/* Row: Venue + Capacity */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
-            <div className="sm:col-span-8">
-              <FormField label="Venue" htmlFor="ev-venue" required error={errors.venue}>
-                <Input
-                  id="ev-venue"
-                  value={venue}
-                  onChange={(e) => {
-                    setVenue(e.target.value)
-                    if (errors.venue) setErrors((p) => ({ ...p, venue: undefined }))
-                  }}
-                  placeholder="e.g. Ayala Center Cebu, Function Room 2"
-                  leftIcon={<MapPin className="h-4 w-4" />}
-                  hasError={Boolean(errors.venue)}
-                  maxLength={200}
-                />
-              </FormField>
-            </div>
-
-            <div className="sm:col-span-4">
-              <FormField
-                label="Capacity"
-                htmlFor="ev-capacity"
-                required
-                error={errors.capacity}
-                hint={isEdit && activeRegistered > 0 ? `Min ${activeRegistered} registered` : undefined}
-              >
-                <Input
-                  id="ev-capacity"
-                  type="number"
-                  min={1}
-                  inputMode="numeric"
-                  value={capacity}
-                  onChange={(e) => {
-                    setCapacity(e.target.value)
-                    if (errors.capacity) setErrors((p) => ({ ...p, capacity: undefined }))
-                  }}
-                  leftIcon={<Users className="h-4 w-4" />}
-                  hasError={Boolean(errors.capacity)}
-                />
-              </FormField>
-            </div>
-          </div>
+          {/* Venue */}
+          <FormField label="Venue" htmlFor="ev-venue" required error={errors.venue}>
+            <Input
+              id="ev-venue"
+              value={venue}
+              onChange={(e) => {
+                setVenue(e.target.value)
+                if (errors.venue) setErrors((p) => ({ ...p, venue: undefined }))
+              }}
+              placeholder="e.g. Ayala Center Cebu, Function Room 2"
+              leftIcon={<MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+              hasError={Boolean(errors.venue)}
+              maxLength={200}
+            />
+          </FormField>
 
           {/* Row: Date + Start Time + End Time (no duplicate left icons on native date/time pickers) */}
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-12">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-12 sm:gap-2.5">
             <div className="col-span-2 sm:col-span-4">
               <FormField label="Date (Cebu)" htmlFor="ev-date" required error={errors.date}>
                 <Input
@@ -432,20 +423,33 @@ export function EventFormModal({ open, event, onClose, onSaved }: EventFormModal
               }}
               placeholder="Brief agenda, speaker highlights, or check-in notes…"
               maxLength={2000}
-              className="w-full rounded-[var(--radius-control)] border border-transparent bg-[#F3F5F9] p-3 text-base text-brand-navy placeholder:text-slate-500 transition-colors focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-3 focus:ring-brand-primary/15 sm:text-sm"
+              className="w-full rounded-[var(--radius-control)] border border-transparent bg-[#F3F5F9] p-2 text-[13px] text-brand-navy placeholder:text-slate-500 transition-colors focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-3 focus:ring-brand-primary/15 sm:p-2.5 sm:text-sm"
             />
           </FormField>
         </form>
 
         {/* Modal Footer */}
-        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border/80 bg-page/75 px-4 py-3 sm:px-5">
-          <Button variant="outline" size="md" onClick={onClose} disabled={isPending}>
+        <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border/80 bg-page/75 px-3.5 py-2 sm:px-5 sm:py-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            disabled={isPending}
+            className="sm:h-9 sm:px-3.5 sm:text-sm"
+          >
             Cancel
           </Button>
-          <Button type="submit" form="staff-event-form" variant="primary" size="md" disabled={isPending}>
+          <Button
+            type="submit"
+            form="staff-event-form"
+            variant="primary"
+            size="sm"
+            disabled={isPending}
+            className="sm:h-9 sm:px-3.5 sm:text-sm"
+          >
             {isPending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
                 <span>Saving…</span>
               </>
             ) : (

@@ -9,6 +9,7 @@ export interface RegisterPayload {
 export interface TicketData {
   registrationId: number
   ticketCode: string
+  qrPayload?: string | null
   status: RegistrationStatus
   waitlistPosition?: number | null
   attendeeName: string

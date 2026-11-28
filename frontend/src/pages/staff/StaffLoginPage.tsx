@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Sparkles, User } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, ShieldCheck, User } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
@@ -95,8 +95,12 @@ export function StaffLoginPage() {
           <Link to="/" className="shrink-0">
             <BrandLogo />
           </Link>
-          <Link to="/" className={headerPillClass} aria-label="Back to Home">
-            <ArrowLeft className="h-4 w-4 shrink-0" />
+          <Link
+            to="/"
+            className={`${headerPillClass} !h-7.5 !px-2.5 !text-[11px] sm:!h-8.5 sm:!text-xs`}
+            aria-label="Back to Home"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
             <span>
               <span className="hidden min-[360px]:inline">Back to </span>Home
             </span>
@@ -105,14 +109,14 @@ export function StaffLoginPage() {
       </header>
 
       {/* Main Split Stage */}
-      <main className="page-container relative z-10 flex flex-1 flex-col justify-center gap-4 py-6 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10">
+      <main className="page-container relative z-10 flex flex-1 flex-col justify-center py-6 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10">
         {/* Desktop Brand + Animated Floating Dialog Showcase */}
         <div className="hidden lg:col-span-7 lg:flex lg:flex-col lg:items-start lg:gap-8">
           <div className="animate-rise space-y-2.5">
             <span className="font-code block text-sm font-bold uppercase tracking-[0.32em] text-brand-navy/60">
               THE
             </span>
-            <p className="font-heading bg-gradient-to-r from-brand-navy via-brand-primary to-[#5B8EFF] bg-clip-text pb-1 text-5xl font-black leading-none tracking-tight text-transparent xl:text-[54px]">
+            <p className="font-heading bg-gradient-to-r from-brand-navy via-brand-primary to-[#5B8EFF] bg-clip-text pb-1 text-5xl font-extrabold leading-none tracking-tight text-transparent xl:text-[54px]">
               EventRegister
             </p>
             <p className="font-code text-xs font-bold uppercase tracking-[0.24em] text-brand-navy/65 sm:text-sm">
@@ -132,31 +136,20 @@ export function StaffLoginPage() {
           </div>
         </div>
 
-        {/* Mobile Compact Glass Status Pill */}
-        <div className="flex justify-center lg:hidden">
-          <div className="animate-bubble-in inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/85 bg-white/85 px-3 py-1 text-[11px] font-bold text-brand-navy shadow-xs backdrop-blur-md">
-            <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-brand-primary" />
-            <span className="truncate">Verify your staff identity to open staff tools</span>
-          </div>
-        </div>
-
-        {/* Right Floating Pure-White Login Card */}
+        {/* Floating White Staff Login Card */}
         <div className="flex justify-center lg:col-span-5 lg:justify-end">
-          <div className="animate-card-float-in w-full max-w-[380px] rounded-[var(--radius-card)] border border-white/90 bg-white/95 p-4 shadow-card backdrop-blur-xl sm:max-w-[400px] sm:p-5">
-            <div>
-              <h1 className="heading-section font-heading font-extrabold text-brand-navy">
+          <div className="animate-card-float-in w-full max-w-[380px] rounded-[var(--radius-card)] border border-border/90 bg-white p-4 shadow-card sm:max-w-[400px] sm:p-6">
+            <div className="border-b border-border/75 pb-3.5 text-center">
+              <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-[10px] border border-brand-sky bg-sky-50 text-brand-primary sm:h-10 sm:w-10">
+                <ShieldCheck className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+              </div>
+              <p className="section-eyebrow mt-2.5">Staff Portal · UTC+8</p>
+              <h1 className="heading-section mt-0.5 font-heading font-extrabold text-brand-navy">
                 Sign in to EventRegister
               </h1>
-
-              <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-border/70">
-                <span className="border-b-2 border-brand-primary pb-1.5 text-xs font-bold text-brand-navy">
-                  Staff Login
-                </span>
-                <span className="inline-flex min-w-0 items-center gap-1 pb-1.5 text-[11px] font-semibold text-brand-navy/65">
-                  <Sparkles className="h-3 w-3 shrink-0 text-brand-primary" />
-                  <span className="truncate">Door &amp; Organizer</span>
-                </span>
-              </div>
+              <p className="section-subtitle mt-1">
+                Organizer &amp; door staff access for check-in and event tools.
+              </p>
             </div>
 
             {submitError && (
@@ -167,7 +160,7 @@ export function StaffLoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-3.5 space-y-3" noValidate>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-3" noValidate>
               <FormField
                 label="Username"
                 htmlFor="staff-username"
@@ -181,7 +174,7 @@ export function StaffLoginPage() {
                   autoCapitalize="none"
                   spellCheck={false}
                   placeholder="Enter your username"
-                  leftIcon={<User className="h-4 w-4" />}
+                  leftIcon={<User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                   hasError={Boolean(errors.username)}
                   {...register('username')}
                 />
@@ -199,8 +192,8 @@ export function StaffLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="pr-11"
-                    leftIcon={<Lock className="h-4 w-4" />}
+                    className="pr-10"
+                    leftIcon={<Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                     hasError={Boolean(errors.password)}
                     {...register('password')}
                   />
@@ -208,9 +201,9 @@ export function StaffLoginPage() {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-brand-navy/65 transition-colors hover:bg-white hover:text-brand-navy"
+                    className="absolute right-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-brand-navy/60 transition-colors hover:bg-page hover:text-brand-navy"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                   </button>
                 </div>
               </FormField>
@@ -218,7 +211,7 @@ export function StaffLoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-electric inline-flex h-[var(--control-h)] min-h-[40px] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-[13px] font-bold text-white sm:text-sm"
+                className="btn-electric mt-1 inline-flex h-[var(--control-h)] w-full items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-xs font-bold text-white sm:text-sm"
               >
                 {isSubmitting ? (
                   <>
@@ -231,15 +224,15 @@ export function StaffLoginPage() {
               </button>
             </form>
 
-            <p className="mt-4 text-center text-xs text-brand-navy/75">
-              Looking for an attendee pass?{' '}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 border-t border-border/70 pt-3 text-center text-[11px] text-brand-navy/70 sm:text-xs">
+              <span>Need an attendee QR pass?</span>
               <Link
                 to="/lookup"
-                className="inline-flex min-h-[32px] items-center font-bold text-brand-primary hover:underline"
+                className="font-bold text-brand-primary transition-colors hover:underline"
               >
-                Find My Ticket
+                Find My Ticket →
               </Link>
-            </p>
+            </div>
           </div>
         </div>
       </main>

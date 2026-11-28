@@ -37,6 +37,14 @@ public class StaffUser {
 
     protected StaffUser() {}
 
+    public StaffUser(String name, String username, String passwordHash, Role role) {
+        this.name = name;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.createdAt = Instant.now();
+    }
+
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getUsername() { return username; }

@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ProtectedRoute } from '../features/auth'
+import { OrganizerRoute, ProtectedRoute, StaffIndexRedirect } from '../features/auth'
 import { EventDetailsPage } from '../pages/EventDetailsPage'
 import { EventsPage } from '../pages/EventsPage'
 import { HowItWorksPage } from '../pages/HowItWorksPage'
@@ -8,6 +8,7 @@ import { RegisterPage } from '../pages/RegisterPage'
 import { TicketLookupPage } from '../pages/TicketLookupPage'
 import { TicketPage } from '../pages/TicketPage'
 import { AttendeeListPage } from '../pages/staff/AttendeeListPage'
+import { StaffAuditLogsPage } from '../pages/staff/StaffAuditLogsPage'
 import { StaffCheckInPage } from '../pages/staff/StaffCheckInPage'
 import { StaffDashboardPage } from '../pages/staff/StaffDashboardPage'
 import { StaffEventsPage } from '../pages/staff/StaffEventsPage'
@@ -34,9 +35,12 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<StaffLayout />}>
-            <Route path="/staff" element={<Navigate to="/staff/dashboard" replace />} />
-            <Route path="/staff/dashboard" element={<StaffDashboardPage />} />
-            <Route path="/staff/events" element={<StaffEventsPage />} />
+            <Route path="/staff" element={<StaffIndexRedirect />} />
+            <Route element={<OrganizerRoute />}>
+              <Route path="/staff/dashboard" element={<StaffDashboardPage />} />
+              <Route path="/staff/events" element={<StaffEventsPage />} />
+              <Route path="/staff/audit-logs" element={<StaffAuditLogsPage />} />
+            </Route>
             <Route path="/staff/check-in" element={<StaffCheckInPage />} />
             <Route path="/staff/attendees" element={<AttendeeListPage />} />
             <Route path="/staff/events/:id/attendees" element={<AttendeeListPage />} />

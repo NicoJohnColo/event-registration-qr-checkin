@@ -55,13 +55,13 @@ export function EventDetailsPage() {
   const happeningToday = !event.ended && isTodayInManila(event.startsAt, event.endsAt)
 
   return (
-    <div className="page-container py-5 sm:py-8">
-      <div className="mb-3">
+    <div className="page-container py-3.5 sm:py-8">
+      <div className="mb-2 sm:mb-3">
         <Link
           to="/events"
-          className="inline-flex h-10 min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:text-sm"
+          className="inline-flex h-8 items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:text-sm"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span>All Events</span>
         </Link>
       </div>
@@ -69,7 +69,7 @@ export function EventDetailsPage() {
       {/* Unified Master Event Card */}
       <article className="animate-rise overflow-hidden rounded-[var(--radius-card)] border border-brand-sky/80 bg-surface shadow-dock">
         {/* Card Banner Header */}
-        <header className="relative overflow-hidden bg-hero-blue px-4 py-4 text-white sm:px-6 sm:py-6">
+        <header className="relative overflow-hidden bg-hero-blue px-3 py-3 text-white sm:px-6 sm:py-6">
           <div className="bg-hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
 
           <div className="relative flex items-start justify-between gap-6">
@@ -128,9 +128,9 @@ export function EventDetailsPage() {
 
         {/* Split Card Body */}
         <div className="grid grid-cols-1 lg:grid-cols-12">
-          {/* Left Wing: Schedule Strip + About + Door Check-In */}
-          <div className="space-y-4 p-4 sm:p-6 lg:col-span-7">
-            <div className="grid grid-cols-1 divide-y divide-border/80 rounded-[var(--radius-card)] border border-border/80 bg-page sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          {/* Left Wing: Schedule Strip (shown on >=sm to avoid duplicating header strip on mobile) + About + Door Check-In */}
+          <div className="space-y-3 p-3 sm:space-y-4 sm:p-6 lg:col-span-7">
+            <div className="hidden grid-cols-1 divide-y divide-border/80 rounded-[var(--radius-card)] border border-border/80 bg-page sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               <div className="p-3">
                 <div className="flex items-center gap-1.5 text-[11px] font-semibold text-brand-primary">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
@@ -203,30 +203,30 @@ export function EventDetailsPage() {
           </div>
 
           {/* Right Wing: Integrated Registration Stub */}
-          <aside className="flex flex-col justify-between gap-4 border-t border-dashed border-border bg-page/75 p-4 sm:p-6 lg:col-span-5 lg:border-l lg:border-t-0">
+          <aside className="flex flex-col justify-between gap-3 border-t border-dashed border-border bg-page/75 p-3 sm:gap-4 sm:p-6 lg:col-span-5 lg:border-l lg:border-t-0">
             <div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">
+                <span className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-brand-primary sm:text-[11px]">
                   Registration Pass
                 </span>
-                <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-bold text-brand-navy">
+                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10.5px] font-bold text-brand-navy sm:px-2.5 sm:text-[11px]">
                   Free
                 </span>
               </div>
 
-              <div className="mt-3 rounded-[var(--radius-card)] border border-border/80 bg-surface p-3 shadow-xs">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-brand-navy/75">
+              <div className="mt-2.5 rounded-[var(--radius-card)] border border-border/80 bg-surface p-2.5 shadow-xs sm:mt-3 sm:p-3">
+                <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-brand-navy/75 sm:mb-2 sm:text-xs">
                   <Users className="h-3.5 w-3.5 text-brand-primary" />
                   <span>
                     {event.registeredCount} registered · {event.capacity} max capacity
                   </span>
                 </div>
-                <SpotsLeft event={event} />
+                <SpotsLeft event={event} compact />
               </div>
 
-              <div className="ticket-notch-light my-4" />
+              <div className="ticket-notch-light my-3 sm:my-4" />
 
-              <div className="space-y-2.5">
+              <div className="space-y-2 sm:space-y-2.5">
                 {event.ended ? (
                   <Alert tone="info" title="This event has ended">
                     Registration is closed for past events.
@@ -255,7 +255,7 @@ export function EventDetailsPage() {
               </div>
             </div>
 
-            <div className="border-t border-border/80 pt-4 text-center">
+            <div className="border-t border-border/80 pt-3 text-center sm:pt-4">
               <Link
                 to="/lookup"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover hover:underline"

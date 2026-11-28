@@ -50,33 +50,35 @@ export function EventsPage() {
       <button
         type="button"
         onClick={() => setViewMode('carousel')}
-        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors ${
+        aria-label="Swipe carousel view"
+        className={`inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-lg px-2 text-xs font-bold transition-colors sm:px-2.5 ${
           viewMode === 'carousel'
             ? 'bg-brand-primary text-white shadow-xs'
             : 'text-brand-navy/70 hover:text-brand-navy'
         }`}
       >
         <GalleryHorizontalEnd className="h-3.5 w-3.5" />
-        <span>Carousel</span>
+        <span className="hidden sm:inline">Carousel</span>
       </button>
       <button
         type="button"
         onClick={() => setViewMode('grid')}
-        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-colors ${
+        aria-label="List grid view"
+        className={`inline-flex h-[var(--control-h-sm)] items-center gap-1 rounded-lg px-2 text-xs font-bold transition-colors sm:px-2.5 ${
           viewMode === 'grid'
             ? 'bg-brand-primary text-white shadow-xs'
             : 'text-brand-navy/70 hover:text-brand-navy'
         }`}
       >
         <LayoutGrid className="h-3.5 w-3.5" />
-        <span>Grid</span>
+        <span className="hidden sm:inline">Grid</span>
       </button>
     </div>
   )
 
   return (
     <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 pt-5 pb-10 sm:pt-7 sm:pb-12">
+      <section className="bg-sky-header border-b border-brand-sky/80 pt-3.5 pb-7 sm:pt-7 sm:pb-12">
         <div className="page-container">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -91,10 +93,10 @@ export function EventsPage() {
                 )}
               </div>
 
-              <h1 className="heading-hero mt-2.5 font-heading font-extrabold text-brand-navy">
+              <h1 className="heading-hero mt-2 font-heading font-extrabold text-brand-navy sm:mt-2.5">
                 All Cebu Events
               </h1>
-              <p className="mt-1 max-w-2xl break-words whitespace-normal text-xs leading-relaxed text-brand-navy/80 sm:text-sm">
+              <p className="section-subtitle mt-0.5 max-w-2xl break-words whitespace-normal sm:mt-1">
                 Every published event with 12-hour Cebu start and end times and live seat availability.
               </p>
             </div>

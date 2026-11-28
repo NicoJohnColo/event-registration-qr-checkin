@@ -42,17 +42,17 @@ export function RegisterPage() {
 
   return (
     <div>
-      <section className="bg-sky-header border-b border-brand-sky/80 py-5 sm:py-6">
+      <section className="bg-sky-header border-b border-brand-sky/80 py-3.5 sm:py-6">
         <div className="page-container flex items-start justify-between gap-4">
           <div className="min-w-0">
             <Link
               to={`/events/${event.id}`}
-              className="inline-flex h-10 min-h-[40px] items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:text-sm"
+              className="inline-flex h-8 min-h-[32px] items-center gap-1.5 text-xs font-bold text-brand-primary transition-colors hover:text-brand-primary-hover sm:h-10 sm:text-sm"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to event details</span>
             </Link>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">
+            <p className="section-eyebrow mt-1">
               {event.full && !event.ended ? 'Waitlist Registration' : 'Free Event Registration'}
             </p>
             <h1 className="heading-hero mt-0.5 font-heading font-extrabold text-brand-navy">
@@ -63,13 +63,34 @@ export function RegisterPage() {
         </div>
       </section>
 
-      <section className="page-container grid grid-cols-1 gap-4 py-5 sm:gap-6 sm:py-8 lg:grid-cols-12">
+      <section className="page-container grid grid-cols-1 gap-3 py-3.5 sm:gap-6 sm:py-8 lg:grid-cols-12">
+        {/* Mobile Compact Event Context Strip (above the form so guests never scroll past submit to verify event details) */}
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-2.5 shadow-card lg:hidden">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] font-semibold text-brand-navy/85">
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3 w-3 shrink-0 text-brand-primary" />
+              <span>{formatCebuDate(event.startsAt)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3 w-3 shrink-0 text-brand-primary" />
+              <span>{formatCebuTimeRange(event.startsAt, event.endsAt)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-3 w-3 shrink-0 text-brand-primary" />
+              <span>{event.venue}</span>
+            </span>
+          </div>
+          <div className="mt-2 border-t border-border/70 pt-1.5">
+            <SpotsLeft event={event} compact />
+          </div>
+        </div>
+
         <div className="lg:col-span-7">
-          <div className="animate-rise rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-card sm:p-5">
+          <div className="animate-rise rounded-[var(--radius-card)] border border-border bg-surface p-3 shadow-card sm:p-5">
             <h2 className="heading-card font-heading font-extrabold text-brand-navy">
               Attendee Details
             </h2>
-            <p className="mt-0.5 text-xs leading-relaxed text-brand-navy/75 sm:text-sm">
+            <p className="section-subtitle mt-0.5">
               One registration per email for this event. Your ticket code is generated immediately.
             </p>
 
@@ -109,7 +130,7 @@ export function RegisterPage() {
           </div>
         </div>
 
-        <aside className="lg:col-span-5">
+        <aside className="hidden lg:col-span-5 lg:block">
           <div className="sticky top-20 rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-card sm:p-5">
             <h3 className="heading-card font-heading font-extrabold text-brand-navy">
               Event Summary
