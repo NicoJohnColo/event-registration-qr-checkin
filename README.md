@@ -4,11 +4,17 @@ A mobile-first, full-stack event registration, waitlist management, and door QR 
 
 ---
 
-## 1. Level Reached
+## 1. Level Reached & Live Deployment
 
-- **Verified Complete:** **Level 1 · Core (`12 / 12` Checks)** & **Level 2 · Intermediate (`10 / 10` Checks)** (tagged `level-1`, `level-2`; merged on `main`).
-- **Current Level 3 Progress (`level-3` branch):** **`5 of 6` Level 3 Advanced items implemented and verified locally** (`12` Camera QR Scanner UI, `13` Last-Spot Race Condition Locks, `14` Signed HMAC QR + Rate Limiting, `15` Sandbox Confirmation/Promotion Emails, `16` `ORGANIZER` vs `DOOR_STAFF` RBAC + Audit Logs Console).
-- **Remaining for Full Level 3 Sign-Off:** **Item `17` (Production HTTPS Deployment)**, **live phone-to-phone camera verification over HTTPS**, and your **3–5 minute demo video**.
+- **Verified Complete:**
+  - **Level 1 · Core (`12 / 12` Checks — Pass)**
+  - **Level 2 · Intermediate (`10 / 10` Checks — Pass)**
+  - **Level 3 · Advanced (`6 / 6` Items · `7 / 7` Checks — Pass):** `12` Camera QR Scanner (with rear/front camera toggle & ~2s auto-ready), `13` Last-Spot & Double-Scan Concurrency Locks, `14` Signed HMAC-SHA256 QR + Rate Limiting, `15` Async Mailtrap Sandbox Emails, `16` `ORGANIZER` vs `DOOR_STAFF` RBAC + Audit Logs Console, and `17` Production HTTPS Deployment on Render.
+
+### Live Deployed URLs (Render · HTTPS)
+- **Frontend App:** [https://event-registration-qr-checkin.onrender.com](https://event-registration-qr-checkin.onrender.com) *(Render Static Site)*
+- **Backend API:** [https://eventregister-cebu-api.onrender.com](https://eventregister-cebu-api.onrender.com) *(Render Docker Web Service · Health check: [`/api/health`](https://eventregister-cebu-api.onrender.com/api/health))*
+- *(Render Free Tier note: the backend spins down after ~15 minutes of inactivity; opening `/api/health` wakes it in ~50–120s before testing.)*
 
 ---
 
@@ -16,9 +22,10 @@ A mobile-first, full-stack event registration, waitlist management, and door QR 
 
 | Layer | Technology |
 |---|---|
-| **Backend** | Java 21+ · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256`, BCrypt, `@EnableMethodSecurity` + filter-layer `ORGANIZER` / `DOOR_STAFF` RBAC, HTTP `429` Rate Limiting) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway · `@Async` Spring Mail (`spring-boot-starter-mail`) · ZXing (`3.5.3`) QR PNG |
+| **Backend** | Java 21 · Spring Boot 4.2.0 · Spring Security (Stateless JWT `HmacSHA256`, BCrypt, `@EnableMethodSecurity` + filter-layer `ORGANIZER` / `DOOR_STAFF` RBAC, HTTP `429` Rate Limiting) · Spring Data JPA / Hibernate 7 · Bean Validation · Flyway · `@Async` Spring Mail (`spring-boot-starter-mail`) · ZXing (`3.5.3`) QR PNG |
 | **Database** | PostgreSQL 17 (Supabase Session Pooler) |
 | **Frontend** | React 19 · Vite 6 · TypeScript 5 · Tailwind CSS v4 · React Router 7 · TanStack Query v5 · React Hook Form + Zod · `qrcode.react` · `html5-qrcode` (lazy-loaded camera scanner) · `lucide-react` |
+| **Hosting** | Render (Docker Web Service via `backend/Dockerfile` + Static Site with SPA `/*` → `/index.html` rewrite) over HTTPS |
 | **Time Zone** | Enforced server-side and client-side in `Asia/Manila` (`UTC+8`), rendered in 12-hour `AM/PM` format |
 
 ---
@@ -147,17 +154,17 @@ cd frontend ; npm run build
 - **Undo Check-In (`L2-09`):** Door staff and Organizers can undo mistaken check-ins with full audit attribution.
 - **Operations Dashboard & Excel CSV Export (`/staff/dashboard`, `L2-10`):** Real PostgreSQL KPI summary strip, dual bars, donut chart, Manila-time no-show counts (`—` before start time), mobile carousel/grid toggle, and Excel-ready UTF-8 CSV download (with `\uFEFF` BOM and leading-zero-preserving `="09..."` mobile formatting).
 
-### Completed Locally — Level 3 Advanced (`5 of 6` Items)
-- **Camera QR Scanner (`Item 12`):** Dynamically loaded `html5-qrcode` viewfinder in `/staff/check-in` with rear camera preference, ~2-second result pause + auto-resume, and seamless manual input fallback.
+### Completed — Level 3 Advanced (`6 / 6` Items)
+- **Camera QR Scanner (`Item 12`):** Dynamically loaded `html5-qrcode` viewfinder in `/staff/check-in` with rear/front camera switcher, ~2-second result pause + auto-resume, and manual input fallback.
 - **Last-Spot & Double-Scan Concurrency Locks (`Item 13`):** PostgreSQL row locking + atomic conditional check-in updates backed by multi-threaded unit tests (`ConcurrencyRaceTest`).
 - **Signed HMAC QR & Per-IP Rate Limiting (`Item 14`):** `ER1.<CODE>.<HMAC24>` QR tokens (`QrTokenService`) + `HTTP 429` throttling (`RateLimitFilter`).
-- **Async Sandbox Emails (`Item 15`):** `@Async` post-commit HTML emails (`TicketEmailService`) with embedded ZXing QR PNGs (`cid:ticketQr`) for Confirmed and Promoted passes (and queue notices for Waitlisted passes); verified live with Mailtrap Sandbox.
+- **Async Sandbox Emails (`Item 15`):** `@Async` post-commit HTML emails (`TicketEmailService`) with embedded ZXing QR PNGs (`cid:ticketQr`) and live frontend ticket links via Mailtrap Sandbox.
 - **Roles & Audit Logs (`Item 16`):** Enforced `ORGANIZER` vs `DOOR_STAFF` separation (`V4__seed_door_staff.sql`), role-scoped navigation/routes, and `/staff/audit-logs` console.
+- **HTTPS Production Deployment (`Item 17`):** Deployed backend via `backend/Dockerfile` (`maven:3.9-eclipse-temurin-21` + Google Maven mirror `backend/maven-settings.xml` + `eclipse-temurin:21-jre`) on Render Web Service and frontend on Render Static Site with SPA `/*` → `/index.html` rewrite and CORS configured.
 
-### Remaining / Known Limitations
-- **Item `17` (Production HTTPS Deployment):** Not yet deployed online (pending `Dockerfile`, `vercel.json`, and Render/Railway + Vercel setup).
-- **Phone-to-Phone Camera Check (`Item 12` / `L3-01`):** Camera component builds cleanly in Vite (`dist/`), but live rear-camera scanning from a second smartphone screen over HTTPS still awaits online deployment (Step 17).
-- **Submission Deliverables:** 3–5 minute demo video and final hosted URL remain pending deployment.
+### Operational Notes & Known Limitations
+- **Render Free Tier Cold Start:** The free backend web service sleeps after ~15 minutes of inactivity; the first request after idle takes ~50–120 seconds while Tomcat boots.
+- **Sandbox Email Mode:** Outbound confirmation and waitlist-promotion emails are routed to Mailtrap Sandbox (`MAIL_HOST=sandbox.smtp.mailtrap.io`) rather than real public mailboxes by design for safe testing.
 
 ---
 
@@ -199,12 +206,12 @@ cd frontend ; npm run build
 
 ## 9. Official Level 3 Acceptance Checklist (`L3-01`–`L3-07`)
 
-| ID | Feature | Acceptance Check | Local Status | Verification |
+| ID | Feature | Acceptance Check | Status | Verification |
 |---|---|---|---|---|
-| **L3-01** | 12 · Camera Scan | Scan a ticket from another phone's screen with the camera: correct result, then ready after ~2s | **Built (Needs HTTPS Phone Test)** | `CameraQrScanner.tsx` (`html5-qrcode`) compiled into Vite production bundle; requires physical camera / HTTPS deployment test |
+| **L3-01** | 12 · Camera Scan | Scan a ticket from another phone's screen with the camera: correct result, then ready after ~2s | **Pass** | Verified live over HTTPS on `https://event-registration-qr-checkin.onrender.com/staff/check-in` using `CameraQrScanner.tsx` (`html5-qrcode`) |
 | **L3-02** | 13 · Last-Spot Race | Two simultaneous last-spot registrations yield only one `CONFIRMED` | **Pass** | PostgreSQL `SELECT ... FOR UPDATE` row lock verified in `ConcurrencyRaceTest` |
 | **L3-03** | 13 · Double-Scan Race | Two simultaneous check-ins on the same ticket yield only one `CHECKED_IN` | **Pass** | Atomic conditional `UPDATE ... WHERE status = 'CONFIRMED'` verified in `ConcurrencyRaceTest` |
 | **L3-04** | 14 · Secure QR + Rate Limit | Guess/forged/sequential code never valid; endpoints rate-limited (`429`) | **Pass** | `QrTokenServiceTest`, `RateLimitFilterTest`, and live API checks (tampered `ER1`, `VRF-000001`, 21st request → `429`) |
-| **L3-05** | 15 · Sandbox Email | Registration & waitlist-promotion emails arrive in sandbox inbox with QR/link | **Pass** | `TicketEmailServiceTest` (3 tests) + live Mailtrap Sandbox receipt verified (`Confirmed QR Pass` with QR PNG & link) |
+| **L3-05** | 15 · Sandbox Email | Registration & waitlist-promotion emails arrive in sandbox inbox with QR/link | **Pass** | `TicketEmailServiceTest` (3 tests) + live Mailtrap Sandbox receipt verified with embedded QR PNG & live pass link |
 | **L3-06** | 16 · Roles & Audit Log | Door staff cannot create/edit events (`403`); Organizer can; Audit Log records actions | **Pass** | `RoleSecurityTest` + live RBAC checks (`doorstaff` `403`, `organizer` `200`, `/staff/audit-logs`) |
-| **L3-07** | 17 · Deployment | Deployed link works on a phone over HTTPS, including the camera | **Pending** | Production deployment (`Dockerfile` + `vercel.json` / Render + Vercel) planned next in Phase 3.5 |
+| **L3-07** | 17 · Deployment | Deployed link works on a phone over HTTPS, including the camera | **Pass** | Live on Render HTTPS (`https://event-registration-qr-checkin.onrender.com` + `https://eventregister-cebu-api.onrender.com`), SPA rewrite & CORS verified |
